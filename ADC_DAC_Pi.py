@@ -18,6 +18,11 @@ class DetectPi:
 		'''
 		Initialise ADC-DAC Pi.
 		'''
+		
+		adcdac = ADCDACPi(1) # Create instance of ADCDACPi, with gain set to 1
+		
+		adcdac.set_adc_refvoltage(3.3) # Set reference voltage to 3.3 V
+		
 	
 	def getDetails(self):
 		'''
@@ -28,11 +33,15 @@ class DetectPi:
 		'''
 		Write values to a DAC pin.
 		'''
+		
+		adcdac.set_dac_voltage(Port, Volt) # Set DAC output voltage <Volt> on channel <Port>
 	
 	def readPort(self, Port):
 		'''
 		Read values from an ADC pin.
 		'''
+		
+		adcdac.read_adc_voltage(Port, 0) # Read voltage from channel <Port> in single ended mode
 	
 	def streamRead(self, scanRate, scansPerRead, Port):
 		'''
