@@ -1,5 +1,5 @@
 '''
-Adaptation of DAQT7_Objective.py for the Raspberry Pi.
+Adaptation of the DAQT7_Objective library for the Raspberry Pi.
 
 Author: Damon Hutley
 Date: 21st November 2016
