@@ -23,20 +23,38 @@ class cameraModuleClient:
 		self.camera = PiCamera()
 		
 	
+	def setResoltion(self):
+		
+	
+	def setFrameRate(self):
+		
+	
+	def setExposureTime(self):
+		
+	
 	def capturePhoto(self):
 		'''
 		Capture a photo and store on Pi.
 		'''
+		
+		# Warm the camera up
+		self.camera.start_preview()
+		sleep(2)
 		
 		# Capture an image and store in file image.png. Will later add options 
 		# such as resolution, exposure time, etc.
 		self.camera.capture('image.png')
 		
 	
-	def captureStream(self):
+	def captureStream(self, duration):
 		'''
 		Capture a video and store on Pi.
 		'''
+		
+		# Record the camera for length <duration>, and store in file video.h264
+		self.camera.start_recording('video.h264')
+		self.camera.wait_recording(duration)
+		self.camera.stop_recording()
 		
 	
 	def networkStreamClient(self, duration):
