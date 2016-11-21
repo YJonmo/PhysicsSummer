@@ -82,7 +82,18 @@ class DetectPi:
 		Read analogue input values from an ADC pin, in stream mode.
 		'''
 		
-		
+		Read = [0, 1, 2]
+        StartingMoment = 0 
+        FinishingMoment = 0
+        
+        scansPerRead = int(scansPerRead)
+        
+        StartingMoment = time.time()
+        
+        FinishingMoment = time.time()
+        print ('Elapsed time %f seconds' %(FinishingMoment - StartingMoment))
+        
+        return Read, StartingMoment, FinishingMoment
 		
 	
 	def close(self):
