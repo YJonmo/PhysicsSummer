@@ -20,6 +20,7 @@ class DetectPi:
 		the DAC output voltage to be set between 0 and 2.048 V. The DAC gain 
 		factor may also be set to 2, which gives an output range of 0 to 3.3 V.
 		'''
+		
 		# Create instance of ADCDACPi, with gain set to 1
 		adcdac = ADCDACPi(1)
 		
@@ -31,7 +32,8 @@ class DetectPi:
 	
 	def getDetails(self):
 		'''
-		Return details of ADC_DAC Pi.
+		Return details of ADC_DAC Pi. This function does not currently return 
+		any details, but this may change later.
 		'''
 		
 		return
@@ -39,7 +41,10 @@ class DetectPi:
 	
 	def writePort(self, Port, Volt):
 		'''
-		Write values to a DAC pin.
+		Write values to a DAC pin. Values may be written to either channel 1 
+		or channel 2. The maximum voltage is specified by the gain factor.
+		Note: Setting a voltage of 5 V will return an error for exceeding 
+		the maximum voltage.
 		'''
 		
 		# Convert DAQT7 DAC ports to DAC Pi channels
@@ -56,7 +61,8 @@ class DetectPi:
 	
 	def readPort(self, Port):
 		'''
-		Read values from an ADC pin.
+		Read values from an ADC pin. Values may be read from either channel 1 
+		or channel 2. 
 		'''
 		
 		# Convert DAQT7 AIN ports to ADC Pi channels
@@ -75,6 +81,8 @@ class DetectPi:
 		'''
 		Read analogue input values from an ADC pin, in stream mode.
 		'''
+		
+		
 		
 	
 	def close(self):
