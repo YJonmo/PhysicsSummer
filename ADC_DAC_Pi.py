@@ -22,10 +22,10 @@ class DetectPi:
 		'''
 		
 		# Create instance of ADCDACPi, with gain set to 1
-		adcdac = ADCDACPi(1)
+		self.adcdac = ADCDACPi(1)
 		
 		# Set reference voltage to 3.3 V
-		adcdac.set_adc_refvoltage(3.3)
+		self.adcdac.set_adc_refvoltage(3.3)
 		
 		return
 		
@@ -54,7 +54,7 @@ class DetectPi:
 			channel = 2
 		
 		# Set DAC output voltage <Volt> on channel <channel>
-		adcdac.set_dac_voltage(channel, Volt)
+		self.adcdac.set_dac_voltage(channel, Volt)
 		
 		return
 		
@@ -72,7 +72,7 @@ class DetectPi:
 			channel = 2
 		
 		# Read voltage from channel <channel> in single ended mode
-		voltRead = adcdac.read_adc_voltage(channel, 0)
+		voltRead = self.adcdac.read_adc_voltage(channel, 0)
 		
 		return np.float(voltRead), time.time()
 		

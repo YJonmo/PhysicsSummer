@@ -16,16 +16,29 @@ class cameraModule:
 		Initialise the camera module class with picamera.
 		'''
 		
-		camera = PiCamera()
+		self.camera = PiCamera()
 		
 	
 	def capturePhoto(self):
+		'''
+		Capture a photo and store on Pi.
+		'''
 		
 	
 	def captureStream(self):
+		'''
+		Capture a video and store on Pi.
+		'''
 		
 	
 	def networkStream(self):
+		'''
+		Stream a video through ethernet and playback through VLC on network computer.
+		'''
 		
 	
 	def remoteControl(self):
+		'''
+		Control the camera remotely from a network computer.
+		'''
+		
