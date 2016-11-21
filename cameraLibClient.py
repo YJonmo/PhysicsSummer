@@ -6,7 +6,6 @@ Date: 21st November 2016
 '''
 
 
-from io import BytesIO
 from picamera import PiCamera
 import socket
 import time
@@ -23,14 +22,31 @@ class cameraModuleClient:
 		self.camera = PiCamera()
 		
 	
-	def setResoltion(self):
+	def setResoltion(self, width, height):
+		'''
+		Set the resolution of the camera
+		'''
 		
+		# Change the resolution of the camera
+		self.camera.resolution = (width, height)
 	
-	def setFrameRate(self):
+	def setFrameRate(self, rate):
+		'''
+		Set the framerate of the camera
+		'''
 		
+		# Change the framerate of the camera
+		self.camera.framerate = rate
 	
-	def setExposureTime(self):
+	def setExposureTime(self, speed):
+		'''
+		Set the exposure time of the camera. Note that the shutter speed 
+		must be greater than (1/framerate). A shutter speed of zero will 
+		result in an automatically determined exposure time.
+		'''
 		
+		# Change the shutter speed of the camera
+		self.camera.shutter_speed = speed
 	
 	def capturePhoto(self):
 		'''
@@ -69,10 +85,6 @@ class cameraModuleClient:
 		# Create a file-like object for the connection
 		connection = client_socket.makefile('wb')
 		try:
-			# Set camera parameters
-			self.camera.resolution = (640, 480)
-			self.camera.framerate = 24
-			
 			# Warm the camera up
 			self.camera.start_preview()
 			time.sleep(2)

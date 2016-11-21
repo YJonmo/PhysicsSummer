@@ -7,7 +7,6 @@ Date: 22nd November 2016
 '''
 
 
-from io import BytesIO
 import socket
 import subprocess
 import time
