@@ -83,19 +83,19 @@ class DetectPi:
 		'''
 		
 		Read = [0, 1, 2]
-        StartingMoment = 0
-        FinishingMoment = 0
-        
-        scansPerRead = int(scansPerRead)
-        
-        StartingMoment = time.time()
-        
-        '''Insert Stream Read code here'''
-        
-        FinishingMoment = time.time()
-        print ('Elapsed time %f seconds' %(FinishingMoment - StartingMoment))
-        
-        return Read, StartingMoment, FinishingMoment
+		StartingMoment = 0
+		FinishingMoment = 0
+		
+		scansPerRead = int(scansPerRead)
+		
+		StartingMoment = time.time()
+			
+		'''Insert Stream Read code here'''
+		
+		FinishingMoment = time.time()
+		print ('Elapsed time %f seconds' %(FinishingMoment - StartingMoment))
+		
+		return Read, StartingMoment, FinishingMoment
 		
 	
 	def close(self):
