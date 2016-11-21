@@ -16,25 +16,52 @@ class cameraModuleServer:
 	
 	def __init__(self):
 		'''
-		Initialise the camera module class with picamera.
+		Initialise the server to the Raspberry Pi.
 		'''
 		
-		# Will probably initialise the socket connection here
-		pass
+		# Initialise the socket connection
+		self.server_socket = socket.socket()
+		self.server_socket.bind(('0.0.0.0', 8000))
+		self.server_socket.listen(0)
 		
+		# Accept a single connection
+		self.connection = self.server_socket.accept()[0].makefile('rb')
+		
+	
+	#def networkStreamServer(self):
+		#'''
+		#Recieve a video stream from the Pi, and playback through VLC.
+		#'''
+		
+		## Initialise the socket connection
+		#server_socket = socket.socket()
+		#server_socket.bind(('0.0.0.0', 8000))
+		#server_socket.listen(0)
+		
+		## Accept a single connection
+		#connection = server_socket.accept()[0].makefile('rb')
+		#try:
+			## Start stream to VLC
+			#cmdline = ['vlc', '--demux', 'h264', '-']
+			#player = subprocess.Popen(cmdline, stdin=subprocess.PIPE)
+			#while True:
+				## Send data to VLC input
+				#data = connection.read(1024)
+				#if not data:
+					#break
+				#player.stdin.write(data)
+		#finally:
+			## Free connection resources
+			#connection.close()
+			#server_socket.close()
+			#player.terminate()
+	
 	
 	def networkStreamServer(self):
 		'''
 		Recieve a video stream from the Pi, and playback through VLC.
 		'''
 		
-		# Initialise the socket connection
-		server_socket = socket.socket()
-		server_socket.bind(('0.0.0.0', 8000))
-		server_socket.listen(0)
-		
-		# Accept a single connection
-		connection = server_socket.accept()[0].makefile('rb')
 		try:
 			# Start stream to VLC
 			cmdline = ['vlc', '--demux', 'h264', '-']
@@ -47,8 +74,6 @@ class cameraModuleServer:
 				player.stdin.write(data)
 		finally:
 			# Free connection resources
-			connection.close()
-			server_socket.close()
 			player.terminate()
 		
 	
@@ -57,3 +82,12 @@ class cameraModuleServer:
 		Control the camera remotely from a network computer.
 		'''
 		
+	
+	def closeServer(self):
+		'''
+		Free server resources.
+		'''
+		
+		# Close the connection and socket
+		self.connection.close()
+		self.server_socket.close()
