@@ -1,48 +1,32 @@
 '''
-Library for the control of the Raspberry Pi camera module using picamera.
+Library for the control of the Raspberry Pi camera module from a host computer 
+via a network connection.
 
 Author: Damon Hutley
-Date: 21st November 2016
+Date: 22nd November 2016
 '''
 
 
 from io import BytesIO
-from picamera import PiCamera
 import socket
 import subprocess
 import time
 
 
-class cameraModule:
+class cameraModuleServer:
 	
 	def __init__(self):
 		'''
 		Initialise the camera module class with picamera.
 		'''
 		
-		# Create an instance of the Picamera class
-		self.camera = PiCamera()
+		# Will probably initialise the socket connection here
+		pass
 		
 	
-	def capturePhoto(self):
+	def networkStreamServer(self):
 		'''
-		Capture a photo and store on Pi.
-		'''
-		
-		# Capture an image and store in file image.png. Will later add options 
-		# such as resolution, exposure time, etc.
-		self.camera.capture('image.png')
-		
-	
-	def captureStream(self):
-		'''
-		Capture a video and store on Pi.
-		'''
-		
-	
-	def networkStream(self):
-		'''
-		Stream a video through ethernet and playback through VLC on network computer.
+		Recieve a video stream from the Pi, and playback through VLC.
 		'''
 		
 		# Initialise the socket connection
@@ -69,16 +53,8 @@ class cameraModule:
 			player.terminate()
 		
 	
-	def remoteControl(self):
+	def remoteControlServer(self):
 		'''
 		Control the camera remotely from a network computer.
 		'''
-		
-		
-	def closeCamera(self):
-		'''
-		Release the camera resources.
-		'''
-		
-		self.camera.close()
 		
