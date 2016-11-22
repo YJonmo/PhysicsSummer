@@ -10,6 +10,7 @@ Date: 22nd November 2016
 import socket
 import subprocess
 import time
+import struct
 
 
 class cameraModuleServer:
@@ -77,6 +78,16 @@ class cameraModuleServer:
 			#player.terminate()
 		
 	
+	def send_msg(sock, msg):
+		'''
+		Send message with a prefixed length.
+		'''
+		
+		# Prefix each message with a 4-byte length (network byte order)
+		msg = struct.pack('>I', len(msg)) + msg
+		sock.sendall(msg)
+		
+	
 	def sendCommand(self):
 		'''
 		Send a command via terminal to the Raspberry Pi. Command options are:
@@ -105,27 +116,34 @@ class cameraModuleServer:
 				print("Invalid command")
 		
 		# Send command
-		self.server_socket.send(command)
+		#self.server_socket.send(command)
+		send_msg(self.server_socket, command)
 		
 		# Perform command
 		if command == "V":
 			duration = input("Duration: ")
-			self.server_socket.send(duration)
+			#self.server_socket.send(duration)
+			send_msg(self.server_socket, duration)
 		elif command == "S":
 			duration = input("Duration: ")
-			self.server_socket.send(duration)
+			#self.server_socket.send(duration)
+			send_msg(self.server_socket, duration)
 			self.networkStreamServer()
 		elif command == "R":
 			width = input("Width: ")
-			self.server_socket.send(width)
+			#self.server_socket.send(width)
+			send_msg(self.server_socket, width)
 			height = input("Height: ")
-			self.server_socket.send(height)
+			#self.server_socket.send(height)
+			send_msg(self.server_socket, height)
 		elif command == "F":
 			rate = input("Framerate: ")
-			self.server_socket.send(rate)
+			#self.server_socket.send(rate)
+			send_msg(self.server_socket, rate)
 		elif command == "X":
 			speed = input("Shutter Speed: ")
-			self.server_socket.send(speed)
+			#self.server_socket.send(speed)
+			send_msg(self.server_socket, speed)
 		
 		return command
 	
