@@ -12,8 +12,16 @@ import cameraLibServer
 # Initialise the camera module server
 camCommand = cameraLibServer.cameraModuleServer()
 
-# Stream from Raspberry Pi to VLC on host computer
-camCommand.networkStreamServer()
+# Continuously ask for commands to send to the Raspberry Pi from the terminal.
+while True:
+	command = camCommand.sendCommand()
+	
+	# Exit program if quit command called
+	if command = "Q":
+		break
+
+## Stream from Raspberry Pi to VLC on host computer
+#camCommand.networkStreamServer()
 
 # Close connection
 camCommand.closeServer()
