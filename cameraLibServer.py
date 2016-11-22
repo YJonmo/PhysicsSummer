@@ -20,6 +20,7 @@ class cameraModuleServer:
 		'''
 		
 		# Initialise the socket connection
+		
 		self.server_socket = socket.socket()
 		self.server_socket.bind(('0.0.0.0', 8000))
 		self.server_socket.listen(0)
@@ -77,10 +78,16 @@ class cameraModuleServer:
 			player.terminate()
 		
 	
-	def remoteControlServer(self):
+	def sendCommand(self):
 		'''
-		Control the camera remotely from a network computer.
+		Send a command via terminal to the Raspberry Pi. Command options are:
+			Image: Take image and store on Pi
+			Video: Record video and store on Pi
+			Stream: Stream video to host device
 		'''
+		
+		# Input command from terminal
+		command = input("Input camera command: ")
 		
 	
 	def closeServer(self):

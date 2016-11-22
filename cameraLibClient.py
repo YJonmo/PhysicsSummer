@@ -72,10 +72,9 @@ class cameraModuleClient:
 		self.camera.wait_recording(duration)
 		self.camera.stop_recording()
 		
-	
-	def networkStreamClient(self, duration):
+	def initNetwork(self):
 		'''
-		Stream a video through the network.
+		Initialise the client side network on the Raspberry Pi.
 		'''
 		
 		# Initialise the socket connection
@@ -84,27 +83,64 @@ class cameraModuleClient:
 		
 		# Create a file-like object for the connection
 		connection = client_socket.makefile('wb')
-		try:
-			# Warm the camera up
-			self.camera.start_preview()
-			time.sleep(2)
-			
-			# Record the camera for length <duration>
-			camera.start_recording(connection, format = 'h264')
-			camera.wait_recording(duration)
-			camera.stop_recording()
-		finally:
-			# Free connection resources
-			connection.close()
-			client_socket.close()
 		
 	
-	def remoteControlClient(self):
+	#def networkStreamClient(self, duration):
+		#'''
+		#Stream a video through the network.
+		#'''
+		
+		## Initialise the socket connection
+		#client_socket = socket.socket()
+		#client_socket.connect(('my_server', 8000))
+		
+		## Create a file-like object for the connection
+		#connection = client_socket.makefile('wb')
+		#try:
+			## Warm the camera up
+			#self.camera.start_preview()
+			#time.sleep(2)
+			
+			## Record the camera for length <duration>
+			#camera.start_recording(connection, format = 'h264')
+			#camera.wait_recording(duration)
+			#camera.stop_recording()
+		#finally:
+			## Free connection resources
+			#connection.close()
+			#client_socket.close()
+			
+		
+	def networkStreamClient(self, duration):
+		'''
+		Stream a video through the network.
+		'''
+		
+		# Warm the camera up
+		self.camera.start_preview()
+		time.sleep(2)
+		
+		# Record the camera for length <duration>
+		camera.start_recording(connection, format = 'h264')
+		camera.wait_recording(duration)
+		camera.stop_recording()
+	
+	def receiveCommand(self):
 		'''
 		Control the camera remotely from a network computer.
 		'''
 		
+	
+	def closeClient(self):
+		'''
+		Free the network resources.
+		'''
 		
+		# Free connection resources
+		connection.close()
+		client_socket.close()
+		
+	
 	def closeCamera(self):
 		'''
 		Release the camera resources.
