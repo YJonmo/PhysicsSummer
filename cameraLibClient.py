@@ -29,6 +29,7 @@ class cameraModuleClient:
 		
 		# Change the resolution of the camera
 		self.camera.resolution = (width, height)
+		
 	
 	def setFrameRate(self, rate):
 		'''
@@ -37,6 +38,7 @@ class cameraModuleClient:
 		
 		# Change the framerate of the camera
 		self.camera.framerate = rate
+		
 	
 	def setExposureTime(self, speed):
 		'''
@@ -47,6 +49,7 @@ class cameraModuleClient:
 		
 		# Change the shutter speed of the camera
 		self.camera.shutter_speed = speed
+		
 	
 	def capturePhoto(self):
 		'''
@@ -72,73 +75,99 @@ class cameraModuleClient:
 		self.camera.wait_recording(duration)
 		self.camera.stop_recording()
 		
-	def initNetwork(self):
-		'''
-		Initialise the client side network on the Raspberry Pi.
-		'''
 		
-		# Initialise the socket connection
-		client_socket = socket.socket()
-		client_socket.connect(('my_server', 8000))
-		
-		# Create a file-like object for the connection
-		connection = client_socket.makefile('wb')
-		
-	
-	#def networkStreamClient(self, duration):
+	#def initNetwork(self):
 		#'''
-		#Stream a video through the network.
+		#Initialise the client side network on the Raspberry Pi.
 		#'''
 		
 		## Initialise the socket connection
 		#client_socket = socket.socket()
-		#client_socket.connect(('my_server', 8000))
+		#client_socket.connect(('0.0.0.0', 8000))
 		
 		## Create a file-like object for the connection
-		#connection = client_socket.makefile('wb')
-		#try:
-			## Warm the camera up
-			#self.camera.start_preview()
-			#time.sleep(2)
-			
-			## Record the camera for length <duration>
-			#camera.start_recording(connection, format = 'h264')
-			#camera.wait_recording(duration)
-			#camera.stop_recording()
-		#finally:
-			## Free connection resources
-			#connection.close()
-			#client_socket.close()
-			
+		##connection = client_socket.makefile('wb')
 		
+	
 	def networkStreamClient(self, duration):
 		'''
 		Stream a video through the network.
 		'''
 		
-		# Warm the camera up
-		self.camera.start_preview()
-		time.sleep(2)
+		# Initialise the socket connection
+		client_socket = socket.socket()
+		client_socket.connect(('0.0.0.0', 8000))
 		
-		# Record the camera for length <duration>
-		camera.start_recording(connection, format = 'h264')
-		camera.wait_recording(duration)
-		camera.stop_recording()
+		# Create a file-like object for the connection
+		connection = client_socket.makefile('wb')
+		try:
+			# Warm the camera up
+			self.camera.start_preview()
+			time.sleep(2)
+			
+			# Record the camera for length <duration>
+			camera.start_recording(connection, format = 'h264')
+			camera.wait_recording(duration)
+			camera.stop_recording()
+		finally:
+			# Free connection resources
+			connection.close()
+			client_socket.close()
+			
+		
+	#def networkStreamClient(self, duration):
+		#'''
+		#Stream a video through the network.
+		#'''
+		
+		## Warm the camera up
+		#self.camera.start_preview()
+		#time.sleep(2)
+		
+		## Record the camera for length <duration>
+		#camera.start_recording(connection, format = 'h264')
+		#camera.wait_recording(duration)
+		#camera.stop_recording()
+		
 	
 	def receiveCommand(self):
 		'''
 		Control the camera remotely from a network computer.
 		'''
 		
-	
-	def closeClient(self):
-		'''
-		Free the network resources.
-		'''
+		# Initialise the socket connection
+		client_socket = socket.socket()
+		client_socket.connect(('0.0.0.0', 8000))
 		
-		# Free connection resources
-		connection.close()
-		client_socket.close()
+		# Recieve data from host
+		command = client_socket.recv(1024)
+		
+		# Perform command
+		if command == "I":
+			capturePhoto()
+		elif command == "V":
+			captureStream()
+		elif command == "S":
+			client_socket.close()
+			networkStreamClient()
+			client_socket = socket.socket()
+			client_socket.connect(('0.0.0.0', 8000))
+		elif command == "R":
+			setResolution()
+		elif command == "F":
+			setFrameRate()
+		elif command == "X":
+			setExposureTime()
+		
+	
+	#def closeClient(self):
+		#'''
+		#Free the network resources.
+		#'''
+		
+		## Free connection resources
+		#connection.close()
+		#client_socket.close()
 		
 	
 	def closeCamera(self):

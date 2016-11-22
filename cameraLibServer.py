@@ -107,8 +107,8 @@ class cameraModuleServer:
 		# Send command
 		self.server_socket.send(command)
 		
-		# Options
-		if command = "R":
+		# Perform command
+		if command == "S":
 			self.networkStreamServer()
 		
 		return command
