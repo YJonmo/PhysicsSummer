@@ -108,8 +108,24 @@ class cameraModuleServer:
 		self.server_socket.send(command)
 		
 		# Perform command
-		if command == "S":
+		if command == "V":
+			duration = input("Duration: ")
+			self.server_socket.send(duration)
+		elif command == "S":
+			duration = input("Duration: ")
+			self.server_socket.send(duration)
 			self.networkStreamServer()
+		elif command == "R":
+			width = input("Width: ")
+			self.server_socket.send(width)
+			height = input("Height: ")
+			self.server_socket.send(height)
+		elif command == "F":
+			rate = input("Framerate: ")
+			self.server_socket.send(rate)
+		elif command == "X":
+			speed = input("Shutter Speed: ")
+			self.server_socket.send(speed)
 		
 		return command
 	

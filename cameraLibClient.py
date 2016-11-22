@@ -146,18 +146,24 @@ class cameraModuleClient:
 		if command == "I":
 			capturePhoto()
 		elif command == "V":
-			captureStream()
+			duration = client_socket.recv(1024)
+			captureStream(duration)
 		elif command == "S":
+			duration = client_socket.recv(1024)
 			client_socket.close()
-			networkStreamClient()
+			networkStreamClient(duration)
 			client_socket = socket.socket()
 			client_socket.connect(('0.0.0.0', 8000))
 		elif command == "R":
-			setResolution()
+			width = client_socket.recv(1024)
+			height = client_socket.recv(1024)
+			setResolution(width, height)
 		elif command == "F":
-			setFrameRate()
+			rate = client_socket.recv(1024)
+			setFrameRate(rate)
 		elif command == "X":
-			setExposureTime()
+			speed = client_socket.recv(1024)
+			setExposureTime(speed)
 		
 	
 	#def closeClient(self):
