@@ -68,7 +68,7 @@ class cameraModuleServer:
 			player = subprocess.Popen(cmdline, stdin=subprocess.PIPE)
 			while True:
 				# Send data to VLC input
-				data = connection.read(1024)
+				data = self.connection.read(1024)
 				if not data:
 					break
 				player.stdin.write(data)
