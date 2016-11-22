@@ -130,6 +130,35 @@ class cameraModuleClient:
 		#camera.stop_recording()
 		
 	
+	def recv_msg(sock):
+		'''
+		Receive a message from the network.
+		'''
+		
+		# Read message length and unpack it into an integer
+		raw_msglen = recvall(sock, 4)
+		if not raw_msglen:
+			return None
+		msglen = struct.unpack('>I', raw_msglen)[0]
+		# Read the message data
+		return recvall(sock, msglen)
+		
+	
+	def recvall(sock, n):
+		'''
+		Decode the message given the message length.
+		'''
+		
+		# Helper function to recv n bytes or return None if EOF is hit
+		data = ''
+		while len(data) < n:
+			packet = sock.recv(n - len(data))
+			if not packet:
+				return None
+			data += packet
+	   return data
+	   
+	
 	def receiveCommand(self):
 		'''
 		Control the camera remotely from a network computer.
@@ -140,29 +169,36 @@ class cameraModuleClient:
 		client_socket.connect(('0.0.0.0', 8000))
 		
 		# Recieve data from host
-		command = client_socket.recv(1024)
+		#command = client_socket.recv(1024)
+		command = recv_msg(client_socket)
 		
 		# Perform command
 		if command == "I":
 			capturePhoto()
 		elif command == "V":
-			duration = client_socket.recv(1024)
+			#duration = client_socket.recv(1024)
+			duration = recv_msg(client_socket)
 			captureStream(duration)
 		elif command == "S":
-			duration = client_socket.recv(1024)
+			#duration = client_socket.recv(1024)
+			duration = recv_msg(client_socket)
 			client_socket.close()
 			networkStreamClient(duration)
 			client_socket = socket.socket()
 			client_socket.connect(('0.0.0.0', 8000))
 		elif command == "R":
-			width = client_socket.recv(1024)
-			height = client_socket.recv(1024)
+			#width = client_socket.recv(1024)
+			width = recv_msg(client_socket)
+			#height = client_socket.recv(1024)
+			height = recv_msg(client_socket)
 			setResolution(width, height)
 		elif command == "F":
-			rate = client_socket.recv(1024)
+			#rate = client_socket.recv(1024)
+			rate = recv_msg(client_socket)
 			setFrameRate(rate)
 		elif command == "X":
-			speed = client_socket.recv(1024)
+			#speed = client_socket.recv(1024)
+			speed = recv_msg(client_socket)
 			setExposureTime(speed)
 		
 	
