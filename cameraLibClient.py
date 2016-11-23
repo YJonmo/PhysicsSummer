@@ -13,6 +13,7 @@ except RuntimeError:
 	picam = 0
 import socket
 import time
+import struct
 
 
 class cameraModuleClient:
@@ -177,7 +178,8 @@ class cameraModuleClient:
 		#command = client_socket.recv(1024)
 		print("Waiting for message...")
 		command = self.recv_msg(client_socket)
-		print("Command received!")
+		print("Command received: ")
+		print(command)
 		
 		# Perform command
 		if command == "I":
