@@ -35,6 +35,7 @@ class cameraModuleClient:
 		
 		# Change the resolution of the camera
 		self.camera.resolution = (width, height)
+		print("Resolution changed")
 		
 	
 	def setFrameRate(self, rate):
@@ -44,6 +45,7 @@ class cameraModuleClient:
 		
 		# Change the framerate of the camera
 		self.camera.framerate = rate
+		print("Framerate changed")
 		
 	
 	def setExposureTime(self, speed):
@@ -55,6 +57,7 @@ class cameraModuleClient:
 		
 		# Change the shutter speed of the camera
 		self.camera.shutter_speed = speed
+		print("Exposure Time Changed")
 		
 	
 	def capturePhoto(self):
@@ -66,9 +69,9 @@ class cameraModuleClient:
 		self.camera.start_preview()
 		sleep(2)
 		
-		# Capture an image and store in file image.png. Will later add options 
-		# such as resolution, exposure time, etc.
+		# Capture an image and store in file image.png.
 		self.camera.capture('image.png')
+		print("Photo captured")
 		
 	
 	def captureStream(self, duration):
@@ -78,8 +81,10 @@ class cameraModuleClient:
 		
 		# Record the camera for length <duration>, and store in file video.h264
 		self.camera.start_recording('video.h264')
+		print("Recording started...")
 		self.camera.wait_recording(duration)
 		self.camera.stop_recording()
+		print("Recording finished")
 		
 		
 	#def initNetwork(self):
@@ -178,7 +183,7 @@ class cameraModuleClient:
 		
 		# Recieve data from host
 		#command = client_socket.recv(1024)
-		print("Waiting for message...")
+		print("Waiting for command...")
 		command = self.recv_msg(client_socket)
 		print("Command received: " + command)
 		
@@ -187,30 +192,43 @@ class cameraModuleClient:
 			self.capturePhoto()
 		elif command == "V":
 			#duration = client_socket.recv(1024)
-			duration = self.recv_msg(client_socket)
+			print("Waiting for duration...")
+			duration = int(self.recv_msg(client_socket))
+			print("Duration: " + str(duration))
 			self.captureStream(duration)
 		elif command == "S":
 			#duration = client_socket.recv(1024)
-			duration = self.recv_msg(client_socket)
+			print("Waiting for duration...")
+			duration = int(self.recv_msg(client_socket))
+			print("Duration: " + str(duration))
 			#client_socket.close()
 			self.networkStreamClient(client_socket, duration)
 			#client_socket = socket.socket()
 			#client_socket.connect(('172.24.94.238', 8000))
 		elif command == "R":
 			#width = client_socket.recv(1024)
-			width = self.recv_msg(client_socket)
+			print("Waiting for width...")
+			width = int(self.recv_msg(client_socket))
+			print("Width: " + str(width))
 			#height = client_socket.recv(1024)
-			height = self.recv_msg(client_socket)
+			print("Waiting for height...")
+			height = int(self.recv_msg(client_socket))
+			print("Height: " + str(height))
 			self.setResolution(width, height)
 		elif command == "F":
 			#rate = client_socket.recv(1024)
-			rate = self.recv_msg(client_socket)
+			print("Wating for framerate...")
+			rate = int(self.recv_msg(client_socket))
+			print("Framerate: " + str(rate))
 			self.setFrameRate(rate)
 		elif command == "X":
 			#speed = client_socket.recv(1024)
-			speed = self.recv_msg(client_socket)
+			print("Waiting for shutter speed...")
+			speed = int(self.recv_msg(client_socket))
+			print("Shutter Speed: " + str(speed))
 			self.setExposureTime(speed)
 		elif command == "Q":
+			print("Closing socket...")
 			client_socket.close()
 		
 		return command
