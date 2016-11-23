@@ -17,7 +17,7 @@ while True:
 	command = camCommand.sendCommand()
 	
 	# Exit program if quit command called
-	if command = "Q":
+	if command == "Q":
 		break
 
 ## Stream from Raspberry Pi to VLC on host computer

@@ -101,7 +101,7 @@ class cameraModuleClient:
 		
 		# Initialise the socket connection
 		client_socket = socket.socket()
-		client_socket.connect(('0.0.0.0', 8000))
+		client_socket.connect(('172.24.94.238', 8000))
 		
 		# Create a file-like object for the connection
 		connection = client_socket.makefile('wb')
@@ -171,7 +171,7 @@ class cameraModuleClient:
 		
 		# Initialise the socket connection
 		client_socket = socket.socket()
-		client_socket.connect(('0.0.0.0', 8000))
+		client_socket.connect(('172.24.94.238', 8000))
 		
 		# Recieve data from host
 		#command = client_socket.recv(1024)

@@ -21,9 +21,14 @@ class cameraModuleServer:
 		'''
 		
 		# Initialise the socket connection
-		self.server_socket = socket.socket()
-		self.server_socket.bind(('0.0.0.0', 8000))
-		self.server_socket.listen(0)
+		self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.host = socket.gethostbyname(socket.gethostname())
+		print(self.host)
+		self.server_socket.bind((self.host, 8000))
+		self.server_socket.listen(5)
+		print("Waiting for Connection...")
+		(self.hostSock, self.address) = self.server_socket.accept()
+		print("Connection accepted!")
 		
 		## Accept a single connection
 		#self.connection = self.server_socket.accept()[0].makefile('rb')
