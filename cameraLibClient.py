@@ -30,13 +30,14 @@ class cameraModuleClient:
 			self.camera = PiCamera()
 		
 	
-	def setResoltion(self, width, height):
+	def setResolution(self, width, height):
 		'''
 		Set the resolution of the camera
 		'''
 		
 		# Change the resolution of the camera
-		self.camera.resolution = (width, height)
+		if picam == 1:
+			self.camera.resolution = (width, height)
 		print("Resolution changed")
 		
 	
@@ -227,7 +228,7 @@ class cameraModuleClient:
 			height = int(self.recv_msg(client_socket))
 			print("Height: " + str(height))
 			self.setResolution(width, height)
-			self.send_msg(self.client_socket, "Resolution changed")
+			self.send_msg(client_socket, "Resolution changed")
 		elif command == "F":
 			#rate = client_socket.recv(1024)
 			print("Wating for framerate...")
