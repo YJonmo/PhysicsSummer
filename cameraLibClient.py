@@ -141,12 +141,12 @@ class cameraModuleClient:
 		'''
 		
 		# Read message length and unpack it into an integer
-		raw_msglen = recvall(sock, 4)
+		raw_msglen = self.recvall(sock, 4)
 		if not raw_msglen:
 			return None
 		msglen = struct.unpack('>I', raw_msglen)[0]
 		# Read the message data
-		return recvall(sock, msglen)
+		return self.recvall(sock, msglen)
 		
 	
 	def recvall(self, sock, n):
