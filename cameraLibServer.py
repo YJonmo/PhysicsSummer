@@ -128,29 +128,29 @@ class cameraModuleServer:
 		
 		# Perform command
 		if command == "V":
-			duration = input("Duration: ")
+			duration = str(input("Duration: "))
 			#self.server_socket.send(duration)
-			self.send_msg(self.server_socket, duration)
+			self.send_msg(self.hostSock, duration)
 		elif command == "S":
-			duration = input("Duration: ")
+			duration = str(input("Duration: "))
 			#self.server_socket.send(duration)
-			self.send_msg(self.server_socket, duration)
+			self.send_msg(self.hostSock, duration)
 			self.networkStreamServer()
 		elif command == "R":
-			width = input("Width: ")
+			width = str(input("Width: "))
 			#self.server_socket.send(width)
-			self.send_msg(self.server_socket, width)
-			height = input("Height: ")
+			self.send_msg(self.hostSock, width)
+			height = str(input("Height: "))
 			#self.server_socket.send(height)
-			self.send_msg(self.server_socket, height)
+			self.send_msg(self.hostSock, height)
 		elif command == "F":
-			rate = input("Framerate: ")
+			rate = str(input("Framerate: "))
 			#self.server_socket.send(rate)
-			self.send_msg(self.server_socket, rate)
+			self.send_msg(self.hostSock, rate)
 		elif command == "X":
-			speed = input("Shutter Speed: ")
+			speed = str(input("Shutter Speed: "))
 			#self.server_socket.send(speed)
-			self.send_msg(self.server_socket, speed)
+			self.send_msg(self.hostSock, speed)
 		
 		return command
 		
@@ -161,4 +161,5 @@ class cameraModuleServer:
 		'''
 		
 		# Close the connection and socket
+		print("Closing socket...")
 		self.server_socket.close()
