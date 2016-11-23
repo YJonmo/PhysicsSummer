@@ -183,9 +183,9 @@ class cameraModuleClient:
 		return data
 	   
 	
-	def receiveCommand(self):
+	def initNetwork(self):
 		'''
-		Control the camera remotely from a network computer.
+		Initialise the client side network on the Raspberry Pi.
 		'''
 		
 		# Initialise the socket connection
@@ -193,6 +193,18 @@ class cameraModuleClient:
 		print("Waiting for connection...")
 		client_socket.connect(('172.24.94.238', 8000))
 		print("Connection accepted!")
+		
+	
+	def receiveCommand(self):
+		'''
+		Control the camera remotely from a network computer.
+		'''
+		
+		# Initialise the socket connection
+		#client_socket = socket.socket()
+		#print("Waiting for connection...")
+		#client_socket.connect(('172.24.94.238', 8000))
+		#print("Connection accepted!")
 		
 		# Recieve data from host
 		#command = client_socket.recv(1024)

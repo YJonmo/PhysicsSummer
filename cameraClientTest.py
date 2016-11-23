@@ -12,6 +12,9 @@ import cameraLibClient
 # Initialise the camera module client
 camCommand = cameraLibClient.cameraModuleClient()
 
+# Initialise the network
+camCommand.initNetwork()
+
 # Continuously wait for commands from a computer on the network
 while True:
 	command = camCommand.receiveCommand()
