@@ -95,17 +95,17 @@ class cameraModuleClient:
 		##connection = client_socket.makefile('wb')
 		
 	
-	def networkStreamClient(self, duration):
+	def networkStreamClient(self, sock, duration):
 		'''
 		Stream a video through the network.
 		'''
 		
 		# Initialise the socket connection
-		client_socket = socket.socket()
-		client_socket.connect(('172.24.94.238', 8000))
+		#client_socket = socket.socket()
+		#client_socket.connect(('172.24.94.238', 8000))
 		
 		# Create a file-like object for the connection
-		connection = client_socket.makefile('wb')
+		connection = sock.makefile('wb')
 		try:
 			# Warm the camera up
 			self.camera.start_preview()
@@ -118,7 +118,7 @@ class cameraModuleClient:
 		finally:
 			# Free connection resources
 			connection.close()
-			client_socket.close()
+			#client_socket.close()
 			
 		
 	#def networkStreamClient(self, duration):
@@ -172,43 +172,44 @@ class cameraModuleClient:
 		
 		# Initialise the socket connection
 		client_socket = socket.socket()
+		print("Waiting for connection...")
 		client_socket.connect(('172.24.94.238', 8000))
+		print("Connection accepted!")
 		
 		# Recieve data from host
 		#command = client_socket.recv(1024)
 		print("Waiting for message...")
 		command = self.recv_msg(client_socket)
-		print("Command received: ")
-		print(command)
+		print("Command received: " + command)
 		
 		# Perform command
 		if command == "I":
-			capturePhoto()
+			self.capturePhoto()
 		elif command == "V":
 			#duration = client_socket.recv(1024)
 			duration = self.recv_msg(client_socket)
-			captureStream(duration)
+			self.captureStream(duration)
 		elif command == "S":
 			#duration = client_socket.recv(1024)
 			duration = self.recv_msg(client_socket)
-			client_socket.close()
-			networkStreamClient(duration)
-			client_socket = socket.socket()
-			client_socket.connect(('172.24.94.238', 8000))
+			#client_socket.close()
+			self.networkStreamClient(client_socket, duration)
+			#client_socket = socket.socket()
+			#client_socket.connect(('172.24.94.238', 8000))
 		elif command == "R":
 			#width = client_socket.recv(1024)
 			width = self.recv_msg(client_socket)
 			#height = client_socket.recv(1024)
 			height = self.recv_msg(client_socket)
-			setResolution(width, height)
+			self.setResolution(width, height)
 		elif command == "F":
 			#rate = client_socket.recv(1024)
 			rate = self.recv_msg(client_socket)
-			setFrameRate(rate)
+			self.setFrameRate(rate)
 		elif command == "X":
 			#speed = client_socket.recv(1024)
 			speed = self.recv_msg(client_socket)
-			setExposureTime(speed)
+			self.setExposureTime(speed)
 		elif command == "Q":
 			client_socket.close()
 		
@@ -229,6 +230,6 @@ class cameraModuleClient:
 		'''
 		Release the camera resources.
 		'''
-		
-		self.camera.close()
+		if picam == 1:
+			self.camera.close()
 		
