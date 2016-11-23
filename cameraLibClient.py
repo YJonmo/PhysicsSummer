@@ -156,7 +156,7 @@ class cameraModuleClient:
 			if not packet:
 				return None
 			data += packet
-	   return data
+		return data
 	   
 	
 	def receiveCommand(self):
