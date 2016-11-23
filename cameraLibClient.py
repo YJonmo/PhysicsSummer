@@ -5,6 +5,8 @@ Author: Damon Hutley
 Date: 21st November 2016
 '''
 
+
+# For network testing purposes
 try:
 	from picamera import PiCamera
 	picam = 1
@@ -141,6 +143,16 @@ class cameraModuleClient:
 		#camera.stop_recording()
 		
 	
+	def send_msg(self, sock, msg):
+		'''
+		Send message with a prefixed length.
+		'''
+		
+		# Prefix each message with a 4-byte length (network byte order)
+		msg = struct.pack('>I', len(msg)) + msg
+		sock.sendall(msg)
+		
+	
 	def recv_msg(self, sock):
 		'''
 		Receive a message from the network.
@@ -215,6 +227,7 @@ class cameraModuleClient:
 			height = int(self.recv_msg(client_socket))
 			print("Height: " + str(height))
 			self.setResolution(width, height)
+			self.send_msg(self.client_socket, "Resolution changed")
 		elif command == "F":
 			#rate = client_socket.recv(1024)
 			print("Wating for framerate...")

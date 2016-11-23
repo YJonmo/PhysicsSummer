@@ -93,6 +93,35 @@ class cameraModuleServer:
 		sock.sendall(msg)
 		
 	
+	def recv_msg(self, sock):
+		'''
+		Receive a message from the network.
+		'''
+		
+		# Read message length and unpack it into an integer
+		raw_msglen = self.recvall(sock, 4)
+		if not raw_msglen:
+			return None
+		msglen = struct.unpack('>I', raw_msglen)[0]
+		# Read the message data
+		return self.recvall(sock, msglen)
+		
+	
+	def recvall(self, sock, n):
+		'''
+		Decode the message given the message length.
+		'''
+		
+		# Helper function to recv n bytes or return None if EOF is hit
+		data = ''
+		while len(data) < n:
+			packet = sock.recv(n - len(data))
+			if not packet:
+				return None
+			data += packet
+		return data
+		
+	
 	def sendCommand(self):
 		'''
 		Send a command via terminal to the Raspberry Pi. Command options are:
@@ -143,6 +172,8 @@ class cameraModuleServer:
 			height = str(input("Height: "))
 			#self.server_socket.send(height)
 			self.send_msg(self.hostSock, height)
+			print("Waiting for confirmation")
+			print(self.recv_msg(self.hostSock))
 		elif command == "F":
 			rate = str(input("Framerate: "))
 			#self.server_socket.send(rate)
