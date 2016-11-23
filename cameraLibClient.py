@@ -189,9 +189,9 @@ class cameraModuleClient:
 		'''
 		
 		# Initialise the socket connection
-		client_socket = socket.socket()
+		self.client_socket = socket.socket()
 		print("Waiting for connection...")
-		client_socket.connect(('172.24.94.238', 8000))
+		self.client_socket.connect(('172.24.94.238', 8000))
 		print("Connection accepted!")
 		
 	
@@ -209,7 +209,7 @@ class cameraModuleClient:
 		# Recieve data from host
 		#command = client_socket.recv(1024)
 		print("Waiting for command...")
-		command = self.recv_msg(client_socket)
+		command = self.recv_msg(self.client_socket)
 		print("Command received: " + command)
 		
 		# Perform command
@@ -218,44 +218,44 @@ class cameraModuleClient:
 		elif command == "V":
 			#duration = client_socket.recv(1024)
 			print("Waiting for duration...")
-			duration = int(self.recv_msg(client_socket))
+			duration = int(self.recv_msg(self.client_socket))
 			print("Duration: " + str(duration))
 			self.captureStream(duration)
 		elif command == "S":
 			#duration = client_socket.recv(1024)
 			print("Waiting for duration...")
-			duration = int(self.recv_msg(client_socket))
+			duration = int(self.recv_msg(self.client_socket))
 			print("Duration: " + str(duration))
 			#client_socket.close()
-			self.networkStreamClient(client_socket, duration)
+			self.networkStreamClient(self.client_socket, duration)
 			#client_socket = socket.socket()
 			#client_socket.connect(('172.24.94.238', 8000))
 		elif command == "R":
 			#width = client_socket.recv(1024)
 			print("Waiting for width...")
-			width = int(self.recv_msg(client_socket))
+			width = int(self.recv_msg(self.client_socket))
 			print("Width: " + str(width))
 			#height = client_socket.recv(1024)
 			print("Waiting for height...")
-			height = int(self.recv_msg(client_socket))
+			height = int(self.recv_msg(self.client_socket))
 			print("Height: " + str(height))
 			self.setResolution(width, height)
-			self.send_msg(client_socket, "Resolution changed")
+			self.send_msg(self.client_socket, "Resolution changed")
 		elif command == "F":
 			#rate = client_socket.recv(1024)
 			print("Wating for framerate...")
-			rate = int(self.recv_msg(client_socket))
+			rate = int(self.recv_msg(self.client_socket))
 			print("Framerate: " + str(rate))
 			self.setFrameRate(rate)
 		elif command == "X":
 			#speed = client_socket.recv(1024)
 			print("Waiting for shutter speed...")
-			speed = int(self.recv_msg(client_socket))
+			speed = int(self.recv_msg(self.client_socket))
 			print("Shutter Speed: " + str(speed))
 			self.setExposureTime(speed)
 		elif command == "Q":
 			print("Closing socket...")
-			client_socket.close()
+			self.client_socket.close()
 		
 		return command
 		
