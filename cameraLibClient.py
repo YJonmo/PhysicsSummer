@@ -176,7 +176,7 @@ class cameraModuleClient:
 		# Recieve data from host
 		#command = client_socket.recv(1024)
 		print("Waiting for message...")
-		command = recv_msg(client_socket)
+		command = self.recv_msg(client_socket)
 		print("Command received!")
 		
 		# Perform command
@@ -184,28 +184,28 @@ class cameraModuleClient:
 			capturePhoto()
 		elif command == "V":
 			#duration = client_socket.recv(1024)
-			duration = recv_msg(client_socket)
+			duration = self.recv_msg(client_socket)
 			captureStream(duration)
 		elif command == "S":
 			#duration = client_socket.recv(1024)
-			duration = recv_msg(client_socket)
+			duration = self.recv_msg(client_socket)
 			client_socket.close()
 			networkStreamClient(duration)
 			client_socket = socket.socket()
-			client_socket.connect(('0.0.0.0', 8000))
+			client_socket.connect(('172.24.94.238', 8000))
 		elif command == "R":
 			#width = client_socket.recv(1024)
-			width = recv_msg(client_socket)
+			width = self.recv_msg(client_socket)
 			#height = client_socket.recv(1024)
-			height = recv_msg(client_socket)
+			height = self.recv_msg(client_socket)
 			setResolution(width, height)
 		elif command == "F":
 			#rate = client_socket.recv(1024)
-			rate = recv_msg(client_socket)
+			rate = self.recv_msg(client_socket)
 			setFrameRate(rate)
 		elif command == "X":
 			#speed = client_socket.recv(1024)
-			speed = recv_msg(client_socket)
+			speed = self.recv_msg(client_socket)
 			setExposureTime(speed)
 		
 	
