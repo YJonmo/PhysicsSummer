@@ -91,6 +91,7 @@ class cameraModuleServer:
 		# Prefix each message with a 4-byte length (network byte order)
 		msg = struct.pack('>I', len(msg)) + msg
 		sock.sendall(msg)
+		print(msg)
 		
 	
 	def sendCommand(self):
@@ -122,7 +123,7 @@ class cameraModuleServer:
 		
 		# Send command
 		#self.server_socket.send(command)
-		self.send_msg(self.server_socket, command)
+		self.send_msg(self.hostSock, command)
 		
 		# Perform command
 		if command == "V":
