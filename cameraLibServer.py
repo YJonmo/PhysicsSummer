@@ -172,8 +172,12 @@ class cameraModuleServer:
 			height = str(input("Height: "))
 			#self.server_socket.send(height)
 			self.send_msg(self.hostSock, height)
-			print("Waiting for confirmation")
-			print(self.recv_msg(self.hostSock))
+			print("Waiting for confirmation...")
+			confirm = self.recv_msg(self.hostSock)
+			if confirm == None:
+				print("Command failed")
+			else:
+				print(confirm)
 		elif command == "F":
 			rate = str(input("Framerate: "))
 			#self.server_socket.send(rate)
