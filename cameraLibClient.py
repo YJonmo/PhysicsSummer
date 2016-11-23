@@ -5,8 +5,12 @@ Author: Damon Hutley
 Date: 21st November 2016
 '''
 
-
-from picamera import PiCamera
+try:
+	from picamera import PiCamera
+	picam = 1
+except RuntimeError:
+	print("Picamera not found")
+	picam = 0
 import socket
 import time
 
@@ -19,12 +23,8 @@ class cameraModuleClient:
 		'''
 		
 		# Create an instance of the Picamera class
-		try:
+		if picam == 1:
 			self.camera = PiCamera()
-			self.connected = 1
-		except RuntimeError:
-			print("Picamera not found!")
-			self.connected = 0
 		
 	
 	def setResoltion(self, width, height):
