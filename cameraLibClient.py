@@ -135,7 +135,7 @@ class cameraModuleClient:
 		#camera.stop_recording()
 		
 	
-	def recv_msg(sock):
+	def recv_msg(self, sock):
 		'''
 		Receive a message from the network.
 		'''
@@ -149,7 +149,7 @@ class cameraModuleClient:
 		return recvall(sock, msglen)
 		
 	
-	def recvall(sock, n):
+	def recvall(self, sock, n):
 		'''
 		Decode the message given the message length.
 		'''

@@ -83,7 +83,7 @@ class cameraModuleServer:
 			#player.terminate()
 		
 	
-	def send_msg(sock, msg):
+	def send_msg(self, sock, msg):
 		'''
 		Send message with a prefixed length.
 		'''
