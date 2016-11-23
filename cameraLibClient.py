@@ -19,7 +19,12 @@ class cameraModuleClient:
 		'''
 		
 		# Create an instance of the Picamera class
-		self.camera = PiCamera()
+		try:
+			self.camera = PiCamera()
+			self.connected = 1
+		except RuntimeError:
+			print("Picamera not found!")
+			self.connected = 0
 		
 	
 	def setResoltion(self, width, height):
@@ -170,7 +175,9 @@ class cameraModuleClient:
 		
 		# Recieve data from host
 		#command = client_socket.recv(1024)
+		print("Waiting for message...")
 		command = recv_msg(client_socket)
+		print("Command received!")
 		
 		# Perform command
 		if command == "I":
