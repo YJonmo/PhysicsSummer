@@ -146,6 +146,7 @@ class cameraModuleServer:
 			send_msg(self.server_socket, speed)
 		
 		return command
+		
 	
 	def closeServer(self):
 		'''
