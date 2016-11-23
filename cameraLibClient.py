@@ -209,6 +209,10 @@ class cameraModuleClient:
 			#speed = client_socket.recv(1024)
 			speed = self.recv_msg(client_socket)
 			setExposureTime(speed)
+		elif command == "Q":
+			client_socket.close()
+		
+		return command
 		
 	
 	#def closeClient(self):

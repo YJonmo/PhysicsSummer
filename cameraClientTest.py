@@ -14,7 +14,11 @@ camCommand = cameraLibClient.cameraModuleClient()
 
 # Continuously wait for commands from a computer on the network
 while True:
-	camCommand.receiveCommand()
+	command = camCommand.receiveCommand()
+	
+	# Exit program if quit command called
+	if command == "Q":
+		break
 	
 # Free the camera resources
 camCommand.closeCamera()
