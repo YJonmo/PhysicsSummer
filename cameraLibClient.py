@@ -169,9 +169,21 @@ class cameraModuleClient:
 		'''
 		
 		# Initialise the socket connection
-		self.client_socket = socket.socket()
-		print("Waiting for connection...")
-		self.client_socket.connect(('172.24.94.238', 8000))
+		#self.client_socket = socket.socket()
+		#print("Waiting for connection...")
+		#self.client_socket.connect(('172.24.94.238', 8000))
+		#print("Connection accepted!")
+		
+		# Initialise the socket connection
+		self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.host = socket.gethostbyname(socket.gethostname())
+		print(self.host)
+		self.server_socket.bind((self.host, 8000))
+		self.server_socket.listen(5)
+		
+		# Wait for the Raspberry Pi to connect
+		print("Waiting for Connection...")
+		(self.hostSock, self.address) = self.server_socket.accept()
 		print("Connection accepted!")
 		
 	
@@ -182,62 +194,62 @@ class cameraModuleClient:
 		
 		# Recieve data from host
 		print("Waiting for command...")
-		command = self.recv_msg(self.client_socket)
+		command = self.recv_msg(self.hostSock)
 		print("Command received: " + command)
 		
 		# Perform command
 		# Capture photo
 		if command == "I":
 			self.capturePhoto()
-			self.send_msg(self.client_socket, "Photo captured")
+			self.send_msg(self.hostSock, "Photo captured")
 		
 		# Capture stream
 		elif command == "V":
 			print("Waiting for duration...")
-			duration = int(self.recv_msg(self.client_socket))
+			duration = int(self.recv_msg(self.hostSock))
 			print("Duration: " + str(duration))
-			self.send_msg(self.client_socket, "Recording started...")
+			self.send_msg(self.hostSock, "Recording started...")
 			self.captureStream(duration)
-			self.send_msg(self.client_socket, "Recording finished")
+			self.send_msg(self.hostSock, "Recording finished")
 		
 		# Network stream
 		elif command == "S":
 			print("Waiting for duration...")
-			duration = int(self.recv_msg(self.client_socket))
+			duration = int(self.recv_msg(self.hostSock))
 			print("Duration: " + str(duration))
-			self.networkStreamClient(self.client_socket, duration)
+			self.networkStreamClient(self.hostSock, duration)
 		
 		# Change resolution
 		elif command == "R":
 			print("Waiting for width...")
-			width = int(self.recv_msg(self.client_socket))
+			width = int(self.recv_msg(self.hostSock))
 			print("Width: " + str(width))
 			print("Waiting for height...")
-			height = int(self.recv_msg(self.client_socket))
+			height = int(self.recv_msg(self.hostSock))
 			print("Height: " + str(height))
 			self.setResolution(width, height)
-			self.send_msg(self.client_socket, "Resolution changed")
+			self.send_msg(self.hostSock, "Resolution changed")
 		
 		# Change framerate
 		elif command == "F":
 			print("Wating for framerate...")
-			rate = int(self.recv_msg(self.client_socket))
+			rate = int(self.recv_msg(self.hostSock))
 			print("Framerate: " + str(rate))
 			self.setFrameRate(rate)
-			self.send_msg(self.client_socket, "Framerate changed")
+			self.send_msg(self.hostSock, "Framerate changed")
 			
 		# Change exposure time
 		elif command == "X":
 			print("Waiting for shutter speed...")
-			speed = int(self.recv_msg(self.client_socket))
+			speed = int(self.recv_msg(self.hostSock))
 			print("Shutter Speed: " + str(speed))
 			self.setExposureTime(speed)
-			self.send_msg(self.client_socket, "Exposure time changed")
+			self.send_msg(self.hostSock, "Exposure time changed")
 			
 		# Quit program
 		elif command == "Q":
 			print("Closing socket...")
-			self.client_socket.close()
+			self.server_socket.close()
 		
 		return command
 		
