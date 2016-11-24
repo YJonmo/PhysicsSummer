@@ -47,7 +47,8 @@ class cameraModuleClient:
 		'''
 		
 		# Change the framerate of the camera
-		self.camera.framerate = rate
+		if picam == 1:
+			self.camera.framerate = rate
 		print("Framerate changed")
 		
 	
@@ -59,8 +60,9 @@ class cameraModuleClient:
 		'''
 		
 		# Change the shutter speed of the camera
-		self.camera.shutter_speed = speed
-		print("Exposure Time Changed")
+		if picam == 1:
+			self.camera.shutter_speed = speed
+		print("Exposure time changed")
 		
 	
 	def capturePhoto(self):
@@ -68,12 +70,13 @@ class cameraModuleClient:
 		Capture a photo and store on Pi.
 		'''
 		
-		# Warm the camera up
-		self.camera.start_preview()
-		sleep(2)
-		
-		# Capture an image and store in file image.png.
-		self.camera.capture('image.png')
+		if picam == 1:
+			# Warm the camera up
+			self.camera.start_preview()
+			sleep(2)
+			
+			# Capture an image and store in file image.png.
+			self.camera.capture('image.png')
 		print("Photo captured")
 		
 	
@@ -82,11 +85,15 @@ class cameraModuleClient:
 		Capture a video and store on Pi.
 		'''
 		
-		# Record the camera for length <duration>, and store in file video.h264
-		self.camera.start_recording('video.h264')
-		print("Recording started...")
-		self.camera.wait_recording(duration)
-		self.camera.stop_recording()
+		if picam == 1:
+			# Record the camera for length <duration>, and store in file video.h264
+			self.camera.start_recording('video.h264')
+			print("Recording started...")
+			self.camera.wait_recording(duration)
+			self.camera.stop_recording()
+		else:
+			# Pretend to record (for testing purposes)
+			time.sleep(duration)
 		print("Recording finished")
 		
 	
@@ -175,18 +182,28 @@ class cameraModuleClient:
 		print("Command received: " + command)
 		
 		# Perform command
+		# Capture photo
 		if command == "I":
 			self.capturePhoto()
+			self.send_msg(self.client_socket, "Photo captured")
+		
+		# Capture stream
 		elif command == "V":
 			print("Waiting for duration...")
 			duration = int(self.recv_msg(self.client_socket))
 			print("Duration: " + str(duration))
+			self.send_msg(self.client_socket, "Recording started...")
 			self.captureStream(duration)
+			self.send_msg(self.client_socket, "Recording finished")
+		
+		# Network stream
 		elif command == "S":
 			print("Waiting for duration...")
 			duration = int(self.recv_msg(self.client_socket))
 			print("Duration: " + str(duration))
 			self.networkStreamClient(self.client_socket, duration)
+		
+		# Change resolution
 		elif command == "R":
 			print("Waiting for width...")
 			width = int(self.recv_msg(self.client_socket))
@@ -196,16 +213,24 @@ class cameraModuleClient:
 			print("Height: " + str(height))
 			self.setResolution(width, height)
 			self.send_msg(self.client_socket, "Resolution changed")
+		
+		# Change framerate
 		elif command == "F":
 			print("Wating for framerate...")
 			rate = int(self.recv_msg(self.client_socket))
 			print("Framerate: " + str(rate))
 			self.setFrameRate(rate)
+			self.send_msg(self.client_socket, "Framerate changed")
+			
+		# Change exposure time
 		elif command == "X":
 			print("Waiting for shutter speed...")
 			speed = int(self.recv_msg(self.client_socket))
 			print("Shutter Speed: " + str(speed))
 			self.setExposureTime(speed)
+			self.send_msg(self.client_socket, "Exposure time changed")
+			
+		# Quit program
 		elif command == "Q":
 			print("Closing socket...")
 			self.client_socket.close()

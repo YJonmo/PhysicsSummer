@@ -124,14 +124,37 @@ class cameraModuleServer:
 		# Send command
 		self.send_msg(self.hostSock, command)
 		
-		# Perform command
+		# Send parameters and perform command
+		# Caputre photo
+		if command == "I":
+			confirm = self.recv_msg(self.hostSock)
+			if confirm == None:
+				print("Command failed")
+			else:
+				print(confirm)
+		
+		# Capture stream
 		if command == "V":
 			duration = str(input("Duration: "))
 			self.send_msg(self.hostSock, duration)
+			confirm = self.recv_msg(self.hostSock)
+			if confirm == None:
+				print("Command failed")
+			else:
+				print(confirm)
+			confirm = self.recv_msg(self.hostSock)
+			if confirm == None:
+				print("Command failed")
+			else:
+				print(confirm)
+			
+		# Network stream
 		elif command == "S":
 			duration = str(input("Duration: "))
 			self.send_msg(self.hostSock, duration)
 			self.networkStreamServer()
+			
+		# Change resolution
 		elif command == "R":
 			width = str(input("Width: "))
 			self.send_msg(self.hostSock, width)
@@ -142,12 +165,26 @@ class cameraModuleServer:
 				print("Command failed")
 			else:
 				print(confirm)
+				
+		# Change framerate
 		elif command == "F":
 			rate = str(input("Framerate: "))
 			self.send_msg(self.hostSock, rate)
+			confirm = self.recv_msg(self.hostSock)
+			if confirm == None:
+				print("Command failed")
+			else:
+				print(confirm)
+			
+		# Change exposure time
 		elif command == "X":
 			speed = str(input("Shutter Speed: "))
 			self.send_msg(self.hostSock, speed)
+			confirm = self.recv_msg(self.hostSock)
+			if confirm == None:
+				print("Command failed")
+			else:
+				print(confirm)
 		
 		return command
 		
