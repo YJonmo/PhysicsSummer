@@ -39,7 +39,6 @@ class cameraModuleServer:
 		'''
 		
 		# Accept a single connection
-		#connection = server_socket.accept()[0].makefile('rb')
 		connection = self.hostSock.makefile('rb')
 		try:
 			# Start stream to VLC
@@ -128,6 +127,8 @@ class cameraModuleServer:
 		# Send parameters and perform command
 		# Caputre photo
 		if command == "I":
+			fname = str(input("Filename: "))
+			self.send_msg(self.hostSock, fname)
 			confirm = self.recv_msg(self.hostSock)
 			if confirm == None:
 				print("Command failed")
@@ -138,6 +139,8 @@ class cameraModuleServer:
 		if command == "V":
 			duration = str(input("Duration: "))
 			self.send_msg(self.hostSock, duration)
+			fname = str(input("Filename: "))
+			self.send_msg(self.hostSock, fname)
 			confirm = self.recv_msg(self.hostSock)
 			if confirm == None:
 				print("Command failed")

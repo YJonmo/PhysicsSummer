@@ -65,7 +65,7 @@ class cameraModuleClient:
 		print("Exposure time changed")
 		
 	
-	def capturePhoto(self):
+	def capturePhoto(self, fname):
 		'''
 		Capture a photo and store on Pi.
 		'''
@@ -75,19 +75,19 @@ class cameraModuleClient:
 			self.camera.start_preview()
 			sleep(2)
 			
-			# Capture an image and store in file image.png.
-			self.camera.capture('image.png')
+			# Capture an image and store in file <fname>
+			self.camera.capture(fname)
 		print("Photo captured")
 		
 	
-	def captureStream(self, duration):
+	def captureStream(self, duration, fname):
 		'''
 		Capture a video and store on Pi.
 		'''
 		
 		if picam == 1:
-			# Record the camera for length <duration>, and store in file video.h264
-			self.camera.start_recording('video.h264')
+			# Record the camera for length <duration>, and store in file <fname
+			self.camera.start_recording(fname)
 			print("Recording started...")
 			self.camera.wait_recording(duration)
 			self.camera.stop_recording()
@@ -115,7 +115,7 @@ class cameraModuleClient:
 				camera.wait_recording(duration)
 				camera.stop_recording()
 			else:
-				# Pretend to record for testing purposes
+				# Pretend to record (for testing purposes)
 				time.sleep(duration+2)
 		finally:
 			# Free connection resources
@@ -188,7 +188,10 @@ class cameraModuleClient:
 		# Perform command
 		# Capture photo
 		if command == "I":
-			self.capturePhoto()
+			print("Waiting for filename...")
+			fname = int(self.recv_msg(self.client_socket))
+			print("Filename: " + str(duration))
+			self.capturePhoto(fname)
 			self.send_msg(self.client_socket, "Photo captured")
 		
 		# Capture stream
@@ -196,8 +199,12 @@ class cameraModuleClient:
 			print("Waiting for duration...")
 			duration = int(self.recv_msg(self.client_socket))
 			print("Duration: " + str(duration))
+			print("Waiting for filename...")
+			fname = int(self.recv_msg(self.client_socket))
+			print("Filename: " + str(duration))
+			self.capturePhoto(fname)
 			self.send_msg(self.client_socket, "Recording started...")
-			self.captureStream(duration)
+			self.captureStream(duration, fname)
 			self.send_msg(self.client_socket, "Recording finished")
 		
 		# Network stream
