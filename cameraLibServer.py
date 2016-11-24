@@ -127,7 +127,7 @@ class cameraModuleServer:
 		# Send parameters and perform command
 		# Caputre photo
 		if command == "I":
-			fname = str(input("Filename: "))
+			fname = str(raw_input("Filename: "))
 			self.send_msg(self.hostSock, fname)
 			confirm = self.recv_msg(self.hostSock)
 			if confirm == None:
@@ -139,7 +139,7 @@ class cameraModuleServer:
 		if command == "V":
 			duration = str(input("Duration: "))
 			self.send_msg(self.hostSock, duration)
-			fname = str(input("Filename: "))
+			fname = str(raw_input("Filename: "))
 			self.send_msg(self.hostSock, fname)
 			confirm = self.recv_msg(self.hostSock)
 			if confirm == None:

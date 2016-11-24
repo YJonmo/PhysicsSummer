@@ -189,7 +189,7 @@ class cameraModuleClient:
 		# Capture photo
 		if command == "I":
 			print("Waiting for filename...")
-			fname = int(self.recv_msg(self.client_socket))
+			fname = self.recv_msg(self.client_socket)
 			print("Filename: " + fname)
 			self.capturePhoto(fname)
 			self.send_msg(self.client_socket, "Photo captured")
