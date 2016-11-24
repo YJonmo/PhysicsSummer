@@ -59,7 +59,7 @@ class cameraModuleClient:
 		result in an automatically determined exposure time.
 		'''
 		
-		# Change the shutter speed of the camera
+		# Change the shutter speed of the camera (in microseconds)
 		if picam == 1:
 			self.camera.shutter_speed = speed
 		print("Exposure time changed")
