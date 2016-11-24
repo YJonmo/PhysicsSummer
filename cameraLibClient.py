@@ -190,7 +190,7 @@ class cameraModuleClient:
 		if command == "I":
 			print("Waiting for filename...")
 			fname = int(self.recv_msg(self.client_socket))
-			print("Filename: " + str(duration))
+			print("Filename: " + fname)
 			self.capturePhoto(fname)
 			self.send_msg(self.client_socket, "Photo captured")
 		
@@ -200,9 +200,8 @@ class cameraModuleClient:
 			duration = int(self.recv_msg(self.client_socket))
 			print("Duration: " + str(duration))
 			print("Waiting for filename...")
-			fname = int(self.recv_msg(self.client_socket))
-			print("Filename: " + str(duration))
-			self.capturePhoto(fname)
+			fname = self.recv_msg(self.client_socket)
+			print("Filename: " + fname)
 			self.send_msg(self.client_socket, "Recording started...")
 			self.captureStream(duration, fname)
 			self.send_msg(self.client_socket, "Recording finished")
