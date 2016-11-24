@@ -26,23 +26,17 @@ class cameraModuleServer:
 		print(self.host)
 		self.server_socket.bind((self.host, 8000))
 		self.server_socket.listen(5)
+		
+		# Wait for the Raspberry Pi to connect
 		print("Waiting for Connection...")
 		(self.hostSock, self.address) = self.server_socket.accept()
 		print("Connection accepted!")
-		
-		## Accept a single connection
-		#self.connection = self.server_socket.accept()[0].makefile('rb')
 		
 	
 	def networkStreamServer(self):
 		'''
 		Recieve a video stream from the Pi, and playback through VLC.
 		'''
-		
-		# Initialise the socket connection
-		#server_socket = socket.socket()
-		#server_socket.bind(('0.0.0.0', 8000))
-		#server_socket.listen(0)
 		
 		# Accept a single connection
 		connection = server_socket.accept()[0].makefile('rb')
@@ -59,28 +53,7 @@ class cameraModuleServer:
 		finally:
 			# Free connection resources
 			connection.close()
-			#server_socket.close()
 			player.terminate()
-	
-	
-	#def networkStreamServer(self):
-		#'''
-		#Recieve a video stream from the Pi, and playback through VLC.
-		#'''
-		
-		#try:
-			## Start stream to VLC
-			#cmdline = ['vlc', '--demux', 'h264', '-']
-			#player = subprocess.Popen(cmdline, stdin=subprocess.PIPE)
-			#while True:
-				## Send data to VLC input
-				#data = self.connection.read(1024)
-				#if not data:
-					#break
-				#player.stdin.write(data)
-		#finally:
-			## Free connection resources
-			#player.terminate()
 		
 	
 	def send_msg(self, sock, msg):
@@ -103,6 +76,7 @@ class cameraModuleServer:
 		if not raw_msglen:
 			return None
 		msglen = struct.unpack('>I', raw_msglen)[0]
+		
 		# Read the message data
 		return self.recvall(sock, msglen)
 		
@@ -119,6 +93,7 @@ class cameraModuleServer:
 			if not packet:
 				return None
 			data += packet
+		
 		return data
 		
 	
@@ -137,11 +112,6 @@ class cameraModuleServer:
 		# List of commands
 		opt = ["I","V","S","R","F","X","Q"]
 		
-		# Initialise socket connection
-		#hostSock = socket.socket()
-		#hostSock.bind(('0.0.0.0', 8000))
-		#hostSock.listen(0)
-		
 		# Input command from terminal
 		command = 0
 		while command not in opt:
@@ -152,27 +122,21 @@ class cameraModuleServer:
 				print("Command sent: " + command)
 		
 		# Send command
-		#self.server_socket.send(command)
 		self.send_msg(self.hostSock, command)
 		
 		# Perform command
 		if command == "V":
 			duration = str(input("Duration: "))
-			#self.server_socket.send(duration)
 			self.send_msg(self.hostSock, duration)
 		elif command == "S":
 			duration = str(input("Duration: "))
-			#self.server_socket.send(duration)
 			self.send_msg(self.hostSock, duration)
 			self.networkStreamServer()
 		elif command == "R":
 			width = str(input("Width: "))
-			#self.server_socket.send(width)
 			self.send_msg(self.hostSock, width)
 			height = str(input("Height: "))
-			#self.server_socket.send(height)
 			self.send_msg(self.hostSock, height)
-			print("Waiting for confirmation...")
 			confirm = self.recv_msg(self.hostSock)
 			if confirm == None:
 				print("Command failed")
@@ -180,11 +144,9 @@ class cameraModuleServer:
 				print(confirm)
 		elif command == "F":
 			rate = str(input("Framerate: "))
-			#self.server_socket.send(rate)
 			self.send_msg(self.hostSock, rate)
 		elif command == "X":
 			speed = str(input("Shutter Speed: "))
-			#self.server_socket.send(speed)
 			self.send_msg(self.hostSock, speed)
 		
 		return command

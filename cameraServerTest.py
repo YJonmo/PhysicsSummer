@@ -20,8 +20,5 @@ while True:
 	if command == "Q":
 		break
 
-## Stream from Raspberry Pi to VLC on host computer
-#camCommand.networkStreamServer()
-
 # Close connection
 camCommand.closeServer()
