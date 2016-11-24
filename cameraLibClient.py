@@ -105,14 +105,18 @@ class cameraModuleClient:
 		# Create a file-like object for the connection
 		connection = sock.makefile('wb')
 		try:
-			# Warm the camera up
-			self.camera.start_preview()
-			time.sleep(2)
-			
-			# Record the camera for length <duration>
-			camera.start_recording(connection, format = 'h264')
-			camera.wait_recording(duration)
-			camera.stop_recording()
+			if picam == 1:
+				# Warm the camera up
+				self.camera.start_preview()
+				time.sleep(2)
+				
+				# Record the camera for length <duration>
+				camera.start_recording(connection, format = 'h264')
+				camera.wait_recording(duration)
+				camera.stop_recording()
+			else:
+				# Pretend to record for testing purposes
+				time.sleep(duration+2)
 		finally:
 			# Free connection resources
 			connection.close()
