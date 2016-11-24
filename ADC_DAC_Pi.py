@@ -82,16 +82,30 @@ class DetectPi:
 		Read analogue input values from an ADC pin, in stream mode.
 		'''
 		
+		# Initialise array and time values
 		Read = [0, 1, 2]
 		StartingMoment = 0
 		FinishingMoment = 0
-		
 		scansPerRead = int(scansPerRead)
 		
+		# Determine timing characteristics
+		duration = scansPerRead/scanRate
+		dt = 1/scanRate
 		StartingMoment = time.time()
-			
-		'''Insert Stream Read code here'''
 		
+		# Loop for the duration
+		while (time.time()-StartingMoment) < duration:
+			# Read the ADC value and append to an array
+			voltRead = self.readPort(Port)[0]
+			Read[0].append(voltRead)
+			
+			# Wait for the program to run at the correct frequency
+			lastReadTime = readTime
+			readTime = time.time()
+			if readTime - lastReadTime < dt:
+				time.sleep(dt - readTime + lastReadTime)
+			
+		# Calculate and print elapsed time
 		FinishingMoment = time.time()
 		print ('Elapsed time %f seconds' %(FinishingMoment - StartingMoment))
 		
