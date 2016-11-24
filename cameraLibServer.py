@@ -20,21 +20,16 @@ class cameraModuleServer:
 		Initialise the server to the Raspberry Pi.
 		'''
 		
-		## Initialise the socket connection
-		#self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		#self.host = socket.gethostbyname(socket.gethostname())
-		#print(self.host)
-		#self.server_socket.bind((self.host, 8000))
-		#self.server_socket.listen(5)
+		# Initialise the socket connection
+		self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.host = socket.gethostbyname(socket.gethostname())
+		print(self.host)
+		self.server_socket.bind((self.host, 8000))
+		self.server_socket.listen(5)
 		
-		## Wait for the Raspberry Pi to connect
-		#print("Waiting for Connection...")
-		#(self.hostSock, self.address) = self.server_socket.accept()
-		#print("Connection accepted!")
-		
-		self.client_socket = socket.socket()
-		print("Waiting for connection...")
-		self.client_socket.connect(('172.24.94.238', 8000))
+		# Wait for the Raspberry Pi to connect
+		print("Waiting for Connection...")
+		(self.hostSock, self.address) = self.server_socket.accept()
 		print("Connection accepted!")
 		
 	
@@ -45,7 +40,7 @@ class cameraModuleServer:
 		
 		# Accept a single connection
 		#connection = server_socket.accept()[0].makefile('rb')
-		connection = self.client_socket.makefile('rb')
+		connection = self.hostSock.makefile('rb')
 		try:
 			# Start stream to VLC
 			cmdline = ['vlc', '--demux', 'h264', '-']
@@ -128,12 +123,12 @@ class cameraModuleServer:
 				print("Command sent: " + command)
 		
 		# Send command
-		self.send_msg(self.client_socket, command)
+		self.send_msg(self.hostSock, command)
 		
 		# Send parameters and perform command
 		# Caputre photo
 		if command == "I":
-			confirm = self.recv_msg(self.client_socket)
+			confirm = self.recv_msg(self.hostSock)
 			if confirm == None:
 				print("Command failed")
 			else:
@@ -142,13 +137,13 @@ class cameraModuleServer:
 		# Capture stream
 		if command == "V":
 			duration = str(input("Duration: "))
-			self.send_msg(self.client_socket, duration)
-			confirm = self.recv_msg(self.client_socket)
+			self.send_msg(self.hostSock, duration)
+			confirm = self.recv_msg(self.hostSock)
 			if confirm == None:
 				print("Command failed")
 			else:
 				print(confirm)
-			confirm = self.recv_msg(self.client_socket)
+			confirm = self.recv_msg(self.hostSock)
 			if confirm == None:
 				print("Command failed")
 			else:
@@ -157,16 +152,16 @@ class cameraModuleServer:
 		# Network stream
 		elif command == "S":
 			duration = str(input("Duration: "))
-			self.send_msg(self.client_socket, duration)
+			self.send_msg(self.hostSock, duration)
 			self.networkStreamServer()
 			
 		# Change resolution
 		elif command == "R":
 			width = str(input("Width: "))
-			self.send_msg(self.client_socket, width)
+			self.send_msg(self.hostSock, width)
 			height = str(input("Height: "))
-			self.send_msg(self.client_socket, height)
-			confirm = self.recv_msg(self.client_socket)
+			self.send_msg(self.hostSock, height)
+			confirm = self.recv_msg(self.hostSock)
 			if confirm == None:
 				print("Command failed")
 			else:
@@ -175,8 +170,8 @@ class cameraModuleServer:
 		# Change framerate
 		elif command == "F":
 			rate = str(input("Framerate: "))
-			self.send_msg(self.client_socket, rate)
-			confirm = self.recv_msg(self.client_socket)
+			self.send_msg(self.hostSock, rate)
+			confirm = self.recv_msg(self.hostSock)
 			if confirm == None:
 				print("Command failed")
 			else:
@@ -185,8 +180,8 @@ class cameraModuleServer:
 		# Change exposure time
 		elif command == "X":
 			speed = str(input("Shutter Speed: "))
-			self.send_msg(self.client_socket, speed)
-			confirm = self.recv_msg(self.client_socket)
+			self.send_msg(self.hostSock, speed)
+			confirm = self.recv_msg(self.hostSock)
 			if confirm == None:
 				print("Command failed")
 			else:
@@ -202,4 +197,4 @@ class cameraModuleServer:
 		
 		# Close the connection and socket
 		print("Closing socket...")
-		self.client_socket.close()
+		self.server_socket.close()
