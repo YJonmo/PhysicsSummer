@@ -1,0 +1,1 @@
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++    -std=c++0x -Wl,--no-as-needed     -lpthread -Wl,-search_paths_first -Wl,-headerpad_max_install_names     CMakeFiles/raspicam_still_test.dir/raspicam_still_test.cpp.o  -o raspicam_still_test  ../src/libraspicam.0.1.2.dylib 
