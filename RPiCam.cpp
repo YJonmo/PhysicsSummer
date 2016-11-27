@@ -15,7 +15,7 @@
 #include <ctime>
 #include <fstream>
 #include <iostream>
-#include <raspicam/raspicam.h>
+#include <raspicam/raspicam_cv.h>
 using namespace std;
 
 /***********************************************************************
@@ -89,4 +89,5 @@ int main() {
 				cout << "Command not recognised" << endl;
 				break;
 		}
+	}
 }
