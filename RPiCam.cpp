@@ -35,27 +35,58 @@ cv::Mat image;
 /* Initialise the camera by setting the parameters, and opening the 
  * camera module. */
 void initCamera() {
-	Camera.set( CV_CAP_PROP_FORMAT, CV_8UC1 );
-	cout<<"Opening Camera..."<<endl;
-	if (!Camera.open()) {cerr<<"Error opening the camera"<<endl;return -1;}
+	Camera.set(CV_CAP_PROP_FORMAT, CV_8UC1);
+	cout << "Opening Camera..." << endl;
+	if (!Camera.open()) {
+		cerr << "Error opening the camera" << endl;
+		//return -1;
+	}
 }
 
 /* Capture a single image. */
 void captureImage() {
-	cout<<"Capturing Image..."<<endl;
+	cout << "Capturing Image..." << endl;
 	Camera.grab();
 	Camera.retrieve(image);
 	Camera.release();
-	cout<<"Image Captured"<<endl;
+	cout << "Image Captured" << endl;
 	cv::imwrite("image.jpg",image);
-	cout<<"Image saved at image.jpg"<<endl;
+	cout << "Image saved at image.jpg" << endl;
+}
+
+/* Capture a video. */
+/*void captureVideo() {
+	
+}*/
+
+/* Process command from the terminal. */
+int processCommand() {
+	int command;
+	cout << "Input camera command: ";
+	cin >> command;
+	
+	return command;
 }
 
 /***********************************************************************
  * Main Code
 ***********************************************************************/
 
-int main () {
+int main() {
+	int command;
+	
 	initCamera();
-	captureImage();
+	
+	while (1) {
+		command = processCommand();
+		
+		switch(command) {
+			case 1:
+				captureImage();
+				break;
+			
+			default:
+				cout << "Command not recognised" << endl;
+				break;
+		}
 }
