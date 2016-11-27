@@ -1,0 +1,4 @@
+/home/pi/Documents/PhysicsSummer/raspicam-0.1.3/build/src/CMakeFiles/raspicam.dir
+/home/pi/Documents/PhysicsSummer/raspicam-0.1.3/build/utils/CMakeFiles/raspicam_still_test.dir
+/home/pi/Documents/PhysicsSummer/raspicam-0.1.3/build/utils/CMakeFiles/raspicam_test.dir
+/home/pi/Documents/PhysicsSummer/raspicam-0.1.3/build/CMakeFiles/uninstall.dir

@@ -15,7 +15,8 @@
 #include <ctime>
 #include <fstream>
 #include <iostream>
-#include <raspicam/raspicam_cv.h>
+//#include <raspicam/raspicam_cv.h>
+#include <raspicam/raspicam.h>
 using namespace std;
 
 /***********************************************************************
@@ -23,10 +24,11 @@ using namespace std;
 ***********************************************************************/
 
 /* Create the RaspiCam object. */
-raspicam::RaspiCam_Cv Camera;
+//raspicam::RaspiCam_Cv Camera;
+raspicam::RaspiCam Camera;
 
 /* Create the OpenCV object. */
-cv::Mat image;
+//cv::Mat image;
 
 /***********************************************************************
  * Functions
@@ -35,7 +37,7 @@ cv::Mat image;
 /* Initialise the camera by setting the parameters, and opening the 
  * camera module. */
 void initCamera() {
-	Camera.set(CV_CAP_PROP_FORMAT, CV_8UC1);
+	//Camera.set(CV_CAP_PROP_FORMAT, CV_8UC1);
 	cout << "Opening Camera..." << endl;
 	if (!Camera.open()) {
 		cerr << "Error opening the camera" << endl;
@@ -47,10 +49,10 @@ void initCamera() {
 void captureImage() {
 	cout << "Capturing Image..." << endl;
 	Camera.grab();
-	Camera.retrieve(image);
+	//Camera.retrieve(image);
 	Camera.release();
 	cout << "Image Captured" << endl;
-	cv::imwrite("image.jpg",image);
+	//cv::imwrite("image.jpg",image);
 	cout << "Image saved at image.jpg" << endl;
 }
 
