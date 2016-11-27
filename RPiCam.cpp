@@ -59,6 +59,11 @@ void captureImage() {
 	
 }*/
 
+/* Test of process command. */
+void testFunction() {
+	cout << "Success" << endl;
+}
+
 /* Process command from the terminal. */
 int processCommand() {
 	int command;
@@ -83,6 +88,10 @@ int main() {
 		switch(command) {
 			case 1:
 				captureImage();
+				break;
+				
+			case 2:
+				testFunction();
 				break;
 			
 			default:
