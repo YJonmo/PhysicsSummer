@@ -16,7 +16,7 @@ To install the raspicam library on the Raspberry Pi:
 	
 To compile the program:
 	
-	g++ RPiCam.cpp -o RPiCam -I/usr/local/include -lraspicam -lmmal -lmmal_core -lmmal_util
+	g++ RPiCam.cpp -o RPiCam -I/usr/local/include -lraspicam -lmmal -lmmal_core -lmmal_util -L/opt/vc/lib
 
 To run the program:
 
@@ -24,10 +24,8 @@ To run the program:
 
 ## To-Do
 
--Add getter functions for parameters
+-Implement video stream to vlc through network
 
--Implement video mode
-
--Implement networking
+-Implement remote control (could do through ssh)
 
 -Lots and lots of testing

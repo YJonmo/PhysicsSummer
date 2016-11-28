@@ -131,7 +131,6 @@ void setImageResolution(int width, int height) {
 		//CameraStill.set (CV_CAP_PROP_FRAME_WIDTH, width);
 		//CameraStill.set (CV_CAP_PROP_FRAME_HEIGHT, height);
 	}
-	cout << "Resolution changed" << endl;
 }
 
 /* Set the camera video resoltion. */
@@ -140,7 +139,6 @@ void setVideoResolution(int width, int height) {
 		//Camera.set (CV_CAP_PROP_FRAME_WIDTH, width);
 		//Camera.set (CV_CAP_PROP_FRAME_HEIGHT, height);
 	}
-	cout << "Resolution changed" << endl;
 }
 
 /* Set the camera brightness. */
