@@ -19,7 +19,7 @@
 //#include <raspicam/raspicam_cv.h>
 #include <raspicam/raspicam.h>
 //#include <raspicam/raspicam_still_cv.h>
-//#include <raspicam/raspicam_still.h>
+#include <raspicam/raspicam_still.h>
 using namespace std;
 
 /***********************************************************************
@@ -68,7 +68,7 @@ void captureImage() {
 	cin >> filename;
 	
 	cout << "Capturing image..." << endl;
-	CameraStill.grab();
+	//CameraStill.grab();
 	if (NOCV == 0) {
 		//CameraStill.retrieve(image);
 	}
@@ -272,7 +272,6 @@ void printCommands() {
 	cout << "	I: Capture an image" << endl;
 	cout << "	N: Stream to network (not implemented)" << endl;
 	cout << "	Q: Quit program" << endl;
-	cout << "	R: Set resolution" << endl;
 	cout << "	S: Set saturation" << endl;
 	cout << "	V: Capture a video" << endl;
 	cout << "	X: Set exposure time\n" << endl;
@@ -326,7 +325,7 @@ int main() {
 			case 'I':
 				width = processParameters('W');
 				height = processParameters('H');
-				setResolution(width, height);
+				setImageResolution(width, height);
 				captureImage();
 				break;
 				
@@ -335,12 +334,6 @@ int main() {
 				break;
 				
 			case 'Q':
-				break;
-				
-			case 'R':
-				width = processParameters('W');
-				height = processParameters('H');
-				setImageResolution(width, height);
 				break;
 			
 			case 'S':
