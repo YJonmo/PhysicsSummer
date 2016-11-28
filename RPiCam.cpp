@@ -39,7 +39,7 @@ raspicam::RaspiCam Camera;
 
 /* Create the RaspiStill object. */
 //raspicam::RapiCam_Still_Cv CameraStill;
-//raspicam::RaspiCam_Still CameraStill;
+raspicam::RaspiCam_Still CameraStill;
 
 /***********************************************************************
  * Functions
@@ -68,11 +68,11 @@ void captureImage() {
 	cin >> filename;
 	
 	cout << "Capturing image..." << endl;
-	Camera.grab();
+	CameraStill.grab();
 	if (NOCV == 0) {
-		//Camera.retrieve(image);
+		//CameraStill.retrieve(image);
 	}
-	Camera.release();
+	CameraStill.release();
 	cout << "Image captured" << endl;
 	if (NOCV == 0) {
 		//cv::imwrite(filename,image);
@@ -125,8 +125,17 @@ void captureVideo(int duration) {
 	cout << filename << endl;
 }
 
-/* Set the camera resoltion. */
-void setResolution(int width, int height) {
+/* Set the camera image resoltion. */
+void setImageResolution(int width, int height) {
+	if (DEBUG == 0) {
+		//CameraStill.set (CV_CAP_PROP_FRAME_WIDTH, width);
+		//CameraStill.set (CV_CAP_PROP_FRAME_HEIGHT, height);
+	}
+	cout << "Resolution changed" << endl;
+}
+
+/* Set the camera video resoltion. */
+void setVideoResolution(int width, int height) {
 	if (DEBUG == 0) {
 		//Camera.set (CV_CAP_PROP_FRAME_WIDTH, width);
 		//Camera.set (CV_CAP_PROP_FRAME_HEIGHT, height);
@@ -134,15 +143,11 @@ void setResolution(int width, int height) {
 	cout << "Resolution changed" << endl;
 }
 
-/* Set the camera framerate. */
-/*void setFramerate(int rate) {
-	
-}*/
-
 /* Set the camera brightness. */
 void setBrightness(int brightness) {
 	if (DEBUG == 0) {
 		//Camera.set (CV_CAP_PROP_BRIGHTNESS, brightness);
+		//CameraStill.set (CV_CAP_PROP_BRIGHTNESS, brightness);
 	}
 	cout << "Brightness changed" << endl;
 }
@@ -151,6 +156,7 @@ void setBrightness(int brightness) {
 void setContrast(int contrast) {
 	if (DEBUG == 0) {
 		//Camera.set (CV_CAP_PROP_CONTRAST, contrast);
+		//CameraStill.set (CV_CAP_PROP_CONTRAST, contrast);
 	}
 	cout << "Contrast changed" << endl;
 }
@@ -159,6 +165,7 @@ void setContrast(int contrast) {
 void setSaturation(int saturation) {
 	if (DEBUG == 0) {
 		//Camera.set (CV_CAP_PROP_SATURATION, saturation);
+		//CameraStill.set (CV_CAP_PROP_SATURATION, saturation);
 	}
 	cout << "Saturation changed" << endl;
 }
@@ -167,6 +174,7 @@ void setSaturation(int saturation) {
 void setGain(int gain) {
 	if (DEBUG == 0) {
 		//Camera.set (CV_CAP_PROP_GAIN, gain);
+		//CameraStill.set (CV_CAP_PROP_GAIN, gain);
 	}
 	cout << "Gain changed" << endl;
 }
@@ -175,6 +183,7 @@ void setGain(int gain) {
 void setExposureTime(int speed) {
 	if (DEBUG == 0) {
 		//Camera.set (CV_CAP_PROP_EXPOSURE, speed);
+		//CameraStill.set (CV_CAP_PROP_EXPOSURE, speed);
 	}
 	cout << "Exposure time changed" << endl;
 }
@@ -258,7 +267,6 @@ void printCommands() {
 	cout << "\nList of commands:" << endl;
 	cout << "	B: Set brightness" << endl;
 	cout << "	C: Set contrast" << endl;
-	cout << "	F: Set framerate (not implemented)" << endl;
 	cout << "	G: Set gain" << endl;
 	cout << "	H: Help" << endl;
 	cout << "	I: Capture an image" << endl;
@@ -316,6 +324,9 @@ int main() {
 				break;
 			
 			case 'I':
+				width = processParameters('W');
+				height = processParameters('H');
+				setResolution(width, height);
 				captureImage();
 				break;
 				
@@ -329,7 +340,7 @@ int main() {
 			case 'R':
 				width = processParameters('W');
 				height = processParameters('H');
-				setResolution(width, height);
+				setImageResolution(width, height);
 				break;
 			
 			case 'S':
@@ -338,6 +349,9 @@ int main() {
 				break;
 				
 			case 'V':
+				width = processParameters('W');
+				height = processParameters('H');
+				setVideoResolution(width, height);
 				duration = processParameters('D');
 				captureVideo(duration);
 				break;
