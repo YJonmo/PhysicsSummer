@@ -135,42 +135,51 @@ void setExposureTime(int speed) {
 }
 
 /* Process camera parameters. */
-int processParameters(string parString) {
+int processParameters(char parChar) {
 	int parValue;
 	int currValue;
+	string parString;
 	
-	switch(parString) {
-		case "Width":
+	switch(parChar) {
+		case 'W':
+			parString = "width";
 			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_WIDTH);
 			break;
 		
-		case "Height":
+		case 'H':
+			parString = "height";
 			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_HEIGHT);
 			break;
 		
-		case "Brightness":
+		case 'B':
+			parString = "brightness";
 			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_BRIGHTNESS);
 			break;
 		
-		case "Contrast":
+		case 'C':
+			parString = "contrast";
 			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_CONTRAST);
 			break;
 		
-		case "Saturation":
+		case 'S':
+			parString = "saturation";
 			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_SATURATION);
 			break;
 		
-		case "Gain":
+		case 'G':
+			parString = "gain";
 			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_GAIN);
 			break;
 		
-		case "Exposure Time":
+		case 'X':
+			parString = "exposure time";
 			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_EXPOSURE);
 			break;
 		
 		default:
 			currValue = -2;
-	
+	}
+
 	cout << "Input ";
 	cout << parString;
 	cout << " (Current: ";
@@ -230,12 +239,12 @@ int main() {
 		
 		switch(command) {
 			case 'B':
-				brightness = processParameters("Brightness");
+				brightness = processParameters('B');
 				setBrightness(brightness);
 				break;
 				
 			case 'C':
-				contrast = processParameters("Contrast");
+				contrast = processParameters('C');
 				setContrast(contrast);
 				break;
 			
@@ -244,7 +253,7 @@ int main() {
 				break;
 			
 			case 'G':
-				gain = processParameters("Gain");
+				gain = processParameters('G');
 				setGain(gain);
 				break;
 			
@@ -264,13 +273,13 @@ int main() {
 				break;
 				
 			case 'R':
-				width = processParameters("Width");
-				height = processParameters("Height");
+				width = processParameters('W');
+				height = processParameters('H');
 				setResolution(width, height);
 				break;
 			
 			case 'S':
-				saturation = processParameters("Saturation");
+				saturation = processParameters('S');
 				setSaturation(saturation);
 				break;
 				
@@ -279,7 +288,7 @@ int main() {
 				break;
 			
 			case 'X':
-				speed = processParameters("Exposure Time");
+				speed = processParameters('X');
 				setExposureTime(speed);
 				break;
 
