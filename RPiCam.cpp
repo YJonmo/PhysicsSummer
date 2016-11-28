@@ -38,11 +38,14 @@ using namespace std;
 raspicam::RaspiCam Camera;
 
 /* Create the RaspiStill object. */
-// raspicam::RapiCam_Still_Cv CameraStill;
+//raspicam::RapiCam_Still_Cv CameraStill;
 //raspicam::RaspiCam_Still CameraStill;
 
-/* Create the OpenCV object. */
+/* Create the OpenCV image object. */
 //cv::Mat image;
+
+/* Create the OpenCV video writer object. */
+//cv::VideoWriter writer;
 
 /***********************************************************************
  * Functions
@@ -54,7 +57,7 @@ void initCamera() {
 	if (DEBUG == 0) {
 		//Camera.set(CV_CAP_PROP_FORMAT, CV_8UC1);
 	}
-	cout << "Opening Camera..." << endl;
+	cout << "Opening camera..." << endl;
 	if (!Camera.open()) {
 		cerr << "Error opening the camera" << endl;
 	}
@@ -62,23 +65,43 @@ void initCamera() {
 
 /* Capture a single image. */
 void captureImage() {
-	cout << "Capturing Image..." << endl;
+	cout << "Capturing image..." << endl;
 	Camera.grab();
 	if (NOCV == 0) {
 		//Camera.retrieve(image);
 	}
 	Camera.release();
-	cout << "Image Captured" << endl;
+	cout << "Image captured" << endl;
 	if (NOCV == 0) {
 		//cv::imwrite("image.jpg",image);
 	}
 	cout << "Image saved at image.jpg" << endl;
 }
 
-/* Capture a video. */
-/*void captureVideo() {
+/* Capture a video using openCV video writer. */
+void captureVideo(string filename, int duration, double fps) {
+	double startTime;
+	int codec;
+	bool isColour;
 	
-}*/
+	codec = cv::CV_FOURCC('M', 'J', 'P', 'G');
+	isColour = (image.type() == CV_8UC3);
+	writer.open(filename, codec, fps, image.size(), isColour);
+	
+	cvFreq = cv::getTickFrequency();
+	startTime = cv::getTickCount();
+	cout << "Recording started" << endl;
+	
+	while (((cv::getTickCount() - startTime)/cvFreq) < duration) {
+		Camera.grab();
+		Camera.retrieve(image);
+		
+		writer.write(image);
+	}
+	
+	Camera.release();
+	cout << "Recording finished" << endl;
+}
 
 /* Set the camera resoltion. */
 void setResolution(int width, int height) {
