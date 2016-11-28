@@ -185,6 +185,9 @@ int processParameters(char parChar) {
 	cout << " (Current: ";
 	cout << currValue;
 	cout << "): ";
+
+	cin.clear();
+	cin.ignore(10000, '\n');
 	cin >> parValue;
 	
 	return parValue;
@@ -301,5 +304,8 @@ int main() {
 			cout << "Quitting program..." << endl;
 			break;
 		}
+
+		cin.clear();
+		cin.ignore(10000, '\n');
 	}
 }
