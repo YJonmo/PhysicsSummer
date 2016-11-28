@@ -18,7 +18,16 @@
 #include <string>
 //#include <raspicam/raspicam_cv.h>
 #include <raspicam/raspicam.h>
+//#include <raspicam/raspicam_still_cv.h>
+//#include <raspicam/raspicam_still.h>
 using namespace std;
+
+/***********************************************************************
+ * Constants
+***********************************************************************/
+
+#define DEBUG 1
+#define NOCV 1
 
 /***********************************************************************
  * Objects
@@ -27,6 +36,10 @@ using namespace std;
 /* Create the RaspiCam object. */
 //raspicam::RaspiCam_Cv Camera;
 raspicam::RaspiCam Camera;
+
+/* Create the RaspiStill object. */
+// raspicam::RapiCam_Still_Cv CameraStill;
+//raspicam::RaspiCam_Still CameraStill;
 
 /* Create the OpenCV object. */
 //cv::Mat image;
@@ -38,11 +51,12 @@ raspicam::RaspiCam Camera;
 /* Initialise the camera by setting the parameters, and opening the 
  * camera module. */
 void initCamera() {
-	//Camera.set(CV_CAP_PROP_FORMAT, CV_8UC1);
+	if (DEBUG == 0) {
+		Camera.set(CV_CAP_PROP_FORMAT, CV_8UC1);
+	}
 	cout << "Opening Camera..." << endl;
 	if (!Camera.open()) {
 		cerr << "Error opening the camera" << endl;
-		//return -1;
 	}
 }
 
@@ -50,10 +64,14 @@ void initCamera() {
 void captureImage() {
 	cout << "Capturing Image..." << endl;
 	Camera.grab();
-	//Camera.retrieve(image);
+	if (NOCV == 0) {
+		Camera.retrieve(image);
+	}
 	Camera.release();
 	cout << "Image Captured" << endl;
-	//cv::imwrite("image.jpg",image);
+	if (NOCV == 0) {
+		cv::imwrite("image.jpg",image);
+	}
 	cout << "Image saved at image.jpg" << endl;
 }
 
@@ -64,9 +82,56 @@ void captureImage() {
 
 /* Set the camera resoltion. */
 void setResolution(int width, int height) {
-	//Camera.set (CV_CAP_PROP_FRAME_WIDTH, width);
-	//Camera.set (CV_CAP_PROP_FRAME_HEIGHT, height);
+	if (DEBUG == 0) {
+		Camera.set (CV_CAP_PROP_FRAME_WIDTH, width);
+		Camera.set (CV_CAP_PROP_FRAME_HEIGHT, height);
+	}
 	cout << "Resolution changed" << endl;
+}
+
+/* Set the camera framerate. */
+/*void setFramerate(int rate) {
+	
+}*/
+
+/* Set the camera brightness. */
+void setBrightness(int brightness) {
+	if (DEBUG == 0) {
+		Camera.set (CV_CAP_PROP_BRIGHTNESS, brightness);
+	}
+	cout << "Brightness changed" << endl;
+}
+
+/* Set the camera contrast. */
+void setContrast(int contrast) {
+	if (DEBUG == 0) {
+		Camera.set (CV_CAP_PROP_CONTRAST, contrast);
+	}
+	cout << "Contrast changed" << endl;
+}
+
+/* Set the camera saturation. */
+void setSaturation(int saturation) {
+	if (DEBUG == 0) {
+		Camera.set (CV_CAP_PROP_SATURATION, saturation);
+	}
+	cout << "Saturation changed" << endl;
+}
+
+/* Set the camera saturation. */
+void setGain(int gain) {
+	if (DEBUG == 0) {
+		Camera.set (CV_CAP_PROP_GAIN, gain);
+	}
+	cout << "Gain changed" << endl;
+}
+
+/* Set the camera saturation. */
+void setExposureTime(int speed) {
+	if (DEBUG == 0) {
+		Camera.set (CV_CAP_PROP_EXPOSURE, speed);
+	}
+	cout << "Exposure time changed" << endl;
 }
 
 /* Process camera parameters. */
@@ -81,19 +146,21 @@ int processParameters(string parString) {
 	return parValue;
 }
 
-/* Test of process command. */
-void testFunction() {
-	cout << "Success" << endl;
-}
-
 /* Print a list of commands. */
 void printCommands() {
 	cout << "\nList of commands:" << endl;
-	cout << "	I: Capture an image" << endl;
-	cout << "	V: Capture a video" << endl;
+	cout << "	B: Set brightness" << endl;
+	cout << "	C: Set contrast" << endl;
+	cout << "	F: Set framerate (not implemented)" << endl;
+	cout << "	G: Set gain" << endl;
 	cout << "	H: Help" << endl;
-	cout << "	T: Test function" << endl;
-	cout << "	Q: Quit program\n" << endl;
+	cout << "	I: Capture an image" << endl;
+	cout << "	N: Stream to network (not implemented)" << endl;
+	cout << "	Q: Quit program" << endl;
+	cout << "	R: Set resolution" << endl;
+	cout << "	S: Set saturation" << endl;
+	cout << "	V: Capture a video (not implemented)" << endl;
+	cout << "	X: Set exposure time\n" << endl;
 }
 
 /* Process command from the terminal. */
@@ -112,6 +179,11 @@ char processCommand() {
 
 int main() {
 	char command;
+	int brightness;
+	int contrast;
+	int saturation;
+	int gain;
+	int speed;
 	int width;
 	int height;
 	
@@ -122,22 +194,58 @@ int main() {
 		command = processCommand();
 		
 		switch(command) {
-			case 'I':
-				width = processParameters("Width");
-				height = processParameters("Height");
-				setResolution(width, height);
-				captureImage();
+			case 'B':
+				brightness = processParameters("Brightness");
+				setBrightness();
 				break;
 				
-			case 'T':
-				testFunction();
+			case 'C':
+				contrast = processParameters("Contrast");
+				setContrast();
 				break;
-				
+			
+			case 'F':
+				cout << "Not yet implemented" << endl;
+				break;
+			
+			case 'G':
+				gain = processParameters("Gain");
+				setGain();
+				break;
+			
 			case 'H':
 				printCommands();
 				break;
 			
+			case 'I':
+				captureImage();
+				break;
+				
+			case 'N':
+				cout << "Not yet implemented" << endl;
+				break;
+				
 			case 'Q':
+				break;
+				
+			case 'R':
+				width = processParameters("Width");
+				height = processParameters("Height");
+				setResolution(width, height);
+				break;
+			
+			case 'S':
+				saturation = processParameters("Saturation");
+				setSaturation();
+				break;
+				
+			case 'V':
+				cout << "Not yet implemented" << endl;
+				break;
+			
+			case 'X':
+				speed = processParameters("Exposure Time");
+				setExposureTime();
 				break;
 
 			default:
