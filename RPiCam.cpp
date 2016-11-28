@@ -61,6 +61,13 @@ void captureImage() {
 	
 }*/
 
+/* Set the camera resoltion. */
+void setResolution(width, height) {
+	Camera.set (CV_CAP_PROP_FRAME_WIDTH, width);
+	Camera.set (CV_CAP_PROP_FRAME_HEIGHT, height);
+	cout << "Resolution changed" << endl;
+}
+
 /* Test of process command. */
 void testFunction() {
 	cout << "Success" << endl;
@@ -71,9 +78,9 @@ void printCommands() {
 	cout << "\nList of commands:" << endl;
 	cout << "	I: Capture an image" << endl;
 	cout << "	V: Capture a video" << endl;
-	cout << "	H: Help << endl;
+	cout << "	H: Help" << endl;
 	cout << "	T: Test function" << endl;
-	cout << "	Q: Quit program" << endl;
+	cout << "	Q: Quit program\n" << endl;
 }
 
 /* Process command from the terminal. */
