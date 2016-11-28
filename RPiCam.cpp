@@ -137,13 +137,58 @@ void setExposureTime(int speed) {
 /* Process camera parameters. */
 int processParameters(string parString) {
 	int parValue;
+	int currValue;
+	
+	switch(parString) {
+		case "Width":
+			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_WIDTH);
+			break;
+		
+		case "Height":
+			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_HEIGHT);
+			break;
+		
+		case "Brightness":
+			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_BRIGHTNESS);
+			break;
+		
+		case "Contrast":
+			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_CONTRAST);
+			break;
+		
+		case "Saturation":
+			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_SATURATION);
+			break;
+		
+		case "Gain":
+			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_GAIN);
+			break;
+		
+		case "Exposure Time":
+			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_EXPOSURE);
+			break;
+		
+		default:
+			currValue = -2;
 	
 	cout << "Input ";
 	cout << parString;
-	cout << ": ";
+	cout << " (Current: ";
+	cout << currValue;
+	cout << "): ";
 	cin >> parValue;
 	
 	return parValue;
+}
+
+/* Process command from the terminal. */
+char processCommand() {
+	char command;
+	
+	cout << "Input camera command: ";
+	cin >> command;
+	
+	return toupper(command);
 }
 
 /* Print a list of commands. */
@@ -161,16 +206,6 @@ void printCommands() {
 	cout << "	S: Set saturation" << endl;
 	cout << "	V: Capture a video (not implemented)" << endl;
 	cout << "	X: Set exposure time\n" << endl;
-}
-
-/* Process command from the terminal. */
-char processCommand() {
-	char command;
-	
-	cout << "Input camera command: ";
-	cin >> command;
-	
-	return toupper(command);
 }
 
 /***********************************************************************
