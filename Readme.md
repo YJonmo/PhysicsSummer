@@ -2,14 +2,32 @@
 
 Code for the Raspberry Pi. This includes an adaptation of the DAQT7_Objective library for Raspberry Pi, as well as a library for the camera module.
 
+## Raspberry Pi Camera Installation
+
+To install the raspicam library on the Raspberry Pi:
+
+	cd raspicam-0.1.3
+	mkdir build
+	cd build
+	cmake ..
+	make
+	sudo make install
+	sudo ldconfig
+	
+To compile the program:
+	
+	g++ RPiCam.cpp -o RPiCam -I/usr/local/include -lraspicam -lmmal -lmmal_core -lmmal_util
+
+To run the program:
+
+	./RPiCam
+
 ## To-Do
 
--Add functions to client camera library to control picamera through the Raspberry Pi
+-Add getter functions for parameters
 
--Add functions to server camera library to remotely control the picamera through a network, as well as stream to VLC
+-Implement video mode
 
--Complete streamRead function for ADC_DAC
-
--Create program that utilises client and server libraries
+-Implement networking
 
 -Lots and lots of testing
