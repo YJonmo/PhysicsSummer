@@ -64,8 +64,8 @@ void captureImage() {
 
 /* Set the camera resoltion. */
 void setResolution(int width, int height) {
-	Camera.set (CV_CAP_PROP_FRAME_WIDTH, width);
-	Camera.set (CV_CAP_PROP_FRAME_HEIGHT, height);
+	//Camera.set (CV_CAP_PROP_FRAME_WIDTH, width);
+	//Camera.set (CV_CAP_PROP_FRAME_HEIGHT, height);
 	cout << "Resolution changed" << endl;
 }
 
@@ -76,7 +76,7 @@ int processParameters(string parString) {
 	cout << "Input ";
 	cout << parString;
 	cout << ": ";
-	cin << parValue;
+	cin >> parValue;
 	
 	return parValue;
 }
@@ -123,8 +123,8 @@ int main() {
 		
 		switch(command) {
 			case 'I':
-				width = processParameters("Width")
-				height = processParameters("Height")
+				width = processParameters("Width");
+				height = processParameters("Height");
 				setResolution(width, height);
 				captureImage();
 				break;
