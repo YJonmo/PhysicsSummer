@@ -77,7 +77,7 @@ void captureImage() {
 	if (NOCV == 0) {
 		//cv::imwrite(filename,image);
 	}
-	cout << "Image saved at "
+	cout << "Image saved at ";
 	cout << filename << endl;
 }
 
@@ -89,6 +89,7 @@ void captureVideo(int duration) {
 	int codec;
 	bool isColour;
 	double fps;
+	string filename;
 	
 	cout << "Input filename: " << endl;
 	cin.clear();
@@ -118,9 +119,9 @@ void captureVideo(int duration) {
 	}
 	
 	Camera.release();
-	writer.release();
+	//writer.release();
 	cout << "Recording finished" << endl;
-	cout << "Video saved at "
+	cout << "Video saved at ";
 	cout << filename << endl;
 }
 
