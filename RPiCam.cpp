@@ -66,6 +66,16 @@ void testFunction() {
 	cout << "Success" << endl;
 }
 
+/* Print a list of commands. */
+void printCommands() {
+	cout << "\nList of commands:" << endl;
+	cout << "	I: Capture an image" << endl;
+	cout << "	V: Capture a video" << endl;
+	cout << "	H: Help << endl;
+	cout << "	T: Test function" << endl;
+	cout << "	Q: Quit program" << endl;
+}
+
 /* Process command from the terminal. */
 char processCommand() {
 	char command;
@@ -83,6 +93,7 @@ int main() {
 	char command;
 	
 	initCamera();
+	printCommands();
 	
 	while (1) {
 		command = processCommand();
@@ -94,6 +105,10 @@ int main() {
 				
 			case 'T':
 				testFunction();
+				break;
+				
+			case 'H':
+				printCommands();
 				break;
 			
 			case 'Q':
