@@ -41,12 +41,6 @@ raspicam::RaspiCam Camera;
 //raspicam::RapiCam_Still_Cv CameraStill;
 //raspicam::RaspiCam_Still CameraStill;
 
-/* Create the OpenCV image object. */
-//cv::Mat image;
-
-/* Create the OpenCV video writer object. */
-//cv::VideoWriter writer;
-
 /***********************************************************************
  * Functions
 ***********************************************************************/
@@ -65,6 +59,14 @@ void initCamera() {
 
 /* Capture a single image. */
 void captureImage() {
+	//cv::Mat image;
+	string filename;
+	
+	cout << "Input filename: " << endl;
+	cin.clear();
+	cin.ignore(10000, '\n');
+	cin >> filename;
+	
 	cout << "Capturing image..." << endl;
 	Camera.grab();
 	if (NOCV == 0) {
@@ -73,34 +75,53 @@ void captureImage() {
 	Camera.release();
 	cout << "Image captured" << endl;
 	if (NOCV == 0) {
-		//cv::imwrite("image.jpg",image);
+		//cv::imwrite(filename,image);
 	}
-	cout << "Image saved at image.jpg" << endl;
+	cout << "Image saved at "
+	cout << filename << endl;
 }
 
 /* Capture a video using openCV video writer. */
-void captureVideo(string filename, int duration, double fps) {
-	double startTime;
+void captureVideo(int duration) {
+	//cv::Mat image;
+	//cv::VideoWriter writer;
+	clock_t startTime;
 	int codec;
 	bool isColour;
+	double fps;
 	
-	codec = cv::CV_FOURCC('M', 'J', 'P', 'G');
-	isColour = (image.type() == CV_8UC3);
-	writer.open(filename, codec, fps, image.size(), isColour);
+	cout << "Input filename: " << endl;
+	cin.clear();
+	cin.ignore(10000, '\n');
+	cin >> filename;
 	
-	cvFreq = cv::getTickFrequency();
-	startTime = cv::getTickCount();
+	if (NOCV == 0) {
+		//codec = cv::CV_FOURCC('M', 'J', 'P', 'G');
+		//isColour = (image.type() == CV_8UC3);
+		//fps = 0;
+		//writer.open(filename, codec, fps, image.size(), isColour);
+	}
+	
+	startTime = clock();
 	cout << "Recording started" << endl;
 	
-	while (((cv::getTickCount() - startTime)/cvFreq) < duration) {
-		Camera.grab();
-		Camera.retrieve(image);
-		
-		writer.write(image);
+	while (((clock() - startTime)/CLOCKS_PER_SEC) < duration) {
+		if (NOCV == 0) {
+			Camera.grab();
+			//Camera.retrieve(image);
+			
+			//writer.write(image);
+		}
+		else {
+			continue;
+		}
 	}
 	
 	Camera.release();
+	writer.release();
 	cout << "Recording finished" << endl;
+	cout << "Video saved at "
+	cout << filename << endl;
 }
 
 /* Set the camera resoltion. */
@@ -198,6 +219,11 @@ int processParameters(char parChar) {
 			parString = "exposure time";
 			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_EXPOSURE);
 			break;
+			
+		case 'D':
+			parString = "duration";
+			currValue = 0;
+			break;
 		
 		default:
 			currValue = -2;
@@ -239,7 +265,7 @@ void printCommands() {
 	cout << "	Q: Quit program" << endl;
 	cout << "	R: Set resolution" << endl;
 	cout << "	S: Set saturation" << endl;
-	cout << "	V: Capture a video (not implemented)" << endl;
+	cout << "	V: Capture a video" << endl;
 	cout << "	X: Set exposure time\n" << endl;
 }
 
@@ -256,6 +282,7 @@ int main() {
 	int speed;
 	int width;
 	int height;
+	int duration;
 	
 	initCamera();
 	printCommands();
@@ -310,7 +337,8 @@ int main() {
 				break;
 				
 			case 'V':
-				cout << "Not yet implemented" << endl;
+				duration = processParameters('D');
+				captureVideo(duration);
 				break;
 			
 			case 'X':
