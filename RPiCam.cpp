@@ -67,12 +67,12 @@ void testFunction() {
 }
 
 /* Process command from the terminal. */
-int processCommand() {
-	int command;
+char processCommand() {
+	char command;
 	cout << "Input camera command: ";
 	cin >> command;
 	
-	return command;
+	return toupper(command);
 }
 
 /***********************************************************************
@@ -80,7 +80,7 @@ int processCommand() {
 ***********************************************************************/
 
 int main() {
-	int command;
+	char command;
 	
 	initCamera();
 	
@@ -88,17 +88,25 @@ int main() {
 		command = processCommand();
 		
 		switch(command) {
-			case 1:
+			case 'I':
 				captureImage();
 				break;
 				
-			case 2:
+			case 'T':
 				testFunction();
 				break;
 			
+			case 'Q':
+				break;
+
 			default:
 				cout << "Command not recognised" << endl;
 				break;
+		}
+
+		if (command == 'Q') {
+			cout << "Quitting program..." << endl;
+			break;
 		}
 	}
 }
