@@ -15,6 +15,7 @@
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <string>
 //#include <raspicam/raspicam_cv.h>
 #include <raspicam/raspicam.h>
 using namespace std;
@@ -62,10 +63,22 @@ void captureImage() {
 }*/
 
 /* Set the camera resoltion. */
-void setResolution(width, height) {
+void setResolution(int width, int height) {
 	Camera.set (CV_CAP_PROP_FRAME_WIDTH, width);
 	Camera.set (CV_CAP_PROP_FRAME_HEIGHT, height);
 	cout << "Resolution changed" << endl;
+}
+
+/* Process camera parameters. */
+int processParameters(string parString) {
+	int parValue;
+	
+	cout << "Input ";
+	cout << parString;
+	cout << ": ";
+	cin << parValue;
+	
+	return parValue;
 }
 
 /* Test of process command. */
@@ -86,6 +99,7 @@ void printCommands() {
 /* Process command from the terminal. */
 char processCommand() {
 	char command;
+	
 	cout << "Input camera command: ";
 	cin >> command;
 	
@@ -98,6 +112,8 @@ char processCommand() {
 
 int main() {
 	char command;
+	int width;
+	int height;
 	
 	initCamera();
 	printCommands();
@@ -107,6 +123,9 @@ int main() {
 		
 		switch(command) {
 			case 'I':
+				width = processParameters("Width")
+				height = processParameters("Height")
+				setResolution(width, height);
 				captureImage();
 				break;
 				
