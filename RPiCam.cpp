@@ -52,7 +52,7 @@ raspicam::RaspiCam Camera;
  * camera module. */
 void initCamera() {
 	if (DEBUG == 0) {
-		Camera.set(CV_CAP_PROP_FORMAT, CV_8UC1);
+		//Camera.set(CV_CAP_PROP_FORMAT, CV_8UC1);
 	}
 	cout << "Opening Camera..." << endl;
 	if (!Camera.open()) {
@@ -65,12 +65,12 @@ void captureImage() {
 	cout << "Capturing Image..." << endl;
 	Camera.grab();
 	if (NOCV == 0) {
-		Camera.retrieve(image);
+		//Camera.retrieve(image);
 	}
 	Camera.release();
 	cout << "Image Captured" << endl;
 	if (NOCV == 0) {
-		cv::imwrite("image.jpg",image);
+		//cv::imwrite("image.jpg",image);
 	}
 	cout << "Image saved at image.jpg" << endl;
 }
@@ -83,8 +83,8 @@ void captureImage() {
 /* Set the camera resoltion. */
 void setResolution(int width, int height) {
 	if (DEBUG == 0) {
-		Camera.set (CV_CAP_PROP_FRAME_WIDTH, width);
-		Camera.set (CV_CAP_PROP_FRAME_HEIGHT, height);
+		//Camera.set (CV_CAP_PROP_FRAME_WIDTH, width);
+		//Camera.set (CV_CAP_PROP_FRAME_HEIGHT, height);
 	}
 	cout << "Resolution changed" << endl;
 }
@@ -97,7 +97,7 @@ void setResolution(int width, int height) {
 /* Set the camera brightness. */
 void setBrightness(int brightness) {
 	if (DEBUG == 0) {
-		Camera.set (CV_CAP_PROP_BRIGHTNESS, brightness);
+		//Camera.set (CV_CAP_PROP_BRIGHTNESS, brightness);
 	}
 	cout << "Brightness changed" << endl;
 }
@@ -105,7 +105,7 @@ void setBrightness(int brightness) {
 /* Set the camera contrast. */
 void setContrast(int contrast) {
 	if (DEBUG == 0) {
-		Camera.set (CV_CAP_PROP_CONTRAST, contrast);
+		//Camera.set (CV_CAP_PROP_CONTRAST, contrast);
 	}
 	cout << "Contrast changed" << endl;
 }
@@ -113,7 +113,7 @@ void setContrast(int contrast) {
 /* Set the camera saturation. */
 void setSaturation(int saturation) {
 	if (DEBUG == 0) {
-		Camera.set (CV_CAP_PROP_SATURATION, saturation);
+		//Camera.set (CV_CAP_PROP_SATURATION, saturation);
 	}
 	cout << "Saturation changed" << endl;
 }
@@ -121,7 +121,7 @@ void setSaturation(int saturation) {
 /* Set the camera saturation. */
 void setGain(int gain) {
 	if (DEBUG == 0) {
-		Camera.set (CV_CAP_PROP_GAIN, gain);
+		//Camera.set (CV_CAP_PROP_GAIN, gain);
 	}
 	cout << "Gain changed" << endl;
 }
@@ -129,7 +129,7 @@ void setGain(int gain) {
 /* Set the camera saturation. */
 void setExposureTime(int speed) {
 	if (DEBUG == 0) {
-		Camera.set (CV_CAP_PROP_EXPOSURE, speed);
+		//Camera.set (CV_CAP_PROP_EXPOSURE, speed);
 	}
 	cout << "Exposure time changed" << endl;
 }
@@ -196,12 +196,12 @@ int main() {
 		switch(command) {
 			case 'B':
 				brightness = processParameters("Brightness");
-				setBrightness();
+				setBrightness(brightness);
 				break;
 				
 			case 'C':
 				contrast = processParameters("Contrast");
-				setContrast();
+				setContrast(contrast);
 				break;
 			
 			case 'F':
@@ -210,7 +210,7 @@ int main() {
 			
 			case 'G':
 				gain = processParameters("Gain");
-				setGain();
+				setGain(gain);
 				break;
 			
 			case 'H':
@@ -236,7 +236,7 @@ int main() {
 			
 			case 'S':
 				saturation = processParameters("Saturation");
-				setSaturation();
+				setSaturation(saturation);
 				break;
 				
 			case 'V':
@@ -245,7 +245,7 @@ int main() {
 			
 			case 'X':
 				speed = processParameters("Exposure Time");
-				setExposureTime();
+				setExposureTime(speed);
 				break;
 
 			default:
