@@ -16,6 +16,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <cstdlib>
 //#include <raspicam/raspicam_cv.h>
 #include <raspicam/raspicam.h>
 //#include <raspicam/raspicam_still_cv.h>
@@ -97,7 +98,7 @@ void captureVideo(int duration) {
 	cin >> filename;
 	
 	if (NOCV == 0) {
-		//codec = cv::CV_FOURCC('M', 'J', 'P', 'G');
+		//codec = cv::CV_FOURCC('M', 'J', 'P', 'G'); // May change to H264
 		//isColour = (image.type() == CV_8UC3);
 		//fps = 0;
 		//writer.open(filename, codec, fps, image.size(), isColour);
@@ -123,6 +124,50 @@ void captureVideo(int duration) {
 	cout << "Recording finished" << endl;
 	cout << "Video saved at ";
 	cout << filename << endl;
+}
+
+/* Capture a video and simultaneously stream through a network. */
+void networkStream(int duration) {
+	//cv::Mat image;
+	//cv::VideoWriter writer;
+	clock_t startTime;
+	int codec;
+	bool isColour;
+	double fps;
+	string filename;
+	
+	cout << "Input filename: " << endl;
+	cin.clear();
+	cin.ignore(10000, '\n');
+	cin >> filename;
+	
+	if (NOCV == 0) {
+		//codec = cv::CV_FOURCC('M', 'J', 'P', 'G'); // May change to H264
+		//isColour = (image.type() == CV_8UC3);
+		//fps = 0;
+		//writer.open(filename, codec, fps, image.size(), isColour);
+	}
+	
+	startTime = clock();
+	cout << "Recording started" << endl;
+	
+	while (((clock() - startTime)/CLOCKS_PER_SEC) < duration) {
+		if (NOCV == 0) {
+			Camera.grab();
+			//Camera.retrieve(image);
+			
+			//writer.write(image);
+		}
+		else {
+			continue;
+		}
+	}
+	
+	Camera.release();
+	//writer.release();
+	cout << "Recording finished" << endl;
+	cout << "Video saved at ";
+	cout << filename << endl;	
 }
 
 /* Set the camera image resoltion. */
@@ -328,7 +373,11 @@ int main() {
 				break;
 				
 			case 'N':
-				cout << "Not yet implemented" << endl;
+				width = processParameters('W');
+				height = processParameters('H');
+				setVideoResolution(width, height);
+				duration = processParameters('D');
+				networkStream(duration);
 				break;
 				
 			case 'Q':
