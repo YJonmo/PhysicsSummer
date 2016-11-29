@@ -126,48 +126,27 @@ void captureVideo(int duration) {
 	cout << filename << endl;
 }
 
-/* Capture a video and simultaneously stream through a network. */
-void networkStream(int duration) {
-	//cv::Mat image;
-	//cv::VideoWriter writer;
+/* Capture a video and simultaneously stream through a network. This is 
+ * achieved through the command line, may be changed to work through openCV. */
+void networkStream(int width, int height, int duration) {
 	clock_t startTime;
-	int codec;
-	bool isColour;
-	double fps;
-	string filename;
+	string netCommand;
+	string sWidth;
+	string sHeight;
+	string sDuration;
 	
-	cout << "Input filename: " << endl;
-	cin.clear();
-	cin.ignore(10000, '\n');
-	cin >> filename;
-	
-	if (NOCV == 0) {
-		//codec = cv::CV_FOURCC('M', 'J', 'P', 'G'); // May change to H264
-		//isColour = (image.type() == CV_8UC3);
-		//fps = 0;
-		//writer.open(filename, codec, fps, image.size(), isColour);
-	}
+	sWidth = to_string(width);
+	sHeight = to_string(height);
+	sDuration = to_string(duration*1000);
+	netCommand = "raspivid -w " + sWidth + "-h " + sHeight + " -t " + sDuration + " -o - | nc my_server 8000";
 	
 	startTime = clock();
-	cout << "Recording started" << endl;
+	cout << "Streaming started" << endl;
 	
-	while (((clock() - startTime)/CLOCKS_PER_SEC) < duration) {
-		if (NOCV == 0) {
-			Camera.grab();
-			//Camera.retrieve(image);
-			
-			//writer.write(image);
-		}
-		else {
-			continue;
-		}
-	}
+	cout << netCommand << endl;
+	system(netCommand);
 	
-	Camera.release();
-	//writer.release();
-	cout << "Recording finished" << endl;
-	cout << "Video saved at ";
-	cout << filename << endl;	
+	cout << "Streaming finished" << endl;
 }
 
 /* Set the camera image resoltion. */
@@ -375,9 +354,8 @@ int main() {
 			case 'N':
 				width = processParameters('W');
 				height = processParameters('H');
-				setVideoResolution(width, height);
 				duration = processParameters('D');
-				networkStream(duration);
+				networkStream(width, height, duration);
 				break;
 				
 			case 'Q':
