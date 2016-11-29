@@ -318,6 +318,32 @@ int processParameters(char parChar) {
 	cin.ignore(10000, '\n');
 	cin >> parValue;
 	
+	while (cin.fail() || parValue < minValue || parValue > maxValue) {
+		if (cin.fail()) {
+			cout << "Error: Not a number" << endl;
+		}
+		else if (parValue < minValue) {
+			cout << "Error: Value is less than minimum" << endl;
+		}
+		else if (parValue > maxValue) {
+			cout << "Error: Value is greater than maximum" << endl;
+		}
+		
+		cout << "Input ";
+		cout << parString;
+		cout << " (Current: ";
+		cout << currValue;
+		cout << ", Min: ";
+		cout << minValue;
+		cout << ", Max: ";
+		cout << maxValue;
+		cout << "): ";
+
+		cin.clear();
+		cin.ignore(10000, '\n');
+		cin >> parValue;
+	}
+	
 	return parValue;
 }
 
