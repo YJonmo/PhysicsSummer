@@ -28,19 +28,18 @@ using namespace std;
 ***********************************************************************/
 
 #define DEBUG 1
-#define NOCV 1
 
 /***********************************************************************
  * Objects
 ***********************************************************************/
 
 /* Create the RaspiCam object. */
-//raspicam::RaspiCam_Cv Camera;
-raspicam::RaspiCam Camera;
+raspicam::RaspiCam_Cv Camera;
+//raspicam::RaspiCam Camera;
 
 /* Create the RaspiStill object. */
-//raspicam::RapiCam_Still_Cv CameraStill;
-raspicam::RaspiCam_Still CameraStill;
+raspicam::RapiCam_Still_Cv CameraStill;
+//raspicam::RaspiCam_Still CameraStill;
 
 /***********************************************************************
  * Functions
@@ -60,7 +59,7 @@ void initCamera() {
 
 /* Capture a single image. */
 void captureImage() {
-	//cv::Mat image;
+	cv::Mat image;
 	string filename;
 	
 	cout << "Input filename: " << endl;
@@ -70,22 +69,18 @@ void captureImage() {
 	
 	cout << "Capturing image..." << endl;
 	//CameraStill.grab();
-	if (NOCV == 0) {
-		//CameraStill.retrieve(image);
-	}
+	CameraStill.retrieve(image);
 	CameraStill.release();
 	cout << "Image captured" << endl;
-	if (NOCV == 0) {
-		//cv::imwrite(filename,image);
-	}
+	cv::imwrite(filename,image);
 	cout << "Image saved at ";
 	cout << filename << endl;
 }
 
 /* Capture a video using openCV video writer. */
 void captureVideo(int duration) {
-	//cv::Mat image;
-	//cv::VideoWriter writer;
+	cv::Mat image;
+	cv::VideoWriter writer;
 	clock_t startTime;
 	int codec;
 	bool isColour;
@@ -97,30 +92,26 @@ void captureVideo(int duration) {
 	cin.ignore(10000, '\n');
 	cin >> filename;
 	
-	if (NOCV == 0) {
-		//codec = cv::CV_FOURCC('M', 'J', 'P', 'G'); // May change to H264
-		//isColour = (image.type() == CV_8UC3);
-		//fps = 0;
-		//writer.open(filename, codec, fps, image.size(), isColour);
-	}
+	codec = cv::CV_FOURCC('M', 'J', 'P', 'G'); // May change to H264
+	isColour = (image.type() == CV_8UC3);
+	fps = 0;
+	writer.open(filename, codec, fps, image.size(), isColour);
 	
 	startTime = clock();
 	cout << "Recording started" << endl;
 	
 	while (((clock() - startTime)/CLOCKS_PER_SEC) < duration) {
-		if (NOCV == 0) {
-			Camera.grab();
-			//Camera.retrieve(image);
+		Camera.grab();
+		Camera.retrieve(image);
 			
-			//writer.write(image);
-		}
+		writer.write(image);
 		else {
 			continue;
 		}
 	}
 	
 	Camera.release();
-	//writer.release();
+	writer.release();
 	cout << "Recording finished" << endl;
 	cout << "Video saved at ";
 	cout << filename << endl;
