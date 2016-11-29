@@ -127,9 +127,6 @@ void captureVideo(int duration) {
 		Camera.retrieve(image);
 			
 		writer.write(image);
-		else {
-			continue;
-		}
 	}
 	
 	Camera.release();
