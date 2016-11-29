@@ -16,7 +16,7 @@ To install the raspicam library on the Raspberry Pi:
 	
 To compile the program:
 	
-	g++ RPiCam.cpp -o RPiCam -I/usr/local/include -lraspicam -lmmal -lmmal_core -lmmal_util -L/opt/vc/lib
+	g++ RPiCam.cpp -o RPiCam -I/usr/local/include -lraspicam -lmmal -lmmal_core -lmmal_util -L/opt/vc/lib -std=c++0x
 
 To run the program:
 

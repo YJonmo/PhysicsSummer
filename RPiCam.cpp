@@ -139,12 +139,13 @@ void networkStream(int width, int height, int duration) {
 	sHeight = to_string(height);
 	sDuration = to_string(duration*1000);
 	netCommand = "raspivid -w " + sWidth + "-h " + sHeight + " -t " + sDuration + " -o - | nc my_server 8000";
+	const char *netCmd = netCommand.c_str();
 	
 	startTime = clock();
 	cout << "Streaming started" << endl;
 	
 	cout << netCommand << endl;
-	system(netCommand);
+	system(netCmd);
 	
 	cout << "Streaming finished" << endl;
 }
