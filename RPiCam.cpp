@@ -17,6 +17,7 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
+#include <climits>
 //#include <raspicam/raspicam_cv.h>
 #include <raspicam/raspicam.h>
 //#include <raspicam/raspicam_still_cv.h>
@@ -28,6 +29,27 @@ using namespace std;
 ***********************************************************************/
 
 #define DEBUG 1
+
+#define BRIGHTNESS_MIN 0
+#define BRIGHTNESS_MAX 100
+#define CONTRAST_MIN 0
+#define CONTRAST_MAX 100
+#define SATURATION_MIN 0
+#define SATURATION_MAX 100
+#define GAIN_MIN 0
+#define GAIN_MAX 100
+#define EXPOSURE_MIN 0
+#define EXPOSURE_MAX 100
+#define WIDTH_IMG_MIN 64
+#define WIDTH_IMG_MAX 3280
+#define WIDTH_VID_MIN 64
+#define WIDTH_VID_MAX 1280
+#define HEIGHT_IMG_MIN 64
+#define HEIGHT_IMG_MAX 2464
+#define HEIGHT_VID_MIN 64
+#define HEIGHT_VID_MAX 960
+#define DURATION_MIN 0
+#define DURATION_MAX INT_MAX
 
 /***********************************************************************
  * Objects
@@ -206,47 +228,79 @@ void setExposureTime(int speed) {
 int processParameters(char parChar) {
 	int parValue;
 	int currValue;
+	int minValue;
+	int maxValue;
 	string parString;
 	
 	switch(parChar) {
 		case 'W':
 			parString = "width";
-			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_WIDTH);
+			currValue = -1;//CameraStill.get(CV_CAP_PROP_FRAME_WIDTH);
+			minValue = WIDTH_IMG_MIN;
+			maxValue = WIDTH_IMG_MAX;
 			break;
 		
 		case 'H':
 			parString = "height";
+			currValue = -1;//CameraStill.get(CV_CAP_PROP_FRAME_HEIGHT);
+			minValue = HEIGHT_IMG_MIN;
+			maxValue = HEIGHT_IMG_MAX;
+			break;
+			
+		case 'w':
+			parString = "width";
+			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_WIDTH);
+			minValue = WIDTH_VID_MIN;
+			maxValue = WIDTH_VID_MAX;
+			break;
+		
+		case 'h':
+			parString = "height";
 			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_HEIGHT);
+			minValue = HEIGHT_VID_MIN;
+			maxValue = HEIGHT_VID_MAX;
 			break;
 		
 		case 'B':
 			parString = "brightness";
 			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_BRIGHTNESS);
+			minValue = BRIGHTNESS_MIN;
+			maxValue = BRIGHTNESS_MAX;
 			break;
 		
 		case 'C':
 			parString = "contrast";
 			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_CONTRAST);
+			minValue = CONTRAST_MIN;
+			maxValue = CONTRAST_MAX;
 			break;
 		
 		case 'S':
 			parString = "saturation";
 			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_SATURATION);
+			minValue = SATURATION_MIN;
+			maxValue = SATURATION_MAX;
 			break;
 		
 		case 'G':
 			parString = "gain";
 			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_GAIN);
+			minValue = GAIN_MIN;
+			maxValue = GAIN_MAX;
 			break;
 		
 		case 'X':
 			parString = "exposure time";
 			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_EXPOSURE);
+			minValue = EXPOSURE_MIN;
+			maxValue = EXPOSURE_MAX;
 			break;
 			
 		case 'D':
 			parString = "duration";
 			currValue = 0;
+			minValue = DURATION_MIN;
+			maxValue = DURATION_MAX;
 			break;
 		
 		default:
@@ -257,6 +311,10 @@ int processParameters(char parChar) {
 	cout << parString;
 	cout << " (Current: ";
 	cout << currValue;
+	cout << ", Min: ";
+	cout << minValue;
+	cout << ", Max: ";
+	cout << maxValue;
 	cout << "): ";
 
 	cin.clear();
@@ -344,8 +402,8 @@ int main() {
 				break;
 				
 			case 'N':
-				width = processParameters('W');
-				height = processParameters('H');
+				width = processParameters('w');
+				height = processParameters('h');
 				duration = processParameters('D');
 				networkStream(width, height, duration);
 				break;
@@ -359,8 +417,8 @@ int main() {
 				break;
 				
 			case 'V':
-				width = processParameters('W');
-				height = processParameters('H');
+				width = processParameters('w');
+				height = processParameters('h');
 				setVideoResolution(width, height);
 				duration = processParameters('D');
 				captureVideo(duration);
