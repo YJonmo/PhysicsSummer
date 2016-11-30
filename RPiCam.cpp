@@ -100,7 +100,6 @@ void captureImage() {
 /* Capture a video using openCV video writer. */
 void captureVideo(int duration) {
 	cv::Mat image;
-	cv::VideoWriter writer;
 	clock_t startTime;
 	int codec;
 	bool isColour;
@@ -113,13 +112,14 @@ void captureVideo(int duration) {
 	cin.ignore(10000, '\n');
 	cin >> filename;
 	
-	codec = CV_FOURCC('H', '2', '6', '4'); // May change to H264
+	codec = CV_FOURCC('P', 'I', 'M', '1'); // May change to H264
 	isColour = (image.type() == CV_8UC3);
 	fps = 24;
 	image.cols = Camera.get(CV_CAP_PROP_FRAME_WIDTH);
 	image.rows = Camera.get(CV_CAP_PROP_FRAME_HEIGHT);
-
-	writer.open(filename, codec, fps, image.size(), isColour);
+	
+	cv::VideoWriter writer;//filename, -1, fps, image.size(), isColour);
+	writer.open(filename, -1, fps, image.size(), isColour);
 	
 	startTime = clock();
 	cout << "Recording started" << endl;
@@ -127,7 +127,7 @@ void captureVideo(int duration) {
 	while (((clock() - startTime)/CLOCKS_PER_SEC) < duration) {
 		Camera.grab();
 		Camera.retrieve(image);
-
+		cout << writer.isOpened() << endl;
 		writer.write(image);
 		fno++;
 		cout << "Frame ";

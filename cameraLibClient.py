@@ -7,17 +7,15 @@ Date: 21st November 2016
 
 
 # For network testing purposes
-'''try:
+try:
 	from picamera import PiCamera
 	picam = 1
 except RuntimeError:
 	print("Picamera not found")
-	picam = 0'''
+	picam = 0
 import socket
 import time
 import struct
-
-picam = 0
 
 class cameraModuleClient:
 	
@@ -74,7 +72,7 @@ class cameraModuleClient:
 		if picam == 1:
 			# Warm the camera up
 			self.camera.start_preview()
-			sleep(2)
+			time.sleep(2)
 			
 			# Capture an image and store in file <fname>
 			self.camera.capture(fname)
