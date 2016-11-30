@@ -7,16 +7,17 @@ Date: 21st November 2016
 
 
 # For network testing purposes
-try:
+'''try:
 	from picamera import PiCamera
 	picam = 1
 except RuntimeError:
 	print("Picamera not found")
-	picam = 0
+	picam = 0'''
 import socket
 import time
 import struct
 
+picam = 0
 
 class cameraModuleClient:
 	

@@ -60,7 +60,7 @@ raspicam::RaspiCam_Cv Camera;
 //raspicam::RaspiCam Camera;
 
 /* Create the RaspiStill object. */
-raspicam::RapiCam_Still_Cv CameraStill;
+raspicam::RaspiCam_Still_Cv CameraStill;
 //raspicam::RaspiCam_Still CameraStill;
 
 /***********************************************************************
@@ -114,7 +114,7 @@ void captureVideo(int duration) {
 	cin.ignore(10000, '\n');
 	cin >> filename;
 	
-	codec = cv::CV_FOURCC('M', 'J', 'P', 'G'); // May change to H264
+	codec = CV_FOURCC('M', 'J', 'P', 'G'); // May change to H264
 	isColour = (image.type() == CV_8UC3);
 	fps = 0;
 	writer.open(filename, codec, fps, image.size(), isColour);
