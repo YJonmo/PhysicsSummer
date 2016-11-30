@@ -106,15 +106,19 @@ void captureVideo(int duration) {
 	bool isColour;
 	double fps;
 	string filename;
+	int fno;
 	
 	cout << "Input filename: " << endl;
 	cin.clear();
 	cin.ignore(10000, '\n');
 	cin >> filename;
 	
-	codec = CV_FOURCC('M', 'J', 'P', 'G'); // May change to H264
+	codec = CV_FOURCC('H', '2', '6', '4'); // May change to H264
 	isColour = (image.type() == CV_8UC3);
 	fps = 24;
+	image.cols = Camera.get(CV_CAP_PROP_FRAME_WIDTH);
+	image.rows = Camera.get(CV_CAP_PROP_FRAME_HEIGHT);
+
 	writer.open(filename, codec, fps, image.size(), isColour);
 	
 	startTime = clock();
@@ -123,8 +127,11 @@ void captureVideo(int duration) {
 	while (((clock() - startTime)/CLOCKS_PER_SEC) < duration) {
 		Camera.grab();
 		Camera.retrieve(image);
-			
+
 		writer.write(image);
+		fno++;
+		cout << "Frame ";
+		cout << fno << endl;
 	}
 	
 	Camera.release();
