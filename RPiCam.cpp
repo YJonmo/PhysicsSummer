@@ -18,10 +18,10 @@
 #include <string>
 #include <cstdlib>
 #include <climits>
-//#include <raspicam/raspicam_cv.h>
-#include <raspicam/raspicam.h>
-//#include <raspicam/raspicam_still_cv.h>
-#include <raspicam/raspicam_still.h>
+#include <raspicam/raspicam_cv.h>
+//#include <raspicam/raspicam.h>
+#include <raspicam/raspicam_still_cv.h>
+//#include <raspicam/raspicam_still.h>
 using namespace std;
 
 /***********************************************************************
@@ -71,7 +71,7 @@ raspicam::RapiCam_Still_Cv CameraStill;
  * camera module. */
 void initCamera() {
 	if (DEBUG == 0) {
-		//Camera.set(CV_CAP_PROP_FORMAT, CV_8UC1);
+		//Camera.set(CV_CAP_PROP_FORMAT, CV_8UC3);
 	}
 	cout << "Opening camera..." << endl;
 	if (!Camera.open()) {
@@ -136,8 +136,8 @@ void captureVideo(int duration) {
 	cout << filename << endl;
 }
 
-/* Capture a video and simultaneously stream through a network. This is 
- * achieved through the command line, may be changed to work through openCV. */
+/* Stream a video through a network. This is achieved through the command 
+ * line, may be changed to work through openCV. */
 void networkStream(int width, int height, int duration) {
 	clock_t startTime;
 	string netCommand;
