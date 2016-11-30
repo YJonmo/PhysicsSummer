@@ -70,9 +70,7 @@ raspicam::RaspiCam_Still_Cv CameraStill;
 /* Initialise the camera by setting the parameters, and opening the 
  * camera module. */
 void initCamera() {
-	if (DEBUG == 0) {
-		//Camera.set(CV_CAP_PROP_FORMAT, CV_8UC3);
-	}
+	Camera.set(CV_CAP_PROP_FORMAT, CV_8UC3);
 	cout << "Opening camera..." << endl;
 	if (!Camera.open()) {
 		cerr << "Error opening the camera" << endl;
@@ -90,9 +88,9 @@ void captureImage() {
 	cin >> filename;
 	
 	cout << "Capturing image..." << endl;
-	//CameraStill.grab();
-	CameraStill.retrieve(image);
-	CameraStill.release();
+	Camera.grab();
+	Camera.retrieve(image);
+	Camera.release();
 	cout << "Image captured" << endl;
 	cv::imwrite(filename,image);
 	cout << "Image saved at ";
@@ -116,7 +114,7 @@ void captureVideo(int duration) {
 	
 	codec = CV_FOURCC('M', 'J', 'P', 'G'); // May change to H264
 	isColour = (image.type() == CV_8UC3);
-	fps = 0;
+	fps = 24;
 	writer.open(filename, codec, fps, image.size(), isColour);
 	
 	startTime = clock();
@@ -162,62 +160,48 @@ void networkStream(int width, int height, int duration) {
 
 /* Set the camera image resoltion. */
 void setImageResolution(int width, int height) {
-	if (DEBUG == 0) {
-		//CameraStill.set (CV_CAP_PROP_FRAME_WIDTH, width);
-		//CameraStill.set (CV_CAP_PROP_FRAME_HEIGHT, height);
-	}
+	CameraStill.set (CV_CAP_PROP_FRAME_WIDTH, width);
+	CameraStill.set (CV_CAP_PROP_FRAME_HEIGHT, height);
 }
 
 /* Set the camera video resoltion. */
 void setVideoResolution(int width, int height) {
-	if (DEBUG == 0) {
-		//Camera.set (CV_CAP_PROP_FRAME_WIDTH, width);
-		//Camera.set (CV_CAP_PROP_FRAME_HEIGHT, height);
-	}
+	Camera.set (CV_CAP_PROP_FRAME_WIDTH, width);
+	Camera.set (CV_CAP_PROP_FRAME_HEIGHT, height);
 }
 
 /* Set the camera brightness. */
 void setBrightness(int brightness) {
-	if (DEBUG == 0) {
-		//Camera.set (CV_CAP_PROP_BRIGHTNESS, brightness);
-		//CameraStill.set (CV_CAP_PROP_BRIGHTNESS, brightness);
-	}
+	Camera.set (CV_CAP_PROP_BRIGHTNESS, brightness);
+	CameraStill.set (CV_CAP_PROP_BRIGHTNESS, brightness);
 	cout << "Brightness changed" << endl;
 }
 
 /* Set the camera contrast. */
 void setContrast(int contrast) {
-	if (DEBUG == 0) {
-		//Camera.set (CV_CAP_PROP_CONTRAST, contrast);
-		//CameraStill.set (CV_CAP_PROP_CONTRAST, contrast);
-	}
+	Camera.set (CV_CAP_PROP_CONTRAST, contrast);
+	CameraStill.set (CV_CAP_PROP_CONTRAST, contrast);
 	cout << "Contrast changed" << endl;
 }
 
 /* Set the camera saturation. */
 void setSaturation(int saturation) {
-	if (DEBUG == 0) {
-		//Camera.set (CV_CAP_PROP_SATURATION, saturation);
-		//CameraStill.set (CV_CAP_PROP_SATURATION, saturation);
-	}
+	Camera.set (CV_CAP_PROP_SATURATION, saturation);
+	CameraStill.set (CV_CAP_PROP_SATURATION, saturation);
 	cout << "Saturation changed" << endl;
 }
 
 /* Set the camera saturation. */
 void setGain(int gain) {
-	if (DEBUG == 0) {
-		//Camera.set (CV_CAP_PROP_GAIN, gain);
-		//CameraStill.set (CV_CAP_PROP_GAIN, gain);
-	}
+	Camera.set (CV_CAP_PROP_GAIN, gain);
+	CameraStill.set (CV_CAP_PROP_GAIN, gain);
 	cout << "Gain changed" << endl;
 }
 
 /* Set the camera saturation. */
 void setExposureTime(int speed) {
-	if (DEBUG == 0) {
-		//Camera.set (CV_CAP_PROP_EXPOSURE, speed);
-		//CameraStill.set (CV_CAP_PROP_EXPOSURE, speed);
-	}
+	Camera.set (CV_CAP_PROP_EXPOSURE, speed);
+	CameraStill.set (CV_CAP_PROP_EXPOSURE, speed);
 	cout << "Exposure time changed" << endl;
 }
 
@@ -232,63 +216,63 @@ int processParameters(char parChar) {
 	switch(parChar) {
 		case 'W':
 			parString = "width";
-			currValue = -1;//CameraStill.get(CV_CAP_PROP_FRAME_WIDTH);
+			currValue = CameraStill.get(CV_CAP_PROP_FRAME_WIDTH);
 			minValue = WIDTH_IMG_MIN;
 			maxValue = WIDTH_IMG_MAX;
 			break;
 		
 		case 'H':
 			parString = "height";
-			currValue = -1;//CameraStill.get(CV_CAP_PROP_FRAME_HEIGHT);
+			currValue = CameraStill.get(CV_CAP_PROP_FRAME_HEIGHT);
 			minValue = HEIGHT_IMG_MIN;
 			maxValue = HEIGHT_IMG_MAX;
 			break;
 			
 		case 'w':
 			parString = "width";
-			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_WIDTH);
+			currValue = Camera.get(CV_CAP_PROP_FRAME_WIDTH);
 			minValue = WIDTH_VID_MIN;
 			maxValue = WIDTH_VID_MAX;
 			break;
 		
 		case 'h':
 			parString = "height";
-			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_HEIGHT);
+			currValue = Camera.get(CV_CAP_PROP_FRAME_HEIGHT);
 			minValue = HEIGHT_VID_MIN;
 			maxValue = HEIGHT_VID_MAX;
 			break;
 		
 		case 'B':
 			parString = "brightness";
-			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_BRIGHTNESS);
+			currValue = Camera.get(CV_CAP_PROP_BRIGHTNESS);
 			minValue = BRIGHTNESS_MIN;
 			maxValue = BRIGHTNESS_MAX;
 			break;
 		
 		case 'C':
 			parString = "contrast";
-			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_CONTRAST);
+			currValue = Camera.get(CV_CAP_PROP_CONTRAST);
 			minValue = CONTRAST_MIN;
 			maxValue = CONTRAST_MAX;
 			break;
 		
 		case 'S':
 			parString = "saturation";
-			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_SATURATION);
+			currValue = Camera.get(CV_CAP_PROP_SATURATION);
 			minValue = SATURATION_MIN;
 			maxValue = SATURATION_MAX;
 			break;
 		
 		case 'G':
 			parString = "gain";
-			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_GAIN);
+			currValue = Camera.get(CV_CAP_PROP_GAIN);
 			minValue = GAIN_MIN;
 			maxValue = GAIN_MAX;
 			break;
 		
 		case 'X':
 			parString = "exposure time";
-			currValue = -1;//Camera.get(CV_CAP_PROP_FRAME_EXPOSURE);
+			currValue = Camera.get(CV_CAP_PROP_EXPOSURE);
 			minValue = EXPOSURE_MIN;
 			maxValue = EXPOSURE_MAX;
 			break;
