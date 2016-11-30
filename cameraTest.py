@@ -20,14 +20,14 @@ rate = 24
 cam.setFrameRate(rate)
 
 # Set the exposure time
-speed = 0#30000
-cam.setExposureTime(speed)
+#speed = 0#30000
+#cam.setExposureTime(speed)
 
 # Take a photo
-cam.capturePhoto('image.png')
+#cam.capturePhoto('image.png')
 
 # Record a video
-duration = 10
+duration = 4
 cam.captureStream(duration, 'video.h264')
 
 # Free the camera resources

@@ -16,6 +16,7 @@ except RuntimeError:
 import socket
 import time
 import struct
+import os
 
 class cameraModuleClient:
 	
@@ -85,6 +86,9 @@ class cameraModuleClient:
 		'''
 		
 		if picam == 1:
+			self.camera.start_preview()
+			time.sleep(2)
+			
 			# Record the camera for length <duration>, and store in file <fname
 			self.camera.start_recording(fname)
 			print("Recording started...")
@@ -94,6 +98,9 @@ class cameraModuleClient:
 			# Pretend to record (for testing purposes)
 			time.sleep(duration)
 		print("Recording finished")
+		
+		comStr = "avconv -i " + fname + " -f rawvideo - | avconv -y -f rawvideo -r:v 24 -s:v 640x480 -i - out3.mp4"
+		os.system(comStr)
 		
 	
 	def networkStreamClient(self, sock, duration):
