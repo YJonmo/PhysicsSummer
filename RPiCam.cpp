@@ -112,14 +112,14 @@ void captureVideo(int duration) {
 	cin.ignore(10000, '\n');
 	cin >> filename;
 	
-	codec = CV_FOURCC('P', 'I', 'M', '1'); // May change to H264
+	codec = CV_FOURCC('M', 'J', 'P', 'G'); // May change to H264
 	isColour = (image.type() == CV_8UC3);
 	fps = 24;
 	image.cols = Camera.get(CV_CAP_PROP_FRAME_WIDTH);
 	image.rows = Camera.get(CV_CAP_PROP_FRAME_HEIGHT);
 	
-	cv::VideoWriter writer;//filename, -1, fps, image.size(), isColour);
-	writer.open(filename, -1, fps, image.size(), isColour);
+	cv::VideoWriter writer;//filename, codec, fps, image.size(), isColour);
+	writer.open(filename, codec, fps, image.size(), 1);
 	
 	startTime = clock();
 	cout << "Recording started" << endl;
