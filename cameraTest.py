@@ -11,12 +11,12 @@ import cameraLibClient
 cam = cameraLibClient.cameraModuleClient()
 
 # Set the resolution
-width = 1920
-height = 1080
+width = 640
+height = 480
 cam.setResolution(width, height)
 
 # Set the framerate
-rate = 30
+rate = 90
 cam.setFrameRate(rate)
 
 # Set the exposure time
@@ -28,7 +28,7 @@ cam.setFrameRate(rate)
 
 # Record a video
 duration = 4
-cam.captureStream(duration, 'video2.avi')
+cam.captureStream(duration, 'video.h264')
 
 # Free the camera resources
 cam.closeCamera()
