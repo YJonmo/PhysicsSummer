@@ -106,13 +106,14 @@ void captureVideo(int duration) {
 	double fps;
 	string filename;
 	int fno;
+	int frate;
 	
 	cout << "Input filename: " << endl;
 	cin.clear();
 	cin.ignore(10000, '\n');
 	cin >> filename;
 	
-	codec = CV_FOURCC('M', 'J', 'P', 'G'); // May change to H264
+	codec = CV_FOURCC('I','Y','U','V'); // May change to H264
 	isColour = (image.type() == CV_8UC3);
 	fps = 24;
 	image.cols = Camera.get(CV_CAP_PROP_FRAME_WIDTH);
@@ -127,16 +128,21 @@ void captureVideo(int duration) {
 	while (((clock() - startTime)/CLOCKS_PER_SEC) < duration) {
 		Camera.grab();
 		Camera.retrieve(image);
-		cout << writer.isOpened() << endl;
+		cout << writer.isOpened();
 		writer.write(image);
 		fno++;
-		cout << "Frame ";
-		cout << fno << endl;
+		cout << ", Frame ";
+		cout << fno;
+		cout << ", Time ";
+		cout << ((clock() - startTime)/CLOCKS_PER_SEC) << endl;
 	}
 	
 	Camera.release();
 	writer.release();
+	frate = fno/duration;
 	cout << "Recording finished" << endl;
+	cout << "Framerate: ";
+	cout << frate << endl;
 	cout << "Video saved at ";
 	cout << filename << endl;
 }
