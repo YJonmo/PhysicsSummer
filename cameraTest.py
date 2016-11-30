@@ -16,11 +16,11 @@ height = 480
 cam.setResolution(width, height)
 
 # Set the framerate
-rate = 90
+rate = 24
 cam.setFrameRate(rate)
 
 # Set the exposure time
-speed = 30000
+speed = 0#30000
 cam.setExposureTime(speed)
 
 # Take a photo
