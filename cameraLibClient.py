@@ -90,7 +90,7 @@ class cameraModuleClient:
 			time.sleep(2)
 			
 			# Record the camera for length <duration>, and store in file <fname
-			self.camera.start_recording(fname)
+			self.camera.start_recording("input.h264")
 			print("Recording started...")
 			self.camera.wait_recording(duration)
 			self.camera.stop_recording()
@@ -99,8 +99,13 @@ class cameraModuleClient:
 			time.sleep(duration)
 		print("Recording finished")
 		
-		comStr = "avconv -i " + fname + " -f rawvideo - | avconv -y -f rawvideo -r:v 24 -s:v 640x480 -i - out3.mp4"
+		rate = str(self.camera.framerate)
+		width = str(self.camera.resolution[0])
+		height = str(self.camera.resolution[1])
+		
+		comStr = "avconv -i input.h264 -f rawvideo - | avconv -y -f rawvideo -r:v " + rate + " -s:v " + width + "x" + height + " -i - " + fname
 		os.system(comStr)
+		os.system("rm input.h264")
 		
 	
 	def networkStreamClient(self, sock, duration):
