@@ -181,10 +181,13 @@ class cameraModuleClient:
 		'''
 		
 		# Initialise the socket connection
-		self.client_socket = socket.socket()
+		'''self.client_socket = socket.socket()
 		print("Waiting for connection...")
-		self.client_socket.connect(('172.24.94.238', 8000))
-		print("Connection accepted!")
+		self.client_socket.connect(('', 8000))
+		print("Connection accepted!")'''
+		
+		self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		self.client_socket.bind(('',8000))
 		
 	
 	def receiveCommand(self):
