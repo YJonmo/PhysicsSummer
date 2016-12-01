@@ -21,16 +21,22 @@ class cameraModuleServer:
 		'''
 		
 		# Initialise the socket connection
-		self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.host = socket.gethostbyname(socket.gethostname())
-		print(self.host)
+		'''self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		#self.host = socket.gethostbyname(socket.gethostname())
+		#print(self.host)
+		self.host = '172.24.127.255'
 		self.server_socket.bind((self.host, 8000))
 		self.server_socket.listen(5)
 		
 		# Wait for the Raspberry Pi to connect
 		print("Waiting for Connection...")
 		(self.hostSock, self.address) = self.server_socket.accept()
-		print("Connection accepted!")
+		print("Connection accepted!")'''
+		
+		self.hostSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		self.hostSock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+		self.host = '172.24.127.255'
+		#self.server_socket.bind(('172.24.127.255', 8000))
 		
 	
 	def networkStreamServer(self):
@@ -63,7 +69,8 @@ class cameraModuleServer:
 		
 		# Prefix each message with a 4-byte length (network byte order)
 		msg = struct.pack('>I', len(msg)) + msg
-		sock.sendall(msg)
+		#sock.sendall(msg)
+		sock.sendto(msg, (self.host, 8000))
 		
 	
 	def recv_msg(self, sock):
