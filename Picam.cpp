@@ -4,7 +4,7 @@
  * raspicam C++ API found here: https://github.com/cedricve/raspicam.
  * 
  * Author: Damon Hutley
- * Date: 25th November 2016
+ * Date: 2nd December 2016
  *
 ***********************************************************************/
 
@@ -22,52 +22,14 @@
 //#include <raspicam/raspicam.h>
 #include <raspicam/raspicam_still_cv.h>
 //#include <raspicam/raspicam_still.h>
+#include "Picam.h"
 using namespace std;
-
-/***********************************************************************
- * Constants
-***********************************************************************/
-
-#define BRIGHTNESS_MIN 0
-#define BRIGHTNESS_MAX 100
-#define CONTRAST_MIN 0
-#define CONTRAST_MAX 100
-#define SATURATION_MIN 0
-#define SATURATION_MAX 100
-#define GAIN_MIN 0
-#define GAIN_MAX 100
-#define EXPOSURE_MIN 0
-#define EXPOSURE_MAX 100
-#define WIDTH_IMG_MIN 64
-#define WIDTH_IMG_MAX 3280
-#define WIDTH_VID_MIN 64
-#define WIDTH_VID_MAX 1280
-#define HEIGHT_IMG_MIN 64
-#define HEIGHT_IMG_MAX 2464
-#define HEIGHT_VID_MIN 64
-#define HEIGHT_VID_MAX 960
-#define DURATION_MIN 0
-#define DURATION_MAX INT_MAX
-
-/***********************************************************************
- * Objects
-***********************************************************************/
-
-/* Create the RaspiCam object. */
-raspicam::RaspiCam_Cv Camera;
-//raspicam::RaspiCam Camera;
-
-/* Create the RaspiStill object. */
-raspicam::RaspiCam_Still_Cv CameraStill;
-//raspicam::RaspiCam_Still CameraStill;
 
 /***********************************************************************
  * Functions
 ***********************************************************************/
 
-/* Initialise the camera by setting the parameters, and opening the 
- * camera module. */
-void initCamera() {
+Picam::Picam(raspicam::RaspiCam_Cv cam, raspicam::RaspiCam_Still_Cv camStill) : Camera(cam), CameraStill(camStill) {
 	Camera.set(CV_CAP_PROP_FORMAT, CV_8UC3);
 	cout << "Opening camera..." << endl;
 	if (!Camera.open()) {
@@ -76,7 +38,7 @@ void initCamera() {
 }
 
 /* Capture a single image. */
-void captureImage() {
+void Picam::captureImage() {
 	cv::Mat image;
 	string filename;
 	
@@ -96,7 +58,7 @@ void captureImage() {
 }
 
 /* Capture a video using openCV video writer. */
-void captureVideo(int duration) {
+void Picam::captureVideo(int duration) {
 	cv::Mat image;
 	int64_t startTime;
 	int codec;
@@ -152,7 +114,7 @@ void captureVideo(int duration) {
 
 /* Stream a video through a network. This is achieved through the command 
  * line, may be changed to work through openCV. */
-void networkStream(int width, int height, int duration) {
+void Picam::networkStream(int width, int height, int duration) {
 	clock_t startTime;
 	string netCommand;
 	string sWidth;
@@ -175,54 +137,54 @@ void networkStream(int width, int height, int duration) {
 }
 
 /* Set the camera image resoltion. */
-void setImageResolution(int width, int height) {
+void Picam::setImageResolution(int width, int height) {
 	CameraStill.set (CV_CAP_PROP_FRAME_WIDTH, width);
 	CameraStill.set (CV_CAP_PROP_FRAME_HEIGHT, height);
 }
 
 /* Set the camera video resoltion. */
-void setVideoResolution(int width, int height) {
+void Picam::setVideoResolution(int width, int height) {
 	Camera.set (CV_CAP_PROP_FRAME_WIDTH, width);
 	Camera.set (CV_CAP_PROP_FRAME_HEIGHT, height);
 }
 
 /* Set the camera brightness. */
-void setBrightness(int brightness) {
+void Picam::setBrightness(int brightness) {
 	Camera.set (CV_CAP_PROP_BRIGHTNESS, brightness);
 	CameraStill.set (CV_CAP_PROP_BRIGHTNESS, brightness);
 	cout << "Brightness changed" << endl;
 }
 
 /* Set the camera contrast. */
-void setContrast(int contrast) {
+void Picam::setContrast(int contrast) {
 	Camera.set (CV_CAP_PROP_CONTRAST, contrast);
 	CameraStill.set (CV_CAP_PROP_CONTRAST, contrast);
 	cout << "Contrast changed" << endl;
 }
 
 /* Set the camera saturation. */
-void setSaturation(int saturation) {
+void Picam::setSaturation(int saturation) {
 	Camera.set (CV_CAP_PROP_SATURATION, saturation);
 	CameraStill.set (CV_CAP_PROP_SATURATION, saturation);
 	cout << "Saturation changed" << endl;
 }
 
 /* Set the camera saturation. */
-void setGain(int gain) {
+void Picam::setGain(int gain) {
 	Camera.set (CV_CAP_PROP_GAIN, gain);
 	CameraStill.set (CV_CAP_PROP_GAIN, gain);
 	cout << "Gain changed" << endl;
 }
 
 /* Set the camera saturation. */
-void setExposureTime(int speed) {
+void Picam::setExposureTime(int speed) {
 	Camera.set (CV_CAP_PROP_EXPOSURE, speed);
 	CameraStill.set (CV_CAP_PROP_EXPOSURE, speed);
 	cout << "Exposure time changed" << endl;
 }
 
 /* Process camera parameters. */
-int processParameters(char parChar) {
+int Picam::processParameters(char parChar) {
 	int parValue;
 	int currValue;
 	int minValue;
@@ -348,7 +310,7 @@ int processParameters(char parChar) {
 }
 
 /* Process command from the terminal. */
-char processCommand() {
+char Picam::processCommand() {
 	char command;
 	
 	cout << "Input camera command: ";
@@ -358,7 +320,7 @@ char processCommand() {
 }
 
 /* Print a list of commands. */
-void printCommands() {
+void Picam::printCommands() {
 	cout << "\nList of commands:" << endl;
 	cout << "	B: Set brightness" << endl;
 	cout << "	C: Set contrast" << endl;
@@ -370,99 +332,4 @@ void printCommands() {
 	cout << "	S: Set saturation" << endl;
 	cout << "	V: Capture a video" << endl;
 	cout << "	X: Set exposure time\n" << endl;
-}
-
-/***********************************************************************
- * Main Code
-***********************************************************************/
-
-int main() {
-	char command;
-	int brightness;
-	int contrast;
-	int saturation;
-	int gain;
-	int speed;
-	int width;
-	int height;
-	int duration;
-	
-	initCamera();
-	printCommands();
-	
-	while (1) {
-		command = processCommand();
-		
-		switch(command) {
-			case 'B':
-				brightness = processParameters('B');
-				setBrightness(brightness);
-				break;
-				
-			case 'C':
-				contrast = processParameters('C');
-				setContrast(contrast);
-				break;
-			
-			case 'F':
-				cout << "Not yet implemented" << endl;
-				break;
-			
-			case 'G':
-				gain = processParameters('G');
-				setGain(gain);
-				break;
-			
-			case 'H':
-				printCommands();
-				break;
-			
-			case 'I':
-				width = processParameters('W');
-				height = processParameters('H');
-				setImageResolution(width, height);
-				captureImage();
-				break;
-				
-			case 'N':
-				width = processParameters('w');
-				height = processParameters('h');
-				duration = processParameters('D');
-				networkStream(width, height, duration);
-				break;
-				
-			case 'Q':
-				break;
-			
-			case 'S':
-				saturation = processParameters('S');
-				setSaturation(saturation);
-				break;
-				
-			case 'V':
-				width = processParameters('w');
-				height = processParameters('h');
-				setVideoResolution(width, height);
-				duration = processParameters('D');
-				captureVideo(duration);
-				break;
-			
-			case 'X':
-				speed = processParameters('X');
-				setExposureTime(speed);
-				break;
-
-			default:
-				cout << "Command not recognised" << endl;
-				break;
-		}
-
-		if (command == 'Q') {
-			cout << "Quitting program..." << endl;
-			break;
-		}
-
-		cin.clear();
-		cin.ignore(10000, '\n');
-	}
 }

@@ -2,7 +2,7 @@
 A set of tests for the Raspberry Pi camera module using the Python camera library.
 
 Author: Damon Hutley
-Date: 2/12/2016
+Date: 2nd December 2016
 '''
 
 import cameraLibClient
