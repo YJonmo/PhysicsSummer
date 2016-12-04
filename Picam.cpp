@@ -49,8 +49,26 @@ void Picam::captureImage() {
 	
 	cout << "Capturing image..." << endl;
 	Camera.grab();
+	cout << "A" << endl;
 	Camera.retrieve(image);
+	cout << "B" << endl;
 	Camera.release();
+	cout << "Image captured" << endl;
+	cv::imwrite(filename,image);
+	cout << "Image saved at ";
+	cout << filename << endl;
+}
+
+/* Capture a single image with an input filename. */
+void Picam::captureImageFname(string filename) {
+	cv::Mat image;
+	
+	cout << "Capturing image..." << endl;
+	CameraStill.grab();
+	cout << "A" << endl;
+	CameraStill.retrieve(image);
+	cout << "B" << endl;
+	CameraStill.release();
 	cout << "Image captured" << endl;
 	cv::imwrite(filename,image);
 	cout << "Image saved at ";

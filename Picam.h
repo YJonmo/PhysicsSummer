@@ -11,6 +11,7 @@
 //#include <raspicam/raspicam.h>
 #include <raspicam/raspicam_still_cv.h>
 //#include <raspicam/raspicam_still.h>
+using namespace std;
 
 #define BRIGHTNESS_MIN 0
 #define BRIGHTNESS_MAX 100
@@ -37,6 +38,7 @@ class Picam {
 	public:
 		Picam(raspicam::RaspiCam_Cv cam, raspicam::RaspiCam_Still_Cv camStill);
 		void captureImage();
+		void captureImageFname(string filename);
 		void captureVideo(int duration);
 		void networkStream(int width, int height, int duration);
 		void setImageResolution(int width, int height);
