@@ -10,7 +10,8 @@ import cameraLibClient
 def setDefaultImageMode(camera):
 	width = 2560
 	height = 1440
-	exTime = 0
+	framerate = 30
+	xt = 0
 	sharpness = 0
 	contrast = 0
 	brightness = 50
@@ -18,7 +19,8 @@ def setDefaultImageMode(camera):
 	gain = 0
 	
 	camera.setResolution(width, height)
-	camera.setExposureTime(exTime)
+	camera.setFrameRate(framerate)
+	camera.setExposureTime(xt)
 	camera.setSharpness(sharpness)
 	camera.setContrast(contrast)
 	camera.setBrightness(brightness)
@@ -188,58 +190,91 @@ def testHighestGain(camera):
 	gain = 800
 	camera.setGain(gain)
 	camera.capturePhoto('gain800.png')
+	
+def testLowestXT(camera):
+	xt = 6600
+	camera.setExposureTime(xt)
+	camera.capturePhoto('xt6600.png')
+	
+def testLowXT(camera):
+	xt = 13200
+	camera.setExposureTime(xt)
+	camera.capturePhoto('xt13200.png')
+	
+def testMidXT(camera):
+	xt = 19800
+	camera.setExposureTime(xt)
+	camera.capturePhoto('xt19800.png')
+	
+def testHighXT(camera):
+	xt = 26400
+	camera.setExposureTime(xt)
+	camera.capturePhoto('xt26400.png')
+	
+def testHighestXT(camera):
+	xt = 33000
+	camera.setExposureTime(xt)
+	camera.capturePhoto('xt33000.png')
 
 # Initialise the camera client module
 cam = cameraLibClient.cameraModuleClient()
 
-# Camera image resolution tests
-setDefaultImageMode(cam)
-testLowestRes(cam)
-testLowRes(cam)
-testMedRes(cam)
-testHighRes(cam)
-testHigherRes(cam)
-#testHighestRes(cam)
+## Camera image resolution tests
+#setDefaultImageMode(cam)
+#testLowestRes(cam)
+#testLowRes(cam)
+#testMedRes(cam)
+#testHighRes(cam)
+#testHigherRes(cam)
+##testHighestRes(cam)
 
-# Camera image sharpness tests
-setDefaultImageMode(cam)
-testLowestSharpness(cam)
-testLowSharpness(cam)
-testMidSharpness(cam)
-testHighSharpness(cam)
-testHighestSharpness(cam)
+## Camera image sharpness tests
+#setDefaultImageMode(cam)
+#testLowestSharpness(cam)
+#testLowSharpness(cam)
+#testMidSharpness(cam)
+#testHighSharpness(cam)
+#testHighestSharpness(cam)
 
-# Camera image contrast tests
-setDefaultImageMode(cam)
-testLowestContrast(cam)
-testLowContrast(cam)
-testMidContrast(cam)
-testHighContrast(cam)
-testHighestContrast(cam)
+## Camera image contrast tests
+#setDefaultImageMode(cam)
+#testLowestContrast(cam)
+#testLowContrast(cam)
+#testMidContrast(cam)
+#testHighContrast(cam)
+#testHighestContrast(cam)
 
-# Camera image brightness tests
-setDefaultImageMode(cam)
-testLowestBrightness(cam)
-testLowBrightness(cam)
-testMidBrightness(cam)
-testHighBrightness(cam)
-testHighestBrightness(cam)
+## Camera image brightness tests
+#setDefaultImageMode(cam)
+#testLowestBrightness(cam)
+#testLowBrightness(cam)
+#testMidBrightness(cam)
+#testHighBrightness(cam)
+#testHighestBrightness(cam)
 
-# Camera image saturation tests
-setDefaultImageMode(cam)
-testLowestSaturation(cam)
-testLowSaturation(cam)
-testMidSaturation(cam)
-testHighSaturation(cam)
-testHighestSaturation(cam)
+## Camera image saturation tests
+#setDefaultImageMode(cam)
+#testLowestSaturation(cam)
+#testLowSaturation(cam)
+#testMidSaturation(cam)
+#testHighSaturation(cam)
+#testHighestSaturation(cam)
 
-# Camera image gain tests
+## Camera image gain tests
 setDefaultImageMode(cam)
 testLowestGain(cam)
 testLowGain(cam)
 testMidGain(cam)
 testHighGain(cam)
 testHighestGain(cam)
+
+# Camera image exposure time tests
+setDefaultImageMode(cam)
+testLowestXT(cam)
+testLowXT(cam)
+testMidXT(cam)
+testHighXT(cam)
+testHighestXT(cam)
 
 # Free the camera resources
 cam.closeCamera()
