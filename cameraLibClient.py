@@ -18,6 +18,8 @@ import time
 import struct
 import os
 
+NETWORK = 0 # Set to 1 if connected to network
+
 class cameraModuleClient:
 	
 	def __init__(self):
@@ -160,24 +162,25 @@ class cameraModuleClient:
 		Stream a video through the network.
 		'''
 		
-		# Create a file-like object for the connection
-		connection = sock.makefile('wb')
-		try:
-			if picam == 1:
-				# Warm the camera up
-				self.camera.start_preview()
-				time.sleep(2)
-				
-				# Record the camera for length <duration>
-				camera.start_recording(connection, format = 'h264')
-				camera.wait_recording(duration)
-				camera.stop_recording()
-			else:
-				# Pretend to record (for testing purposes)
-				time.sleep(duration+2)
-		finally:
-			# Free connection resources
-			connection.close()
+		if NETWORK == 1:
+			# Create a file-like object for the connection
+			connection = sock.makefile('wb')
+			try:
+				if picam == 1:
+					# Warm the camera up
+					self.camera.start_preview()
+					time.sleep(2)
+					
+					# Record the camera for length <duration>
+					camera.start_recording(connection, format = 'h264')
+					camera.wait_recording(duration)
+					camera.stop_recording()
+				else:
+					# Pretend to record (for testing purposes)
+					time.sleep(duration+2)
+			finally:
+				# Free connection resources
+				connection.close()
 		
 	
 	def send_msg(self, sock, msg):
@@ -234,45 +237,95 @@ class cameraModuleClient:
 		
 		self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		self.client_socket.bind(('',8000))
+		NETWORK = 1
+		
+	
+	def closeNetwork(self):
+		'''
+		Close the client side network on the Raspberry Pi.
+		'''
+		
+		self.client_socket.close()
+		NETWORK = 0
+	
+	def printCommands(self):
+		'''
+		Print a list of commands.
+		'''
+		
+		print("\nList of commands: ")
+		print("    B: Set brightness")
+		print("    C: Set contrast")
+		print("    F: Set framerate")
+		print("    G: Set gain")
+		print("    H: Help")
+		print("    I: Capture an image")
+		print("    N: Stream to network")
+		print("    Q: Quit program")
+		print("    R: Set resolution")
+		print("    S: Set sharpness")
+		print("    T: Set saturation")
+		print("    V: Capture a video")
+		print("    X: Set exposure time\n")
 		
 	
 	def receiveCommand(self):
 		'''
-		Control the camera remotely from a network computer.
+		Control the camera remotely from a network computer, or from the 
+		Raspberry Pi terminal.
 		'''
 		
-		# Recieve data from host
-		print("Waiting for command...")
-		command = self.recv_msg(self.client_socket)
-		print("Command received: " + command)
+		if NETWORK == 1:
+			# Recieve data from host
+			print("Waiting for command...")
+			command = self.recv_msg(self.client_socket)
+			print("Command received: " + command)
+		else:
+			# Wait for command from Pi
+			command = str(raw_input("Input camera command: ")).upper()
 		
 		# Perform command
 		# Capture photo
 		if command == "I":
-			print("Waiting for filename...")
-			fname = self.recv_msg(self.client_socket)
-			print("Filename: " + fname)
+			if NETWORK == 1:
+				print("Waiting for filename...")
+				fname = self.recv_msg(self.client_socket)
+				print("Filename: " + fname)
+			else:
+				fname = str(raw_input("Filename: "))
+			
 			self.capturePhoto(fname)
-			self.send_msg(self.client_socket, "Photo captured")
+			
+			if NETWORK == 1:
+				self.send_msg(self.client_socket, "Photo captured")
+			else:
+				print("Photo captured")
 		
 		# Capture stream
 		elif command == "V":
-			print("Waiting for duration...")
-			duration = int(self.recv_msg(self.client_socket))
-			print("Duration: " + str(duration))
-			print("Waiting for filename...")
-			fname = self.recv_msg(self.client_socket)
-			print("Filename: " + fname)
+			if NETWORK == 1:
+				print("Waiting for duration...")
+				duration = int(self.recv_msg(self.client_socket))
+				print("Duration: " + str(duration))
+				print("Waiting for filename...")
+				fname = self.recv_msg(self.client_socket)
+				print("Filename: " + fname)
+			else:
+				duration = input("Duration: ")
+				fname = str(raw_input("Filename: "))
 			self.send_msg(self.client_socket, "Recording started...")
 			self.captureStream(duration, fname)
 			self.send_msg(self.client_socket, "Recording finished")
 		
 		# Network stream
 		elif command == "S":
-			print("Waiting for duration...")
-			duration = int(self.recv_msg(self.client_socket))
-			print("Duration: " + str(duration))
-			self.networkStreamClient(self.client_socket, duration)
+			if NETWORK == 1:
+				print("Waiting for duration...")
+				duration = int(self.recv_msg(self.client_socket))
+				print("Duration: " + str(duration))
+				self.networkStreamClient(self.client_socket, duration)
+			else:
+				print("Not connected to network")
 		
 		# Change resolution
 		elif command == "R":
@@ -303,8 +356,12 @@ class cameraModuleClient:
 			
 		# Quit program
 		elif command == "Q":
-			print("Closing socket...")
-			self.client_socket.close()
+			if NETWORK == 1:
+				print("Closing socket...")
+				self.closeNetwork()
+			
+		else:
+			print("Not a command")
 		
 		return command
 		
