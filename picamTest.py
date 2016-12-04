@@ -225,7 +225,7 @@ cam = cameraLibClient.cameraModuleClient()
 #testLowRes(cam)
 #testMedRes(cam)
 #testHighRes(cam)
-#testHigherRes(cam)
+testHigherRes(cam)
 ##testHighestRes(cam)
 
 ## Camera image sharpness tests
@@ -260,21 +260,21 @@ cam = cameraLibClient.cameraModuleClient()
 #testHighSaturation(cam)
 #testHighestSaturation(cam)
 
-## Camera image gain tests
-setDefaultImageMode(cam)
-testLowestGain(cam)
-testLowGain(cam)
-testMidGain(cam)
-testHighGain(cam)
-testHighestGain(cam)
+### Camera image gain tests
+#setDefaultImageMode(cam)
+#testLowestGain(cam)
+#testLowGain(cam)
+#testMidGain(cam)
+#testHighGain(cam)
+#testHighestGain(cam)
 
-# Camera image exposure time tests
-setDefaultImageMode(cam)
-testLowestXT(cam)
-testLowXT(cam)
-testMidXT(cam)
-testHighXT(cam)
-testHighestXT(cam)
+## Camera image exposure time tests
+#setDefaultImageMode(cam)
+#testLowestXT(cam)
+#testLowXT(cam)
+#testMidXT(cam)
+#testHighXT(cam)
+#testHighestXT(cam)
 
 # Free the camera resources
 cam.closeCamera()

@@ -118,13 +118,15 @@ class cameraModuleClient:
 		Capture a photo and store on Pi.
 		'''
 		
+		floc = "Images/" + fname
+		
 		if picam == 1:
 			# Warm the camera up
 			self.camera.start_preview()
 			time.sleep(2)
 			
 			# Capture an image and store in file <fname>
-			self.camera.capture(fname)
+			self.camera.capture(floc)
 		print("Photo captured")
 		
 	
