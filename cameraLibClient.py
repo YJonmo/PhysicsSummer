@@ -32,7 +32,7 @@ class cameraModuleClient:
 	
 	def setResolution(self, width, height):
 		'''
-		Set the resolution of the camera
+		Set the resolution of the camera.
 		'''
 		
 		# Change the resolution of the camera
@@ -43,7 +43,7 @@ class cameraModuleClient:
 	
 	def setFrameRate(self, rate):
 		'''
-		Set the framerate of the camera
+		Set the framerate of the camera.
 		'''
 		
 		# Change the framerate of the camera
@@ -63,6 +63,52 @@ class cameraModuleClient:
 		if picam == 1:
 			self.camera.shutter_speed = speed
 		print("Exposure time changed")
+		
+	
+	def setSharpness(self, sharpness):
+		'''
+		Set the sharpness level of the camera. Min: -100, Max: 100.
+		'''
+		if picam == 1:
+			self.camera.sharpness = sharpness
+		print("Sharpness changed")
+		
+	
+	def setContrast(self, contrast):
+		'''
+		Set the contrast level of the camera. Min: -100, Max: 100.
+		'''
+		if picam == 1:
+			self.camera.contrast = contrast
+		print("Contrast changed")
+		
+	
+	def setBrightness(self, brightness):
+		'''
+		Set the brightness level of the camera. Min: 0, Max: 100.
+		'''
+		if picam == 1:
+			self.camera.brightness = brightness
+		print("Brightness changed")
+		
+	
+	def setSaturation(self, saturation):
+		'''
+		Set the saturation level of the camera. Min: -100, Max: 100.
+		'''
+		if picam == 1:
+			self.camera.saturation = saturation
+		print("Saturation changed")
+		
+	
+	def setGain(self, gain):
+		'''
+		Set the gain level of the camera. If ISO is set to zero, then the 
+		gain will be chosen automatically. Min: 0, Max: 800.
+		'''
+		if picam == 1:
+			self.camera.iso = gain
+		print("Gain changed")
 		
 	
 	def capturePhoto(self, fname):
