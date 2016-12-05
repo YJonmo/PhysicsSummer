@@ -21,19 +21,6 @@ class cameraModuleServer:
 		'''
 		
 		# Initialise the socket connection
-		'''self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		#self.host = socket.gethostbyname(socket.gethostname())
-		#print(self.host)
-		self.host = '192.168.1.7'
-		self.server_socket.bind((self.host, 8000))
-		self.server_socket.listen(5)
-		
-		# Wait for the Raspberry Pi to connect
-		print("Waiting for Connection...")
-		(self.hostSock, self.address) = self.server_socket.accept()
-		print("Connection accepted!")'''
-		
-		# Initialise the socket connection
 		self.client_socket = socket.socket()
 		print("Waiting for connection...")
 		self.client_socket.connect(('192.168.1.1', 8000))
@@ -104,20 +91,53 @@ class cameraModuleServer:
 		return data
 		
 	
+	def printCommands(self):
+		'''
+		Print a list of commands.
+		'''
+		
+		print("\nList of commands: ")
+		print("    B: Set brightness")
+		print("    C: Set contrast")
+		print("    F: Set framerate")
+		print("    G: Set gain")
+		print("    H: Help")
+		print("    I: Capture an image")
+		print("    N: Stream to network")
+		print("    Q: Quit program")
+		print("    R: Set resolution")
+		print("    S: Set sharpness")
+		print("    T: Set saturation")
+		print("    V: Capture a video")
+		print("    X: Set exposure time\n")
+		
+	
+	def processParameter(self, parameter):
+		'''
+		Wait for parameter from the terminal, and then send to the Pi.
+		'''
+		
+		# Input parameter value from terminal
+		value = str(raw_input(parameter + ": "))
+		
+		# Send parameter value to Pi
+		self.send_msg(self.client_socket, value)
+		
+		# Receive confirmation message from the Pi.
+		confirm = self.recv_msg(self.client_socket)
+		if confirm == None:
+			print("Command failed")
+		else:
+			print(confirm)
+		
+	
 	def sendCommand(self):
 		'''
-		Send a command via terminal to the Raspberry Pi. Command options are:
-			"I": Take image and store on Pi
-			"V": Record video and store on Pi
-			"S": Stream video to host device
-			"R": Change camera resolution
-			"F": Change camera framerate
-			"X": Change camera exposure time
-			"Q": Quit
+		Send a command via terminal to the Raspberry Pi.
 		'''
 		
 		# List of commands
-		opt = ["I","V","S","R","F","X","Q"]
+		opt = ["B","C","F","G","H","I","N","Q","R","S","T","V","X"]
 		
 		# Input command from terminal
 		command = 0
@@ -132,61 +152,65 @@ class cameraModuleServer:
 		self.send_msg(self.client_socket, command)
 		
 		# Send parameters and perform command
+		# Set brightness
+		if command == "B":
+			self.processParameter("Brightness")
+			
+		# Set contrast
+		elif command == "C":
+			self.processParameter("Contrast")
+			
+		# Change framerate
+		elif command == "F":
+			self.processParameter("Framerate")
+		
+		# Set gain
+		elif command == "G":
+			self.processParameter("Gain")
+			
+		# Help
+		elif command == "H":
+			self.printCommands()
+			
 		# Caputre photo
-		if command == "I":
+		elif command == "I":
+			self.processParameter("Filename")
+				
+		# Network stream
+		elif command == "N":
+			self.processParameter("Duration")
+			self.networkStreamServer()
+			
+		# Change resolution
+		elif command == "R":
+			self.processParameter("Width")
+			self.processParameter("Height")
+				
+		# Set sharpness
+		elif command == "S":
+			self.processParameter("Sharpness")
+			
+		# Set saturation
+		elif command == "T":
+			self.processParameter("Saturation")
+		
+		# Capture stream
+		elif command == "V":
+			duration = str(input("Duration: "))
+			self.send_msg(self.client_socket, duration)
 			fname = str(raw_input("Filename: "))
 			self.send_msg(self.client_socket, fname)
+			confirm = self.recv_msg(self.client_socket)
+			if confirm == None:
+				print("Command failed")
+			else:
+				print(confirm)
 			confirm = self.recv_msg(self.client_socket)
 			if confirm == None:
 				print("Command failed")
 			else:
 				print(confirm)
 		
-		# Capture stream
-		if command == "V":
-			duration = str(input("Duration: "))
-			self.send_msg(self.client_socket, duration)
-			fname = str(raw_input("Filename: "))
-			self.send_msg(self.client_socket, fname)
-			confirm = self.recv_msg(self.client_socket)
-			if confirm == None:
-				print("Command failed")
-			else:
-				print(confirm)
-			confirm = self.recv_msg(self.client_socket)
-			if confirm == None:
-				print("Command failed")
-			else:
-				print(confirm)
-			
-		# Network stream
-		elif command == "S":
-			duration = str(input("Duration: "))
-			self.send_msg(self.client_socket, duration)
-			self.networkStreamServer()
-			
-		# Change resolution
-		elif command == "R":
-			width = str(input("Width: "))
-			self.send_msg(self.client_socket, width)
-			height = str(input("Height: "))
-			self.send_msg(self.client_socket, height)
-			confirm = self.recv_msg(self.client_socket)
-			if confirm == None:
-				print("Command failed")
-			else:
-				print(confirm)
-				
-		# Change framerate
-		elif command == "F":
-			rate = str(input("Framerate: "))
-			self.send_msg(self.client_socket, rate)
-			confirm = self.recv_msg(self.client_socket)
-			if confirm == None:
-				print("Command failed")
-			else:
-				print(confirm)
-			
 		# Change exposure time
 		elif command == "X":
 			speed = str(input("Shutter Speed: "))
