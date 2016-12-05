@@ -130,7 +130,7 @@ class cameraModuleClient:
 		Capture a photo and store on Pi.
 		'''
 		
-		floc = "../Images/" + fname
+		floc = "../../Images/" + fname
 		
 		if picam == 1:
 			# Warm the camera up
@@ -147,12 +147,14 @@ class cameraModuleClient:
 		Capture a video and store on Pi.
 		'''
 		
+		floc = "../../Videos/" + fname
+		
 		if picam == 1:
 			self.camera.start_preview()
 			time.sleep(2)
 			
 			# Record the camera for length <duration>, and store in file <fname>
-			self.camera.start_recording("input.h264")
+			self.camera.start_recording("../../Videos/input.h264")
 			self.camera.wait_recording(duration)
 			self.camera.stop_recording()
 			self.camera.stop_preview()
@@ -166,9 +168,9 @@ class cameraModuleClient:
 		height = str(self.camera.resolution[1])
 		
 		# Convert raw h264 video into a container to enable playback at the correct framerate
-		comStr = "avconv -i input.h264 -f rawvideo - | avconv -y -f rawvideo -r:v " + rate + " -s:v " + width + "x" + height + " -i - " + fname
+		comStr = "avconv -i ../../Videos/input.h264 -f rawvideo - | avconv -y -f rawvideo -r:v " + rate + " -s:v " + width + "x" + height + " -i - " + floc
 		os.system(comStr)
-		os.system("rm input.h264")
+		os.system("rm ../../Videos/input.h264")
 		
 	
 	def networkStreamClient(self, sock, duration):
