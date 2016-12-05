@@ -40,7 +40,6 @@ class cameraModuleClient:
 		# Change the resolution of the camera
 		if picam == 1:
 			self.camera.resolution = (width, height)
-		print("Resolution changed")
 		
 	
 	def setFrameRate(self, rate):
@@ -51,7 +50,6 @@ class cameraModuleClient:
 		# Change the framerate of the camera
 		if picam == 1:
 			self.camera.framerate = rate
-		print("Framerate changed")
 		
 	
 	def setExposureTime(self, speed):
@@ -64,7 +62,6 @@ class cameraModuleClient:
 		# Change the shutter speed of the camera (in microseconds)
 		if picam == 1:
 			self.camera.shutter_speed = speed
-		print("Exposure time changed")
 		
 	
 	def setSharpness(self, sharpness):
@@ -73,7 +70,6 @@ class cameraModuleClient:
 		'''
 		if picam == 1:
 			self.camera.sharpness = sharpness
-		print("Sharpness changed")
 		
 	
 	def setContrast(self, contrast):
@@ -82,7 +78,6 @@ class cameraModuleClient:
 		'''
 		if picam == 1:
 			self.camera.contrast = contrast
-		print("Contrast changed")
 		
 	
 	def setBrightness(self, brightness):
@@ -91,7 +86,6 @@ class cameraModuleClient:
 		'''
 		if picam == 1:
 			self.camera.brightness = brightness
-		print("Brightness changed")
 		
 	
 	def setSaturation(self, saturation):
@@ -100,7 +94,6 @@ class cameraModuleClient:
 		'''
 		if picam == 1:
 			self.camera.saturation = saturation
-		print("Saturation changed")
 		
 	
 	def setGain(self, gain):
@@ -110,7 +103,6 @@ class cameraModuleClient:
 		'''
 		if picam == 1:
 			self.camera.iso = gain
-		print("Gain changed")
 		
 	
 	def capturePhoto(self, fname):
@@ -118,7 +110,7 @@ class cameraModuleClient:
 		Capture a photo and store on Pi.
 		'''
 		
-		floc = "Images/" + fname
+		floc = "../Images/" + fname
 		
 		if picam == 1:
 			# Warm the camera up
@@ -127,7 +119,7 @@ class cameraModuleClient:
 			
 			# Capture an image and store in file <fname>
 			self.camera.capture(floc)
-		print("Photo captured")
+			self.camera.stop_preview()
 		
 	
 	def captureStream(self, duration, fname):
@@ -141,19 +133,18 @@ class cameraModuleClient:
 			
 			# Record the camera for length <duration>, and store in file <fname>
 			self.camera.start_recording("input.h264")
-			#self.camera.start_recording(fname)
-			print("Recording started...")
 			self.camera.wait_recording(duration)
 			self.camera.stop_recording()
 		else:
 			# Pretend to record (for testing purposes)
 			time.sleep(duration)
-		print("Recording finished")
 		
+		# Obtain video stats
 		rate = str(self.camera.framerate)
 		width = str(self.camera.resolution[0])
 		height = str(self.camera.resolution[1])
 		
+		# Convert raw h264 video into a container to enable playback at the correct framerate
 		comStr = "avconv -i input.h264 -f rawvideo - | avconv -y -f rawvideo -r:v " + rate + " -s:v " + width + "x" + height + " -i - " + fname
 		os.system(comStr)
 		os.system("rm input.h264")
@@ -271,10 +262,34 @@ class cameraModuleClient:
 		print("    X: Set exposure time\n")
 		
 	
+	def inputParameter(self, parameter):
+		'''
+		Wait for a parameter from either the network or the Pi terminal.
+		'''
+		if NETWORK == 1:
+			print("Wating for " + parameter.lower() + "...")
+			value = self.recv_msg(self.client_socket)
+			print(parameter + ": " + str(value))
+		else:
+			value = str(raw_input(parameter + ": "))
+		
+		return value
+		
+	
+	def confirmCompletion(self, message):
+		'''
+		Print confirmation message of task completion.
+		'''
+		
+		if NETWORK == 1:
+			self.send_msg(self.client_socket, message)
+		else:
+			print(message)
+		
+	
 	def receiveCommand(self):
 		'''
-		Control the camera remotely from a network computer, or from the 
-		Raspberry Pi terminal.
+		Receive a command from the network or the Pi terminal.
 		'''
 		
 		if NETWORK == 1:
@@ -286,86 +301,98 @@ class cameraModuleClient:
 			# Wait for command from Pi
 			command = str(raw_input("Input camera command: ")).upper()
 		
-		# Perform command
+		return command
+		
+	
+	def performCommand(self, command):
+		'''
+		Control the camera remotely from a network computer, or from the 
+		Raspberry Pi terminal.
+		'''
+		
+		# Set brightness
+		if command == "B":
+			brightness = int(self.inputParameter("Brightness"))
+			self.setBrightness(brightness)
+			self.confirmCompletion("Brightness changed")
+			
+		# Set contrast
+		elif command == "C":
+			contrast = int(self.inputParameter("Contrast"))
+			self.setContrast(contrast)
+			self.confirmCompletion("Contrast changed")
+			
+		# Set framerate
+		elif command == "F":
+			rate = int(self.inputParameter("Framerate"))
+			self.setFrameRate(rate)
+			self.confirmCompletion("Framerate changed")
+		
+		# Set gain
+		elif command == "G":
+			gain = int(self.inputParameter("Gain"))
+			self.setGain(gain)
+			self.confirmCompletion("Gain changed")
+			
+		# Help
+		elif command == "H":
+			self.printCommands()
+			
 		# Capture photo
-		if command == "I":
-			if NETWORK == 1:
-				print("Waiting for filename...")
-				fname = self.recv_msg(self.client_socket)
-				print("Filename: " + fname)
-			else:
-				fname = str(raw_input("Filename: "))
-			
+		elif command == "I":
+			fname = self.inputParameter("Filename")
 			self.capturePhoto(fname)
-			
-			if NETWORK == 1:
-				self.send_msg(self.client_socket, "Photo captured")
-			else:
-				print("Photo captured")
-		
-		# Capture stream
-		elif command == "V":
-			if NETWORK == 1:
-				print("Waiting for duration...")
-				duration = int(self.recv_msg(self.client_socket))
-				print("Duration: " + str(duration))
-				print("Waiting for filename...")
-				fname = self.recv_msg(self.client_socket)
-				print("Filename: " + fname)
-			else:
-				duration = input("Duration: ")
-				fname = str(raw_input("Filename: "))
-			self.send_msg(self.client_socket, "Recording started...")
-			self.captureStream(duration, fname)
-			self.send_msg(self.client_socket, "Recording finished")
-		
+			self.confirmCompletion("Image captured")
+				
 		# Network stream
-		elif command == "S":
+		elif command == "N":
 			if NETWORK == 1:
-				print("Waiting for duration...")
-				duration = int(self.recv_msg(self.client_socket))
-				print("Duration: " + str(duration))
+				duration = int(self.inputParameter("Duration"))
 				self.networkStreamClient(self.client_socket, duration)
 			else:
 				print("Not connected to network")
-		
-		# Change resolution
-		elif command == "R":
-			print("Waiting for width...")
-			width = int(self.recv_msg(self.client_socket))
-			print("Width: " + str(width))
-			print("Waiting for height...")
-			height = int(self.recv_msg(self.client_socket))
-			print("Height: " + str(height))
-			self.setResolution(width, height)
-			self.send_msg(self.client_socket, "Resolution changed")
-		
-		# Change framerate
-		elif command == "F":
-			print("Wating for framerate...")
-			rate = int(self.recv_msg(self.client_socket))
-			print("Framerate: " + str(rate))
-			self.setFrameRate(rate)
-			self.send_msg(self.client_socket, "Framerate changed")
-			
-		# Change exposure time
-		elif command == "X":
-			print("Waiting for shutter speed...")
-			speed = int(self.recv_msg(self.client_socket))
-			print("Shutter Speed: " + str(speed))
-			self.setExposureTime(speed)
-			self.send_msg(self.client_socket, "Exposure time changed")
-			
+				
 		# Quit program
 		elif command == "Q":
 			if NETWORK == 1:
 				print("Closing socket...")
 				self.closeNetwork()
+				
+		# Set resolution
+		elif command == "R":
+			width = int(self.inputParameter("Width"))
+			height = int(self.inputParameter("Height"))
+			self.setResolution(width, height)
+			self.confirmCompletion("Resolution changed")
+			
+		# Set sharpness
+		elif command == "S":
+			sharpness = int(self.inputParameter("Sharpness"))
+			self.setSharpness(sharpness)
+			self.confirmCompletion("Sharpness changed")
+			
+		# Set saturation
+		elif command == "T":
+			saturation = int(self.inputParameter("Saturation"))
+			self.setSaturation(saturation)
+			self.confirmCompletion("Saturation changed")
+		
+		# Capture stream
+		elif command == "V":
+			duration = int(self.inputParameter("Duration"))
+			filename = self.inputParameter("Filename")
+			self.confirmCompletion("Recording started...")
+			self.captureStream(duration, fname)
+			self.confirmCompletion("Recording finished")
+		
+		# Change exposure time
+		elif command == "X":
+			xt = int(self.inputParameter("Exposure time"))
+			self.setExposureTime(xt)
+			self.confirmCompletion("Exposure time changed")
 			
 		else:
 			print("Not a command")
-		
-		return command
 		
 	
 	def closeCamera(self):

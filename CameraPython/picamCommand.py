@@ -16,6 +16,7 @@ cam.printCommands()
 # Continuously wait for commands from the terminal
 while True:
 	command = cam.receiveCommand()
+	cam.performCommand(command)
 	
 	# Exit program if quit command called
 	if command == "Q":
