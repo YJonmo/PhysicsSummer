@@ -155,6 +155,7 @@ class cameraModuleClient:
 			self.camera.start_recording("input.h264")
 			self.camera.wait_recording(duration)
 			self.camera.stop_recording()
+			self.camera.stop_preview()
 		else:
 			# Pretend to record (for testing purposes)
 			time.sleep(duration)
