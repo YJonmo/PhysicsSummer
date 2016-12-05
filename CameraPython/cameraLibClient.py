@@ -17,8 +17,28 @@ import socket
 import time
 import struct
 import os
+import sys
 
 NETWORK = 0 # Set to 1 if connected to network
+
+BRIGHTNESS_MIN = 0
+BRIGHTNESS_MAX = 100
+CONTRAST_MIN = -100
+CONTRAST_MAX = 100
+SATURATION_MIN = -100
+SATURATION_MAX = 100
+SHARPNESS_MIN = -100
+SHARPNESS_MAX = 100
+GAIN_MIN = 0
+GAIN_MAX = 1600
+WIDTH_MIN = 64
+WIDTH_MAX = 3280
+HEIGHT_MIN = 64
+HEIGHT_MAX = 2464
+DURATION_MIN = 0
+DURATION_MAX = sys.maxint
+FRAMERATE_MIN = 0.1
+FRAMERATE_MAX = 90
 
 class cameraModuleClient:
 	
@@ -266,12 +286,83 @@ class cameraModuleClient:
 		'''
 		Wait for a parameter from either the network or the Pi terminal.
 		'''
+		
+		# Find the default, minimum, and maximum values for the parameter
+		if parameter == "Brightness":
+			default = self.camera.brightness
+			minimum = BRIGHTNESS_MIN
+			maximum = BRIGHTNESS_MAX
+			
+		elif parameter == "Contrast":
+			default = self.camera.contrast
+			minimum = CONTRAST_MIN
+			maximum = CONTRAST_MAX
+			
+		elif parameter == "Gain":
+			default = self.camera.iso
+			minimum = GAIN_MIN
+			maximum = GAIN_MAX
+			
+		elif parameter == "Saturation":
+			default = self.camera.saturation
+			minimum = SATURATION_MIN
+			maximum = SATURATION_MAX
+			
+		elif parameter == "Sharpness":
+			default = self.camera.sharpness
+			minimum = SHARPNESS_MIN
+			maximum = SHARPNESS_MAX
+			
+		elif parameter == "Exposure time":
+			default = self.camera.shutter_speed
+			minimum = 0
+			maximum = int(1000000/self.camera.framerate)
+			
+		elif parameter == "Width":
+			default = self.camera.resolution[0]
+			minimum = WIDTH_MIN
+			maximum = WIDTH_MAX
+			
+		elif parameter == "Height":
+			default = self.camera.resolution[1]
+			minimum = HEIGHT_MIN
+			maximum = HEIGHT_MAX
+			
+		elif parameter == "Duration":
+			default = DURATION_MIN # Will change to max once ability to escape video is added
+			minimum = DURATION_MIN
+			maximum = DURATION_MAX
+			
+		elif parameter == "Framerate":
+			default = self.camera.framerate
+			minimum = FRAMERATE_MIN
+			maximum = FRAMERATE_MAX
+		
+		else:
+			default = None
+		
 		if NETWORK == 1:
 			print("Wating for " + parameter.lower() + "...")
 			value = self.recv_msg(self.client_socket)
 			print(parameter + ": " + str(value))
-		else:
+		elif default == None:
 			value = str(raw_input(parameter + ": "))
+		else:
+			while True:
+				value = str(raw_input(parameter + " (Default: " + str(default) + ", Min: " + str(minimum) + ", Max: " + str(maximum) + "): "))
+				if value == "":
+					value = default
+					break
+				else:
+					try:
+						if int(value) < minimum:
+							print("Value is less than minimum")
+						elif int(value) > maximum:
+							print("Value is greater than maximum")
+						else:
+							break
+					except ValueError:
+						print("Not a number")
 		
 		return value
 		
