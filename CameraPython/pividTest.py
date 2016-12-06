@@ -5,7 +5,7 @@ Author: Damon Hutley
 Date: 5th December 2016
 '''
 
-import cameraLibClient
+import cameraLibServer
 
 def setDefaultVideoMode(camera):
 	width = 1920
@@ -55,7 +55,7 @@ def testHighFramerate(camera):
 	camera.captureStream(duration, 'vid90fps.avi')
 
 # Initialise the camera client module
-cam = cameraLibClient.cameraModuleClient()
+cam = cameraLibServer.cameraModuleServer()
 
 # Camera video framerate tests
 setDefaultVideoMode(cam)

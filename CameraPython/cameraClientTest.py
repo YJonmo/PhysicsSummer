@@ -1,42 +1,27 @@
 '''
-This script tests the functionallity of the camera client module. This allows 
+This script tests the functionallity of the camera server module. This allows 
 the camera module of the Raspberry Pi to be controlled remotely via network 
 connection.
 
 Author: Damon Hutley
-Date: 23rd November 2016
+Date: 22nd November 2016
 '''
 
 import cameraLibClient
-import time
-import sys
 
-# Initialise the camera module client
+# Initialise the camera module server
 camCommand = cameraLibClient.cameraModuleClient()
 
-# Initialise the network
-#camCommand.initNetwork()
+# Print a list of commands
+camCommand.printCommands()
 
-# Continuously wait for commands from a computer on the network
+# Continuously ask for commands to send to the Raspberry Pi from the terminal.
 while True:
-	if camCommand.network == 0:
-		# Initialise the network
-		camCommand.initNetwork()
-	else:
-		try:
-			# Process and perform command from network
-			command = camCommand.receiveCommand()
-			camCommand.performCommand(command)
-		except:
-			e = sys.exc_info()[0]
-			print("Error: %s" % e)
-			time.sleep(1)
-			camCommand.closeNetwork()
-		
-		# Close network if quit command called
-		if command == "Q":
-			time.sleep(1)
-			camCommand.closeNetwork()
+	command = camCommand.sendCommand()
 	
-# Free the camera resources
-camCommand.closeCamera()
+	# Exit program if quit command called
+	if command == "Q":
+		break
+
+# Close connection
+camCommand.closeServer()

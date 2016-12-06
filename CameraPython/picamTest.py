@@ -5,7 +5,7 @@ Author: Damon Hutley
 Date: 2nd December 2016
 '''
 
-import cameraLibClient
+import cameraLibServer
 
 def setDefaultImageMode(camera):
 	width = 2560
@@ -217,7 +217,7 @@ def testHighestXT(camera):
 	camera.capturePhoto('xt33000.png')
 
 # Initialise the camera client module
-cam = cameraLibClient.cameraModuleClient()
+cam = cameraLibServer.cameraModuleServer()
 
 ## Camera image resolution tests
 #setDefaultImageMode(cam)

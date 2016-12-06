@@ -5,10 +5,10 @@ Author: Damon Hutley
 Date: 5th December 2016
 '''
 
-import cameraLibClient
+import cameraLibServer
 
 # Initialise the camera client module
-cam = cameraLibClient.cameraModuleClient()
+cam = cameraLibServer.cameraModuleServer()
 
 # Print the list of commands
 cam.printCommands()

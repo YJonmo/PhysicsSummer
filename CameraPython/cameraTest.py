@@ -5,10 +5,10 @@ Author: Damon Hutley
 Date: 25th November 2016
 '''
 
-import cameraLibClient
+import cameraLibServer
 
 # Initialise the camera client module
-cam = cameraLibClient.cameraModuleClient()
+cam = cameraLibServer.cameraModuleServer()
 
 # Set the resolution
 width = 1920
