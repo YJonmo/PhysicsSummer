@@ -330,10 +330,10 @@ class cameraModuleServer:
 			minimum = FRAMERATE_MIN
 			maximum = FRAMERATE_MAX
 		
-		elif parameter == "Filename":
-			default = "Image" + datetime.datetime.isoformat() + ".png"
-			minimum = None
-			maximum = None
+		#elif parameter == "Filename":
+			#default = "Image" + datetime.datetime.isoformat() + ".png"
+			#minimum = None
+			#maximum = None
 		
 		else:
 			default = None
@@ -424,6 +424,40 @@ class cameraModuleServer:
 			print(message)
 		
 	
+	def printStats(self):
+		'''
+		Print or send image/video statistics.
+		'''
+		
+		resolution = str(self.camera.resolution[0] + "x" + self.camera.resolution[1])
+		framerate = str(self.camera.framerate)
+		brightness = str(self.camera.brightness)
+		contrast = str(self.camera.contrast)
+		gain = str(self.camera.gain)
+		sharpness = str(self.camera.sharpness)
+		saturation = str(self.camera.saturation)
+		xt = str(self.camera.shutter_speed)
+		
+		if self.network == 1:
+			self.send_msg(self.hostSock, resolution)
+			self.send_msg(self.hostSock, framerate)
+			self.send_msg(self.hostSock, brightness)
+			self.send_msg(self.hostSock, contrast)
+			self.send_msg(self.hostSock, gain)
+			self.send_msg(self.hostSock, sharpness)
+			self.send_msg(self.hostSock, saturation)
+			self.send_msg(self.hostSock, xt)
+		else:
+			print("Resolution: " + resolution)
+			print("Framerate: " + framerate)
+			print("Brightness: " + brightness)
+			print("Contrast: " + contrast)
+			print("Gain: " + gain)
+			print("Sharpness: " + sharpness)
+			print("Saturation: " + saturation)
+			print("Exposure time: " + xt)
+		
+	
 	def receiveCommand(self):
 		'''
 		Receive a command from the network or the Pi terminal.
@@ -481,6 +515,7 @@ class cameraModuleServer:
 			self.confirmCompletion("Image capturing...")
 			self.capturePhoto(filename)
 			self.confirmCompletion("Image captured")
+			self.printStats()
 				
 		# Network stream
 		elif command == "N":
