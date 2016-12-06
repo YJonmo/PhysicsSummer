@@ -30,7 +30,7 @@ HEIGHT_MIN = 64
 HEIGHT_MAX = 2464
 DURATION_MIN = 0
 DURATION_MAX = sys.maxint
-FRAMERATE_MIN = 0.1
+FRAMERATE_MIN = 1
 FRAMERATE_MAX = 90
 
 
@@ -230,6 +230,7 @@ class cameraModuleClient:
 		# Initialise the socket connection
 		self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.host = '192.168.1.1'
+		self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		self.server_socket.bind((self.host, 8000))
 		self.server_socket.listen(5)
 		
@@ -331,6 +332,11 @@ class cameraModuleClient:
 			default = None
 		
 		if self.network == 1:
+			# Send default, min, and max to network computer
+			self.send_msg(self.hostSock, str(default))
+			self.send_msg(self.hostSock, str(minimum))
+			self.send_msg(self.hostSock, str(maximum))
+			
 			# Wait for parameter input from network computer
 			print("Wating for " + parameter.lower() + "...")
 			value = self.recv_msg(self.hostSock)
@@ -447,9 +453,10 @@ class cameraModuleClient:
 		# Set resolution
 		elif command == "R":
 			width = int(self.inputParameter("Width"))
+			self.confirmCompletion("Resolution width changed")
 			height = int(self.inputParameter("Height"))
+			self.confirmCompletion("Resolution height changed")
 			self.setResolution(width, height)
-			self.confirmCompletion("Resolution changed")
 			
 		# Set sharpness
 		elif command == "S":

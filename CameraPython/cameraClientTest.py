@@ -9,6 +9,7 @@ Date: 23rd November 2016
 
 import cameraLibClient
 import time
+import sys
 
 # Initialise the camera module client
 camCommand = cameraLibClient.cameraModuleClient()
@@ -22,14 +23,20 @@ while True:
 		# Initialise the network
 		camCommand.initNetwork()
 	else:
-		# Process and perform command from network
-		command = camCommand.receiveCommand()
-		camCommand.performCommand(command)
+		try:
+			# Process and perform command from network
+			command = camCommand.receiveCommand()
+			camCommand.performCommand(command)
+		except:
+			e = sys.exc_info()[0]
+			print("Error: %s" % e)
+			time.sleep(1)
+			camCommand.closeNetwork()
 		
 		# Close network if quit command called
 		if command == "Q":
+			time.sleep(1)
 			camCommand.closeNetwork()
-			time.sleep(5)
 	
 # Free the camera resources
 camCommand.closeCamera()
