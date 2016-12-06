@@ -196,6 +196,30 @@ class cameraModuleClient:
 			print(confirm)
 		
 	
+	def printStats(self):
+		'''
+		Receive and print image/video stats after capture.
+		'''
+		
+		resolution = self.recv_msg(self.client_socket)
+		framerate = self.recv_msg(self.client_socket)
+		brightness = self.recv_msg(self.client_socket)
+		contrast = self.recv_msg(self.client_socket)
+		gain = self.recv_msg(self.client_socket)
+		sharpness = self.recv_msg(self.client_socket)
+		saturation = self.recv_msg(self.client_socket)
+		xt = self.recv_msg(self.client_socket)
+		
+		print("Resolution: " + resolution)
+		print("Framerate: " + framerate)
+		print("Brightness: " + brightness)
+		print("Contrast: " + contrast)
+		print("Gain: " + gain)
+		print("Sharpness: " + sharpness)
+		print("Saturation: " + saturation)
+		print("Exposure time: " + xt)
+		
+	
 	def sendCommand(self):
 		'''
 		Send a command via terminal to the Raspberry Pi.
@@ -240,6 +264,7 @@ class cameraModuleClient:
 		# Caputre photo
 		elif command == "I":
 			self.processStrParameter("Filename")
+			self.printStats()
 			# Need to copy image from Pi to client computer
 				
 		# Network stream
