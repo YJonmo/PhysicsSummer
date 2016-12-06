@@ -1,6 +1,6 @@
 # Physics Summer Work
 
-Code for the Raspberry Pi. This includes an adaptation of the DAQT7_Objective library for Raspberry Pi, as well as a library for the camera module.
+Code for the Raspberry Pi. This includes an adaptation of the DAQT7_Objective library for Raspberry Pi, as well as libraries for the camera module.
 
 ## Raspberry Pi Camera Installation
 
@@ -24,8 +24,8 @@ To run the program:
 
 ## To-Do
 
--Implement video stream to vlc through network
+-Implement copying of images and videos from the Raspberry Pi to a client computer
 
--Implement remote control (could do through ssh)
+-Minimise the number of errors
 
 -Lots and lots of testing

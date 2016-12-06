@@ -27,27 +27,30 @@ class cameraModuleClient:
 		print("Connection accepted")
 		
 	
-	def networkStreamServer(self):
+	def networkStreamServer(self, duration):
 		'''
 		Recieve a video stream from the Pi, and playback through VLC.
 		'''
 		
+		# Initialise time
+		startTime = time.time()
+		
 		# Accept a single connection
 		connection = self.client_socket.makefile('rb')
-		try:
-			# Start stream to VLC
-			cmdline = ['vlc', '--demux', 'h264', '-']
-			player = subprocess.Popen(cmdline, stdin=subprocess.PIPE)
-			while True:
-				# Send data to VLC input
-				data = connection.read(1024)
-				if not data:
-					break
-				player.stdin.write(data)
-		finally:
-			# Free connection resources
-			connection.close()
-			player.terminate()
+		
+		# Start stream to VLC
+		cmdline = ['vlc', '--demux', 'h264', '-']
+		player = subprocess.Popen(cmdline, stdin=subprocess.PIPE)
+		while (time.time() - startTime) < duration:
+			# Send data to VLC input
+			data = connection.read(1024)
+			if not data:
+				break
+			player.stdin.write(data)
+		
+		# Free connection resources
+		connection.close()
+		player.terminate()
 		
 	
 	def send_msg(self, sock, msg):
@@ -112,9 +115,9 @@ class cameraModuleClient:
 		print("    X: Set exposure time\n")
 		
 	
-	def processParameter(self, parameter):
+	def processIntParameter(self, parameter):
 		'''
-		Wait for parameter from the terminal, and then send to the Pi.
+		Wait for parameter from the terminal, and then send integer to the Pi.
 		'''
 		
 		# Receive default, min, max parameters from Pi
@@ -152,6 +155,45 @@ class cameraModuleClient:
 			print("Command failed")
 		else:
 			print(confirm)
+			
+		return value
+		
+			
+	def processStrParameter(self, parameter):
+		'''
+		Wait for parameter from the terminal, and then send string to the Pi.
+		'''
+		
+		# Receive default, min, max parameters from Pi
+		default = self.recv_msg(self.client_socket)
+		
+		# Input parameter value from terminal
+		while True:
+			value = str(raw_input(parameter + " (Default: " + str(default) + "): "))
+			
+			# Set default value if there is no input
+			if value == "":
+				value = str(default)
+				break
+			else:
+				break # Will add condition to test for correct file type
+		
+		# Send parameter value to Pi
+		self.send_msg(self.client_socket, value)
+		
+		# Receive confirmation message from the Pi.
+		confirm = self.recv_msg(self.client_socket)
+		if confirm == None:
+			print("Command failed")
+		else:
+			print(confirm)
+			
+		# Receive second confirmation message from the Pi.
+		confirm = self.recv_msg(self.client_socket)
+		if confirm == None:
+			print("Command failed")
+		else:
+			print(confirm)
 		
 	
 	def sendCommand(self):
@@ -177,19 +219,19 @@ class cameraModuleClient:
 		# Send parameters and perform command
 		# Set brightness
 		if command == "B":
-			self.processParameter("Brightness")
+			self.processIntParameter("Brightness")
 			
 		# Set contrast
 		elif command == "C":
-			self.processParameter("Contrast")
+			self.processIntParameter("Contrast")
 			
 		# Change framerate
 		elif command == "F":
-			self.processParameter("Framerate")
+			self.processIntParameter("Framerate")
 		
 		# Set gain
 		elif command == "G":
-			self.processParameter("Gain")
+			self.processIntParameter("Gain")
 			
 		# Help
 		elif command == "H":
@@ -197,34 +239,36 @@ class cameraModuleClient:
 			
 		# Caputre photo
 		elif command == "I":
-			self.processParameter("Filename")
+			self.processStrParameter("Filename")
+			# Need to copy image from Pi to client computer
 				
 		# Network stream
 		elif command == "N":
-			self.processParameter("Duration")
-			self.networkStreamServer()
+			duration = int(self.processIntParameter("Duration"))
+			self.networkStreamServer(duration)
 			
 		# Change resolution
 		elif command == "R":
-			self.processParameter("Width")
-			self.processParameter("Height")
+			self.processIntParameter("Width")
+			self.processIntParameter("Height")
 				
 		# Set sharpness
 		elif command == "S":
-			self.processParameter("Sharpness")
+			self.processIntParameter("Sharpness")
 			
 		# Set saturation
 		elif command == "T":
-			self.processParameter("Saturation")
+			self.processIntParameter("Saturation")
 		
 		# Capture stream
 		elif command == "V":
-			self.processParameter("Duration")
-			self.processParameter("Filename")
+			self.processIntParameter("Duration")
+			self.processStrParameter("Filename")
+			# Need to copy video from Pi to client computer
 		
 		# Change exposure time
 		elif command == "X":
-			self.processParameter("Exposure time")
+			self.processIntParameter("Exposure time")
 		
 		return command
 		
