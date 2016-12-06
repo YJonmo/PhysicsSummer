@@ -12,6 +12,9 @@ import cameraLibServer
 # Initialise the camera module server
 camCommand = cameraLibServer.cameraModuleServer()
 
+# Print a list of commands
+camCommand.printCommands()
+
 # Continuously ask for commands to send to the Raspberry Pi from the terminal.
 while True:
 	command = camCommand.sendCommand()

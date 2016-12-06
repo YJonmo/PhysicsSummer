@@ -117,8 +117,31 @@ class cameraModuleServer:
 		Wait for parameter from the terminal, and then send to the Pi.
 		'''
 		
+		# Receive default, min, max parameters from Pi
+		default = int(self.recv_msg(self.client_socket))
+		minimum = int(self.recv_msg(self.client_socket))
+		maximum = int(self.recv_msg(self.client_socket))
+		
 		# Input parameter value from terminal
-		value = str(raw_input(parameter + ": "))
+		while True:
+			value = str(raw_input(parameter + " (Default: " + str(default) + ", Min: " + str(minimum) + ", Max: " + str(maximum) + "): "))
+			
+			# Set default value if there is no input
+			if value == "":
+				value = str(default)
+				break
+			else:
+				try:
+					# Condition for exceeding min/max bounds
+					if int(value) < minimum:
+						print("Value is less than minimum")
+					elif int(value) > maximum:
+						print("Value is greater than maximum")
+					else:
+						break
+				except ValueError:
+					# Condition for parameter inputs that are not integers
+					print("Not a number")
 		
 		# Send parameter value to Pi
 		self.send_msg(self.client_socket, value)
@@ -196,30 +219,12 @@ class cameraModuleServer:
 		
 		# Capture stream
 		elif command == "V":
-			duration = str(input("Duration: "))
-			self.send_msg(self.client_socket, duration)
-			fname = str(raw_input("Filename: "))
-			self.send_msg(self.client_socket, fname)
-			confirm = self.recv_msg(self.client_socket)
-			if confirm == None:
-				print("Command failed")
-			else:
-				print(confirm)
-			confirm = self.recv_msg(self.client_socket)
-			if confirm == None:
-				print("Command failed")
-			else:
-				print(confirm)
+			self.processParameter("Duration")
+			self.processParameter("Filename")
 		
 		# Change exposure time
 		elif command == "X":
-			speed = str(input("Shutter Speed: "))
-			self.send_msg(self.client_socket, speed)
-			confirm = self.recv_msg(self.client_socket)
-			if confirm == None:
-				print("Command failed")
-			else:
-				print(confirm)
+			self.processParameter("Exposure time")
 		
 		return command
 		
