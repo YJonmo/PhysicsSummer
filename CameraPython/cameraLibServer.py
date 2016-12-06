@@ -1,184 +1,53 @@
 '''
-Library for the control of the Raspberry Pi camera module using picamera.
+Library for the control of the Raspberry Pi camera module from a host computer 
+via a network connection.
 
 Author: Damon Hutley
-Date: 21st November 2016
+Date: 22nd November 2016
 '''
 
 
-from picamera import PiCamera
 import socket
+import subprocess
 import time
 import struct
-import os
-import sys
 
 
-BRIGHTNESS_MIN = 0
-BRIGHTNESS_MAX = 100
-CONTRAST_MIN = -100
-CONTRAST_MAX = 100
-SATURATION_MIN = -100
-SATURATION_MAX = 100
-SHARPNESS_MIN = -100
-SHARPNESS_MAX = 100
-GAIN_MIN = 0
-GAIN_MAX = 1600
-WIDTH_MIN = 64
-WIDTH_MAX = 3280
-HEIGHT_MIN = 64
-HEIGHT_MAX = 2464
-DURATION_MIN = 0
-DURATION_MAX = sys.maxint
-FRAMERATE_MIN = 1
-FRAMERATE_MAX = 90
-
-
-class cameraModuleClient:
+class cameraModuleServer:
 	
 	def __init__(self):
 		'''
-		Initialise the camera module class with picamera.
+		Initialise the server to the Raspberry Pi.
 		'''
 		
-		# Create an instance of the Picamera class
-		self.camera = PiCamera()
-		
-		# Initalise network variable
-		self.network = 0
+		# Initialise the socket connection
+		self.client_socket = socket.socket()
+		print("Waiting for connection...")
+		self.client_socket.connect(('192.168.1.1', 8000))
+		print("Connection accepted")
 		
 	
-	def setResolution(self, width, height):
+	def networkStreamServer(self):
 		'''
-		Set the resolution of the camera.
-		'''
-		
-		# Change the resolution of the camera
-		self.camera.resolution = (width, height)
-		
-	
-	def setFrameRate(self, rate):
-		'''
-		Set the framerate of the camera.
+		Recieve a video stream from the Pi, and playback through VLC.
 		'''
 		
-		# Change the framerate of the camera
-		self.camera.framerate = rate
-		
-	
-	def setExposureTime(self, speed):
-		'''
-		Set the exposure time of the camera. Note that the shutter speed 
-		must be greater than (1/framerate). A shutter speed of zero will 
-		result in an automatically determined exposure time.
-		'''
-		
-		# Change the shutter speed of the camera (in microseconds)
-		self.camera.shutter_speed = speed
-		
-	
-	def setSharpness(self, sharpness):
-		'''
-		Set the sharpness level of the camera. Min: -100, Max: 100.
-		'''
-		self.camera.sharpness = sharpness
-		
-	
-	def setContrast(self, contrast):
-		'''
-		Set the contrast level of the camera. Min: -100, Max: 100.
-		'''
-		self.camera.contrast = contrast
-		
-	
-	def setBrightness(self, brightness):
-		'''
-		Set the brightness level of the camera. Min: 0, Max: 100.
-		'''
-		self.camera.brightness = brightness
-		
-	
-	def setSaturation(self, saturation):
-		'''
-		Set the saturation level of the camera. Min: -100, Max: 100.
-		'''
-		self.camera.saturation = saturation
-		
-	
-	def setGain(self, gain):
-		'''
-		Set the gain level of the camera. If ISO is set to zero, then the 
-		gain will be chosen automatically. Min: 0, Max: 800.
-		'''
-		self.camera.iso = gain
-		
-	
-	def capturePhoto(self, fname):
-		'''
-		Capture a photo and store on Pi.
-		'''
-		
-		# Locate the Images folder
-		floc = "../../Images/" + fname
-		
-		# Warm the camera up
-		self.camera.start_preview()
-		time.sleep(2)
-		
-		# Capture an image and store in file <fname>
-		self.camera.capture(floc)
-		self.camera.stop_preview()
-		
-	
-	def captureStream(self, duration, fname):
-		'''
-		Capture a video and store on Pi.
-		'''
-		
-		# Locate the Videos folder
-		floc = "../../Videos/" + fname
-		
-		# Warm up the camera
-		self.camera.start_preview()
-		time.sleep(2)
-		
-		# Record the camera for length <duration>, and store in file <fname>
-		self.camera.start_recording("../../Videos/input.h264")
-		self.camera.wait_recording(duration)
-		self.camera.stop_recording()
-		self.camera.stop_preview()
-		
-		# Obtain video stats
-		rate = str(self.camera.framerate)
-		width = str(self.camera.resolution[0])
-		height = str(self.camera.resolution[1])
-		
-		# Convert raw h264 video into a container to enable playback at the correct framerate
-		comStr = "avconv -i ../../Videos/input.h264 -f rawvideo - | avconv -y -f rawvideo -r:v " + rate + " -s:v " + width + "x" + height + " -i - " + floc
-		os.system(comStr)
-		os.system("rm ../../Videos/input.h264")
-		
-	
-	def networkStreamClient(self, sock, duration):
-		'''
-		Stream a video through the network.
-		'''
-		
-		if self.network == 1:
-			# Create a file-like object for the connection
-			connection = sock.makefile('wb')
-			try:
-				# Warm the camera up
-				self.camera.start_preview()
-				time.sleep(2)
-				
-				# Record the camera for length <duration>
-				camera.start_recording(connection, format = 'h264')
-				camera.wait_recording(duration)
-				camera.stop_recording()
-			finally:
-				# Free connection resources
-				connection.close()
+		# Accept a single connection
+		connection = self.client_socket.makefile('rb')
+		try:
+			# Start stream to VLC
+			cmdline = ['vlc', '--demux', 'h264', '-']
+			player = subprocess.Popen(cmdline, stdin=subprocess.PIPE)
+			while True:
+				# Send data to VLC input
+				data = connection.read(1024)
+				if not data:
+					break
+				player.stdin.write(data)
+		finally:
+			# Free connection resources
+			connection.close()
+			player.terminate()
 		
 	
 	def send_msg(self, sock, msg):
@@ -220,35 +89,6 @@ class cameraModuleClient:
 			data += packet
 		
 		return data
-	   
-	
-	def initNetwork(self):
-		'''
-		Initialise the client side network on the Raspberry Pi.
-		'''
-		
-		# Initialise the socket connection
-		self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.host = '192.168.1.1'
-		self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		self.server_socket.bind((self.host, 8000))
-		self.server_socket.listen(5)
-		
-		# Wait for a computer to connect
-		print("Waiting for connection...")
-		(self.hostSock, self.address) = self.server_socket.accept()
-		print("Connection accepted")
-		self.network = 1
-		
-	
-	def closeNetwork(self):
-		'''
-		Close the client side network on the Raspberry Pi.
-		'''
-		
-		self.hostSock.close()
-		self.server_socket.close()
-		self.network = 0
 		
 	
 	def printCommands(self):
@@ -272,227 +112,123 @@ class cameraModuleClient:
 		print("    X: Set exposure time\n")
 		
 	
-	def inputParameter(self, parameter):
+	def processParameter(self, parameter):
 		'''
-		Wait for a parameter from either the network or the Pi terminal.
+		Wait for parameter from the terminal, and then send to the Pi.
 		'''
 		
-		# Find the default, minimum, and maximum values for the parameter
-		if parameter == "Brightness":
-			default = self.camera.brightness
-			minimum = BRIGHTNESS_MIN
-			maximum = BRIGHTNESS_MAX
-			
-		elif parameter == "Contrast":
-			default = self.camera.contrast
-			minimum = CONTRAST_MIN
-			maximum = CONTRAST_MAX
-			
-		elif parameter == "Gain":
-			default = self.camera.iso
-			minimum = GAIN_MIN
-			maximum = GAIN_MAX
-			
-		elif parameter == "Saturation":
-			default = self.camera.saturation
-			minimum = SATURATION_MIN
-			maximum = SATURATION_MAX
-			
-		elif parameter == "Sharpness":
-			default = self.camera.sharpness
-			minimum = SHARPNESS_MIN
-			maximum = SHARPNESS_MAX
-			
-		elif parameter == "Exposure time":
-			default = self.camera.shutter_speed
-			minimum = 0
-			maximum = int(1000000/self.camera.framerate)
-			
-		elif parameter == "Width":
-			default = self.camera.resolution[0]
-			minimum = WIDTH_MIN
-			maximum = WIDTH_MAX
-			
-		elif parameter == "Height":
-			default = self.camera.resolution[1]
-			minimum = HEIGHT_MIN
-			maximum = HEIGHT_MAX
-			
-		elif parameter == "Duration":
-			default = DURATION_MIN # Will change to max once ability to escape video is added
-			minimum = DURATION_MIN
-			maximum = DURATION_MAX
-			
-		elif parameter == "Framerate":
-			default = self.camera.framerate
-			minimum = FRAMERATE_MIN
-			maximum = FRAMERATE_MAX
+		# Input parameter value from terminal
+		value = str(raw_input(parameter + ": "))
 		
+		# Send parameter value to Pi
+		self.send_msg(self.client_socket, value)
+		
+		# Receive confirmation message from the Pi.
+		confirm = self.recv_msg(self.client_socket)
+		if confirm == None:
+			print("Command failed")
 		else:
-			default = None
-		
-		if self.network == 1:
-			# Send default, min, and max to network computer
-			self.send_msg(self.hostSock, str(default))
-			self.send_msg(self.hostSock, str(minimum))
-			self.send_msg(self.hostSock, str(maximum))
-			
-			# Wait for parameter input from network computer
-			print("Wating for " + parameter.lower() + "...")
-			value = self.recv_msg(self.hostSock)
-			print(parameter + ": " + str(value))
-		elif default == None:
-			# Wait for parameter input from Raspberry Pi terminal
-			value = str(raw_input(parameter + ": "))
-		else:
-			# Process parameter inputs from terminal
-			while True:
-				value = str(raw_input(parameter + " (Default: " + str(default) + ", Min: " + str(minimum) + ", Max: " + str(maximum) + "): "))
-				# Set default value if there is no input
-				if value == "":
-					value = default
-					break
-				else:
-					try:
-						# Condition for exceeding min/max bounds
-						if int(value) < minimum:
-							print("Value is less than minimum")
-						elif int(value) > maximum:
-							print("Value is greater than maximum")
-						else:
-							break
-					except ValueError:
-						# Condition for parameter inputs that are not integers
-						print("Not a number")
-		
-		return value
+			print(confirm)
 		
 	
-	def confirmCompletion(self, message):
+	def sendCommand(self):
 		'''
-		Print confirmation message of task completion.
-		'''
-		
-		if self.network == 1:
-			self.send_msg(self.hostSock, message)
-		else:
-			print(message)
-		
-	
-	def receiveCommand(self):
-		'''
-		Receive a command from the network or the Pi terminal.
+		Send a command via terminal to the Raspberry Pi.
 		'''
 		
-		if self.network == 1:
-			# Recieve data from host
-			print("Waiting for command...")
-			command = self.recv_msg(self.hostSock)
-			print("Command received: " + command)
-		else:
-			# Wait for command from Pi
+		# List of commands
+		opt = ["B","C","F","G","H","I","N","Q","R","S","T","V","X"]
+		
+		# Input command from terminal
+		command = 0
+		while command not in opt:
 			command = str(raw_input("Input camera command: ")).upper()
+			if command not in opt:
+				print("Invalid command")
+			else:
+				print("Command sent: " + command)
 		
-		return command
+		# Send command
+		self.send_msg(self.client_socket, command)
 		
-	
-	def performCommand(self, command):
-		'''
-		Control the camera remotely from a network computer, or from the 
-		Raspberry Pi terminal.
-		'''
-		
+		# Send parameters and perform command
 		# Set brightness
 		if command == "B":
-			brightness = int(self.inputParameter("Brightness"))
-			self.setBrightness(brightness)
-			self.confirmCompletion("Brightness changed")
+			self.processParameter("Brightness")
 			
 		# Set contrast
 		elif command == "C":
-			contrast = int(self.inputParameter("Contrast"))
-			self.setContrast(contrast)
-			self.confirmCompletion("Contrast changed")
+			self.processParameter("Contrast")
 			
-		# Set framerate
+		# Change framerate
 		elif command == "F":
-			rate = int(self.inputParameter("Framerate"))
-			self.setFrameRate(rate)
-			self.confirmCompletion("Framerate changed")
+			self.processParameter("Framerate")
 		
 		# Set gain
 		elif command == "G":
-			gain = int(self.inputParameter("Gain"))
-			self.setGain(gain)
-			self.confirmCompletion("Gain changed")
+			self.processParameter("Gain")
 			
 		# Help
 		elif command == "H":
 			self.printCommands()
 			
-		# Capture photo
+		# Caputre photo
 		elif command == "I":
-			fname = self.inputParameter("Filename")
-			self.capturePhoto(fname)
-			self.confirmCompletion("Image captured")
+			self.processParameter("Filename")
 				
 		# Network stream
 		elif command == "N":
-			if self.network == 1:
-				duration = int(self.inputParameter("Duration"))
-				self.networkStreamClient(self.hostSock, duration)
-			else:
-				print("Not connected to network")
-				
-		# Quit program
-		elif command == "Q":
-			if self.network == 1:
-				print("Closing socket...")
-				self.closeNetwork()
-				
-		# Set resolution
-		elif command == "R":
-			width = int(self.inputParameter("Width"))
-			self.confirmCompletion("Resolution width changed")
-			height = int(self.inputParameter("Height"))
-			self.confirmCompletion("Resolution height changed")
-			self.setResolution(width, height)
+			self.processParameter("Duration")
+			self.networkStreamServer()
 			
+		# Change resolution
+		elif command == "R":
+			self.processParameter("Width")
+			self.processParameter("Height")
+				
 		# Set sharpness
 		elif command == "S":
-			sharpness = int(self.inputParameter("Sharpness"))
-			self.setSharpness(sharpness)
-			self.confirmCompletion("Sharpness changed")
+			self.processParameter("Sharpness")
 			
 		# Set saturation
 		elif command == "T":
-			saturation = int(self.inputParameter("Saturation"))
-			self.setSaturation(saturation)
-			self.confirmCompletion("Saturation changed")
+			self.processParameter("Saturation")
 		
 		# Capture stream
 		elif command == "V":
-			duration = int(self.inputParameter("Duration"))
-			filename = self.inputParameter("Filename")
-			self.confirmCompletion("Recording started...")
-			self.captureStream(duration, fname)
-			self.confirmCompletion("Recording finished")
+			duration = str(input("Duration: "))
+			self.send_msg(self.client_socket, duration)
+			fname = str(raw_input("Filename: "))
+			self.send_msg(self.client_socket, fname)
+			confirm = self.recv_msg(self.client_socket)
+			if confirm == None:
+				print("Command failed")
+			else:
+				print(confirm)
+			confirm = self.recv_msg(self.client_socket)
+			if confirm == None:
+				print("Command failed")
+			else:
+				print(confirm)
 		
 		# Change exposure time
 		elif command == "X":
-			xt = int(self.inputParameter("Exposure time"))
-			self.setExposureTime(xt)
-			self.confirmCompletion("Exposure time changed")
-			
-		else:
-			print("Not a command")
+			speed = str(input("Shutter Speed: "))
+			self.send_msg(self.client_socket, speed)
+			confirm = self.recv_msg(self.client_socket)
+			if confirm == None:
+				print("Command failed")
+			else:
+				print(confirm)
+		
+		return command
 		
 	
-	def closeCamera(self):
+	def closeServer(self):
 		'''
-		Release the camera resources.
+		Free server resources.
 		'''
 		
-		# Turn off the camera
-		self.camera.close()
-		
+		# Close the connection and socket
+		print("Closing socket...")
+		self.client_socket.close()
