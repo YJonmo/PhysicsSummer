@@ -12,6 +12,7 @@ import time
 import struct
 import os
 import sys
+import datetime
 
 
 BRIGHTNESS_MIN = 0
@@ -173,9 +174,10 @@ class cameraModuleServer:
 				time.sleep(2)
 				
 				# Record the camera for length <duration>
-				camera.start_recording(connection, format = 'h264')
-				camera.wait_recording(duration)
-				camera.stop_recording()
+				self.camera.start_recording(connection, format = 'h264')
+				self.camera.wait_recording(duration)
+				self.camera.stop_recording()
+				self.camera.stop_preview()
 			finally:
 				# Free connection resources
 				connection.close()
@@ -328,6 +330,11 @@ class cameraModuleServer:
 			minimum = FRAMERATE_MIN
 			maximum = FRAMERATE_MAX
 		
+		elif parameter == "Filename":
+			default = "Image" + datetime.datetime.isoformat() + ".png"
+			minimum = None
+			maximum = None
+		
 		else:
 			default = None
 		
@@ -338,12 +345,12 @@ class cameraModuleServer:
 			self.send_msg(self.hostSock, str(maximum))
 			
 			# Wait for parameter input from network computer
-			print("Wating for " + parameter.lower() + "...")
+			print("Waiting for " + parameter.lower() + "...")
 			value = self.recv_msg(self.hostSock)
 			print(parameter + ": " + str(value))
-		elif default == None:
-			# Wait for parameter input from Raspberry Pi terminal
-			value = str(raw_input(parameter + ": "))
+		#elif default == None:
+		#	# Wait for parameter input from Raspberry Pi terminal
+		#	value = str(raw_input(parameter + ": "))
 		else:
 			# Process parameter inputs from terminal
 			while True:
@@ -367,6 +374,44 @@ class cameraModuleServer:
 		
 		return value
 		
+	
+	def inputStrParameter(self, parameter):
+		'''
+		Wait for a parameter from either the network or the Pi terminal.
+		'''
+		
+		if parameter == "Image filename":
+			default = "Image" + datetime.datetime.now().isoformat() + ".png"
+			
+		elif parameter == "Video filename":
+			default = "Video" + datetime.datetime.now().isoformat() + ".avi"
+		
+		else:
+			default = None
+		
+		if self.network == 1:
+			# Send default, min, and max to network computer
+			self.send_msg(self.hostSock, default)
+			
+			# Wait for parameter input from network computer
+			print("Wating for " + parameter.lower() + "...")
+			value = self.recv_msg(self.hostSock)
+			print(parameter + ": " + str(value))
+		#elif default == None:
+		#	# Wait for parameter input from Raspberry Pi terminal
+		#	value = str(raw_input(parameter + ": "))
+		else:
+			# Process parameter inputs from terminal
+			while True:
+				value = str(raw_input(parameter + " (Default: " + default + "): "))
+				# Set default value if there is no input
+				if value == "":
+					value = default
+					break
+				else:
+					break # Will add condition to test for correct filetype
+		
+		return value
 	
 	def confirmCompletion(self, message):
 		'''
@@ -432,8 +477,9 @@ class cameraModuleServer:
 			
 		# Capture photo
 		elif command == "I":
-			fname = self.inputParameter("Filename")
-			self.capturePhoto(fname)
+			filename = self.inputStrParameter("Image filename")
+			self.confirmCompletion("Image capturing...")
+			self.capturePhoto(filename)
 			self.confirmCompletion("Image captured")
 				
 		# Network stream
@@ -473,9 +519,10 @@ class cameraModuleServer:
 		# Capture stream
 		elif command == "V":
 			duration = int(self.inputParameter("Duration"))
-			filename = self.inputParameter("Filename")
+			self.confirmCompletion("Duration set")
+			filename = self.inputStrParameter("Video filename")
 			self.confirmCompletion("Recording started...")
-			self.captureStream(duration, fname)
+			self.captureStream(duration, filename)
 			self.confirmCompletion("Recording finished")
 		
 		# Change exposure time
