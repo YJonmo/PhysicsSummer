@@ -37,7 +37,7 @@ class cameraModuleClient:
 		# Initialise time
 		startTime = time.time()
 		
-		# Accept a single connection
+		# Make a file-like object for the connection
 		connection = self.client_socket.makefile('rb')
 		
 		# Start stream to VLC
@@ -183,14 +183,14 @@ class cameraModuleClient:
 		# Send parameter value to Pi
 		self.send_msg(self.client_socket, value)
 		
-		# Receive confirmation message from the Pi.
+		# Receive start confirmation message from the Pi.
 		confirm = self.recv_msg(self.client_socket)
 		if confirm == None:
 			print("Command failed")
 		else:
 			print(confirm)
 			
-		# Receive second confirmation message from the Pi.
+		# Receive finish confirmation message from the Pi.
 		confirm = self.recv_msg(self.client_socket)
 		if confirm == None:
 			print("Command failed")
@@ -242,13 +242,18 @@ class cameraModuleClient:
 		#print("Copied file")
 		
 	
-	def receiveFile(self, fname):
+	def receiveFile(self, fname, typ):
 		'''
 		Receive an image or video from the Pi.
 		'''
 		
 		print("Downloading file...")
-		os.system("nc 192.168.1.1 60000 > ../../Images/" + fname)
+		
+		if typ == "Image":
+			os.system("nc 192.168.1.1 60000 > ../../Images/" + fname)
+		elif typ == "Video":
+			os.system("nc 192.168.1.1 60000 > ../../Videos/" + fname)
+		
 		print("Downloaded file")
 		
 	
@@ -283,10 +288,11 @@ class cameraModuleClient:
 			
 		# Change framerate
 		elif command == "F":
-			self.processIntParameter("Framerate")
+			self.processIntParameter("Framerate (fps)")
 		
 		# Set gain
 		elif command == "G":
+			print("Note: Gain of 0 automatically sets the gain")
 			self.processIntParameter("Gain")
 			
 		# Help
@@ -297,11 +303,12 @@ class cameraModuleClient:
 		elif command == "I":
 			filename = self.processStrParameter("Filename")
 			self.printStats()
-			self.receiveFile(filename)
+			self.receiveFile(filename, "Image")
 				
 		# Network stream
 		elif command == "N":
-			duration = int(self.processIntParameter("Duration"))
+			print("Note: Duration of 0 records indefinately, press Esc to exit recording")
+			duration = int(self.processIntParameter("Duration (seconds)"))
 			self.networkStreamServer(duration)
 			
 		# Change resolution
@@ -319,13 +326,16 @@ class cameraModuleClient:
 		
 		# Capture stream
 		elif command == "V":
-			self.processIntParameter("Duration")
-			self.processStrParameter("Filename")
-			# Need to copy video from Pi to client computer
+			print("Note: Duration of 0 records indefinitely, press Esc to exit recording")
+			self.processIntParameter("Duration (seconds)")
+			filename = self.processStrParameter("Filename")
+			self.printStats()
+			self.receiveFile(filename, "Video")
 		
 		# Change exposure time
 		elif command == "X":
-			self.processIntParameter("Exposure time")
+			print("Note: Exposure time of 0 automatically sets the exposure time")
+			self.processIntParameter("Exposure time (microseconds)")
 		
 		return command
 		
