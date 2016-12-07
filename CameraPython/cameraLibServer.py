@@ -144,11 +144,13 @@ class cameraModuleServer:
 		time.sleep(2)
 		
 		# Record the camera for length <duration>, and store in file <fname>
-		#self.camera.start_recording("../../Videos/input.h264")
-		self.camera.start_recording("../../Videos/" + fname)
+		self.camera.start_recording("../../Videos/input.h264")
+		#self.camera.start_recording("../../Videos/" + fname)
 		self.camera.wait_recording(duration)
 		self.camera.stop_recording()
 		self.camera.stop_preview()
+		
+		os.system("MP4Box -add ../../Videos/input.h264 " + floc + " -fps " + str(self.camera.framerate))
 		
 		'''# Obtain video stats
 		rate = str(self.camera.framerate)
@@ -181,6 +183,7 @@ class cameraModuleServer:
 				self.camera.stop_preview()
 			finally:
 				# Free connection resources
+				print("AAA")
 				connection.close()
 		
 	
@@ -385,7 +388,7 @@ class cameraModuleServer:
 			default = "Image" + datetime.datetime.now().isoformat() + ".png"
 			
 		elif parameter == "Video filename":
-			default = "Video" + datetime.datetime.now().isoformat() + ".mjpeg" #".avi"
+			default = "Video" + datetime.datetime.now().isoformat() + ".mp4"
 		
 		else:
 			default = None
@@ -437,7 +440,7 @@ class cameraModuleServer:
 		gain = str(self.camera.iso)
 		sharpness = str(self.camera.sharpness)
 		saturation = str(self.camera.saturation)
-		xt = str(self.camera.shutter_speed)
+		xt = str(self.camera.exposure_speed)
 		
 		if self.network == 1:
 			self.send_msg(self.hostSock, resolution)
@@ -575,7 +578,7 @@ class cameraModuleServer:
 			self.confirmCompletion("Recording finished")
 			self.printStats()
 			if self.network == 1:
-                                self.sendFile(filename, "Video")
+				self.sendFile(filename, "Video")
 		
 		# Change exposure time
 		elif command == "X":
