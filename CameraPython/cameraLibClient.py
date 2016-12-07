@@ -14,6 +14,9 @@ import struct
 import os
 
 
+IMAGE_TYPES = ['jpeg', 'jpg', 'png', 'gif', 'bmp']
+
+
 class cameraModuleClient:
 	
 	def __init__(self):
@@ -176,8 +179,24 @@ class cameraModuleClient:
 			if value == "":
 				value = str(default)
 				break
+			elif parameter == "Image filename":
+				# Check image filename is of correct filetype
+				fpart = value.split('.',1)
+				
+				# Check file has an extension
+				if len(fpart) > 1:
+					ftype = fpart[-1]
+				else:
+					ftype = ""
+				
+				# Continue only if file extension is correct
+				if ftype in IMAGE_TYPES:
+					break
+				else:
+					print("Image filename must have one of these extensions: " + str(IMAGE_TYPES))
 			else:
-				break # Will add condition to test for correct file type
+				# All video extensions supported, so no need to check
+				break
 		
 		# Send parameter value to Pi
 		self.send_msg(self.client_socket, value)
@@ -209,21 +228,32 @@ class cameraModuleClient:
 		framerate = self.recv_msg(self.client_socket)
 		brightness = self.recv_msg(self.client_socket)
 		contrast = self.recv_msg(self.client_socket)
-		gain = self.recv_msg(self.client_socket)
+		again = self.recv_msg(self.client_socket)
+		dgain = self.recv_msg(self.client_socket)
 		sharpness = self.recv_msg(self.client_socket)
 		saturation = self.recv_msg(self.client_socket)
 		xt = self.recv_msg(self.client_socket)
 		
+		# Convert gain fractions into decimal
+		if "/" in again:
+			anum, aden = again.split('/')
+			again = str(float(anum)/float(aden))
+		
+		if "/" in dgain:
+			dnum, dden = dgain.split('/')
+			dgain = str(float(dnum)/float(dden))
+		
 		# Print the received properties
 		print("\nProperties: ")
 		print("    Resolution: " + resolution)
-		print("    Framerate: " + framerate)
+		print("    Framerate: " + framerate + " fps")
 		print("    Brightness: " + brightness)
 		print("    Contrast: " + contrast)
-		print("    Gain: " + gain)
+		print("    Analog gain: " + str(float(again)) + " dB")
+		print("    Digital gain: " + str(float(dgain)) + " dB")
 		print("    Sharpness: " + sharpness)
 		print("    Saturation: " + saturation)
-		print("    Exposure time: " + xt + "\n")
+		print("    Exposure time: " + xt + " microseconds\n")
 		
 	
 	def receiveFile(self, fname, typ):
@@ -286,7 +316,7 @@ class cameraModuleClient:
 			
 		# Caputre photo
 		elif command == "I":
-			filename = self.processStrParameter("Filename")
+			filename = self.processStrParameter("Image filename")
 			self.printStats()
 			self.receiveFile(filename, "Image")
 				
@@ -313,7 +343,7 @@ class cameraModuleClient:
 		elif command == "V":
 			print("Note: Duration of 0 records indefinitely, press Esc to exit recording")
 			self.processIntParameter("Duration (seconds)")
-			filename = self.processStrParameter("Filename")
+			filename = self.processStrParameter("Video filename")
 			self.printStats()
 			self.receiveFile(filename, "Video")
 		
