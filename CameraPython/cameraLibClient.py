@@ -12,7 +12,6 @@ import subprocess
 import time
 import struct
 import os
-#import pexpect
 
 
 class cameraModuleClient:
@@ -205,6 +204,7 @@ class cameraModuleClient:
 		Receive and print image/video stats after capture.
 		'''
 		
+		# Receive properties of the image/video from the Raspberry Pi
 		resolution = self.recv_msg(self.client_socket)
 		framerate = self.recv_msg(self.client_socket)
 		brightness = self.recv_msg(self.client_socket)
@@ -214,6 +214,7 @@ class cameraModuleClient:
 		saturation = self.recv_msg(self.client_socket)
 		xt = self.recv_msg(self.client_socket)
 		
+		# Print the received properties
 		print("\nProperties: ")
 		print("    Resolution: " + resolution)
 		print("    Framerate: " + framerate)
@@ -225,23 +226,6 @@ class cameraModuleClient:
 		print("    Exposure time: " + xt + "\n")
 		
 	
-	#def secureCopy(self, fname):
-		#'''
-		#Copy image or video from the Pi to the client computer.
-		#'''
-		
-		## Create scp bash command with file location
-		#scpStr = "echo PiPhysics | scp pi@192.168.1.1:Documents/Images/" + fname + " ../../Images"
-		
-		## Execute scp bash command
-		#print("Copying file...")
-		##child = pexpect.spawn(scpStr)
-		##child.expect("password:")
-		##child.sendline("PiPhysics")
-		#os.system(scpStr)
-		#print("Copied file")
-		
-	
 	def receiveFile(self, fname, typ):
 		'''
 		Receive an image or video from the Pi.
@@ -249,6 +233,7 @@ class cameraModuleClient:
 		
 		print("Downloading file...")
 		
+		# Must have Netcat installed on the command-line
 		if typ == "Image":
 			os.system("nc 192.168.1.1 60000 > ../../Images/" + fname)
 		elif typ == "Video":
