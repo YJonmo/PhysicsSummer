@@ -2,28 +2,16 @@
 
 Code for the Raspberry Pi. This includes an adaptation of the DAQT7_Objective library for Raspberry Pi, as well as libraries for the camera module.
 
-## Raspberry Pi Camera Installation
+## Folders
 
-To install the raspicam library on the Raspberry Pi:
+- ADC_DAC: This folder contains an adaption of the DAQT7_Objective library for the Raspberry Pi.
 
-	cd raspicam-0.1.3
-	mkdir build
-	cd build
-	cmake ..
-	make
-	sudo make install
-	sudo ldconfig
-	
-To compile the program:
-	
-	g++ RPiCam.cpp -o RPiCam -I/usr/local/include -L/opt/vc/lib -lraspicam -lraspicam_cv -lmmal -lmmal_core -lmmal_util -lopencv_core -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -std=c++0x
+- CameraC++: This folder contains C++ code to control the camera module. It is no longer updated.
 
-To run the program:
-
-	./RPiCam
+- CameraPython: This folder contains Python code to control the camera module. It also allows the camera module to be controlled from a remote computer.
 
 ## To-Do
 
--A number of things to change and fix
+-A number of things in the Python camera library to change and fix.
 
--Lots and lots of testing
+-Lots and lots of testing.

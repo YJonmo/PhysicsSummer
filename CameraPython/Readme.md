@@ -79,7 +79,19 @@ To enable wifi, run the command:
 	sudo cp /etc/network/interfaces-wifi /etc/network/interfaces
 	sudo reboot
 
+To run the python server script, type:
+
+	python cameraServerTest.py
+
 ## Remote Computer Installation
+
+Streaming video from the camera across the network requires vlc installed in the command-line on the remote computer. On macOS, run:
+
+	brew install Caskroom/cask/vlc
+
+Similarly, on Ubuntu/Mint, run:
+
+	sudo apt-get install vlc
 
 The remote computer can connect to the Raspberry Pi, assuming that the Raspberry Pi adhoc network is set-up correctly and enabled. 
 The network "PiNet" should be listed in the wifi networks of the remote computer. 
@@ -92,3 +104,12 @@ Alternatively, the camera module can be controlled by remotely connecting to the
 	ssh pi@192.168.1.1
 	python picamCommand.py
 
+However, remotely running the picamCommand script will not allow video streaming over the network, nor downloading image and video files directly to the remote computer.
+
+## Current issues
+
+- The remote computer is not able to receive messages from the Raspberry Pi after streaming video to VLC is completed.
+
+- Program can crash if the user does something silly.
+
+- Does not check whether the image/video filename is of a correct filetype (i.e. .jpg, .png, .mp4, etc.)
