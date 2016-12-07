@@ -144,12 +144,13 @@ class cameraModuleServer:
 		time.sleep(2)
 		
 		# Record the camera for length <duration>, and store in file <fname>
-		self.camera.start_recording("../../Videos/input.h264")
+		#self.camera.start_recording("../../Videos/input.h264")
+		self.camera.start_recording("../../Videos/" + fname)
 		self.camera.wait_recording(duration)
 		self.camera.stop_recording()
 		self.camera.stop_preview()
 		
-		# Obtain video stats
+		'''# Obtain video stats
 		rate = str(self.camera.framerate)
 		width = str(self.camera.resolution[0])
 		height = str(self.camera.resolution[1])
@@ -157,7 +158,7 @@ class cameraModuleServer:
 		# Convert raw h264 video into a container to enable playback at the correct framerate
 		comStr = "avconv -i ../../Videos/input.h264 -f rawvideo - | avconv -y -f rawvideo -r:v " + rate + " -s:v " + width + "x" + height + " -i - " + floc
 		os.system(comStr)
-		os.system("rm ../../Videos/input.h264")
+		os.system("rm ../../Videos/input.h264")'''
 		
 	
 	def networkStreamClient(self, sock, duration):
@@ -384,7 +385,7 @@ class cameraModuleServer:
 			default = "Image" + datetime.datetime.now().isoformat() + ".png"
 			
 		elif parameter == "Video filename":
-			default = "Video" + datetime.datetime.now().isoformat() + ".avi"
+			default = "Video" + datetime.datetime.now().isoformat() + ".mjpeg" #".avi"
 		
 		else:
 			default = None
@@ -429,11 +430,11 @@ class cameraModuleServer:
 		Print or send image/video statistics.
 		'''
 		
-		resolution = str(self.camera.resolution[0] + "x" + self.camera.resolution[1])
+		resolution = str(self.camera.resolution[0]) + "x" + str(self.camera.resolution[1])
 		framerate = str(self.camera.framerate)
 		brightness = str(self.camera.brightness)
 		contrast = str(self.camera.contrast)
-		gain = str(self.camera.gain)
+		gain = str(self.camera.iso)
 		sharpness = str(self.camera.sharpness)
 		saturation = str(self.camera.saturation)
 		xt = str(self.camera.shutter_speed)
@@ -456,6 +457,17 @@ class cameraModuleServer:
 			print("Sharpness: " + sharpness)
 			print("Saturation: " + saturation)
 			print("Exposure time: " + xt)
+		
+	
+	def sendFile(self, fname, typ):
+		'''
+		Send an image or video file over a network.
+		'''
+
+		if typ == "Image":
+			os.system("nc -l 60000 < ../../Images/" + fname)
+		elif typ == "Video":
+			os.system("nc -l 60000 < ../../Videos/" + fname)
 		
 	
 	def receiveCommand(self):
@@ -516,6 +528,8 @@ class cameraModuleServer:
 			self.capturePhoto(filename)
 			self.confirmCompletion("Image captured")
 			self.printStats()
+			if self.network == 1:
+				self.sendFile(filename, "Image")
 				
 		# Network stream
 		elif command == "N":
@@ -559,6 +573,9 @@ class cameraModuleServer:
 			self.confirmCompletion("Recording started...")
 			self.captureStream(duration, filename)
 			self.confirmCompletion("Recording finished")
+			self.printStats()
+			if self.network == 1:
+                                self.sendFile(filename, "Video")
 		
 		# Change exposure time
 		elif command == "X":
