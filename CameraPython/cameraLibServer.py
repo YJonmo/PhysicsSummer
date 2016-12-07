@@ -33,6 +33,7 @@ DURATION_MIN = 0
 DURATION_MAX = sys.maxint
 FRAMERATE_MIN = 1
 FRAMERATE_MAX = 90
+IMAGE_TYPES = []
 
 
 class cameraModuleServer:
@@ -82,6 +83,7 @@ class cameraModuleServer:
 		'''
 		Set the sharpness level of the camera. Min: -100, Max: 100.
 		'''
+		
 		self.camera.sharpness = sharpness
 		
 	
@@ -89,6 +91,7 @@ class cameraModuleServer:
 		'''
 		Set the contrast level of the camera. Min: -100, Max: 100.
 		'''
+		
 		self.camera.contrast = contrast
 		
 	
@@ -96,6 +99,7 @@ class cameraModuleServer:
 		'''
 		Set the brightness level of the camera. Min: 0, Max: 100.
 		'''
+		
 		self.camera.brightness = brightness
 		
 	
@@ -103,14 +107,16 @@ class cameraModuleServer:
 		'''
 		Set the saturation level of the camera. Min: -100, Max: 100.
 		'''
+		
 		self.camera.saturation = saturation
 		
 	
 	def setGain(self, gain):
 		'''
 		Set the gain level of the camera. If ISO is set to zero, then the 
-		gain will be chosen automatically. Min: 0, Max: 800.
+		gain will be chosen automatically. Min: 0, Max: 1600.
 		'''
+		
 		self.camera.iso = gain
 		
 	
@@ -145,22 +151,12 @@ class cameraModuleServer:
 		
 		# Record the camera for length <duration>, and store in file <fname>
 		self.camera.start_recording("../../Videos/input.h264")
-		#self.camera.start_recording("../../Videos/" + fname)
 		self.camera.wait_recording(duration)
 		self.camera.stop_recording()
 		self.camera.stop_preview()
 		
+		# Place the h264 raw video file into a container, in order to get playback at the correct framerate
 		os.system("MP4Box -add ../../Videos/input.h264 " + floc + " -fps " + str(self.camera.framerate))
-		
-		'''# Obtain video stats
-		rate = str(self.camera.framerate)
-		width = str(self.camera.resolution[0])
-		height = str(self.camera.resolution[1])
-		
-		# Convert raw h264 video into a container to enable playback at the correct framerate
-		comStr = "avconv -i ../../Videos/input.h264 -f rawvideo - | avconv -y -f rawvideo -r:v " + rate + " -s:v " + width + "x" + height + " -i - " + floc
-		os.system(comStr)
-		os.system("rm ../../Videos/input.h264")'''
 		
 	
 	def networkStreamClient(self, sock, duration):
@@ -334,13 +330,10 @@ class cameraModuleServer:
 			minimum = FRAMERATE_MIN
 			maximum = FRAMERATE_MAX
 		
-		#elif parameter == "Filename":
-			#default = "Image" + datetime.datetime.isoformat() + ".png"
-			#minimum = None
-			#maximum = None
-		
 		else:
 			default = None
+			minimum = None
+			maximum = None
 		
 		if self.network == 1:
 			# Send default, min, and max to network computer
@@ -352,9 +345,6 @@ class cameraModuleServer:
 			print("Waiting for " + parameter.lower() + "...")
 			value = self.recv_msg(self.hostSock)
 			print(parameter + ": " + str(value))
-		#elif default == None:
-		#	# Wait for parameter input from Raspberry Pi terminal
-		#	value = str(raw_input(parameter + ": "))
 		else:
 			# Process parameter inputs from terminal
 			while True:
@@ -401,9 +391,6 @@ class cameraModuleServer:
 			print("Wating for " + parameter.lower() + "...")
 			value = self.recv_msg(self.hostSock)
 			print(parameter + ": " + str(value))
-		#elif default == None:
-		#	# Wait for parameter input from Raspberry Pi terminal
-		#	value = str(raw_input(parameter + ": "))
 		else:
 			# Process parameter inputs from terminal
 			while True:
@@ -413,7 +400,9 @@ class cameraModuleServer:
 					value = default
 					break
 				else:
-					break # Will add condition to test for correct filetype
+					#break # Will add condition to test for correct filetype
+					fpart = value.split('.',1)
+					ftype = fpart[-1]
 		
 		return value
 	
@@ -433,6 +422,7 @@ class cameraModuleServer:
 		Print or send image/video statistics.
 		'''
 		
+		# Get the image/video properties
 		resolution = str(self.camera.resolution[0]) + "x" + str(self.camera.resolution[1])
 		framerate = str(self.camera.framerate)
 		brightness = str(self.camera.brightness)
@@ -443,6 +433,7 @@ class cameraModuleServer:
 		xt = str(self.camera.exposure_speed)
 		
 		if self.network == 1:
+			# Send the properties to the remote computer
 			self.send_msg(self.hostSock, resolution)
 			self.send_msg(self.hostSock, framerate)
 			self.send_msg(self.hostSock, brightness)
@@ -452,6 +443,7 @@ class cameraModuleServer:
 			self.send_msg(self.hostSock, saturation)
 			self.send_msg(self.hostSock, xt)
 		else:
+			# Print the properties to the Pi terminal
 			print("Resolution: " + resolution)
 			print("Framerate: " + framerate)
 			print("Brightness: " + brightness)
@@ -466,7 +458,8 @@ class cameraModuleServer:
 		'''
 		Send an image or video file over a network.
 		'''
-
+		
+		# Send the image via Netcat
 		if typ == "Image":
 			os.system("nc -l 60000 < ../../Images/" + fname)
 		elif typ == "Video":

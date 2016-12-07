@@ -14,9 +14,6 @@ import sys
 # Initialise the camera module client
 camCommand = cameraLibServer.cameraModuleServer()
 
-# Initialise the network
-#camCommand.initNetwork()
-
 # Continuously wait for commands from a computer on the network
 while True:
 	if camCommand.network == 0:
