@@ -11,6 +11,8 @@ import socket
 import subprocess
 import time
 import struct
+import os
+#import pexpect
 
 
 class cameraModuleClient:
@@ -194,6 +196,8 @@ class cameraModuleClient:
 			print("Command failed")
 		else:
 			print(confirm)
+			
+		return value
 		
 	
 	def printStats(self):
@@ -210,14 +214,42 @@ class cameraModuleClient:
 		saturation = self.recv_msg(self.client_socket)
 		xt = self.recv_msg(self.client_socket)
 		
-		print("Resolution: " + resolution)
-		print("Framerate: " + framerate)
-		print("Brightness: " + brightness)
-		print("Contrast: " + contrast)
-		print("Gain: " + gain)
-		print("Sharpness: " + sharpness)
-		print("Saturation: " + saturation)
-		print("Exposure time: " + xt)
+		print("\nProperties: ")
+		print("    Resolution: " + resolution)
+		print("    Framerate: " + framerate)
+		print("    Brightness: " + brightness)
+		print("    Contrast: " + contrast)
+		print("    Gain: " + gain)
+		print("    Sharpness: " + sharpness)
+		print("    Saturation: " + saturation)
+		print("    Exposure time: " + xt + "\n")
+		
+	
+	#def secureCopy(self, fname):
+		#'''
+		#Copy image or video from the Pi to the client computer.
+		#'''
+		
+		## Create scp bash command with file location
+		#scpStr = "echo PiPhysics | scp pi@192.168.1.1:Documents/Images/" + fname + " ../../Images"
+		
+		## Execute scp bash command
+		#print("Copying file...")
+		##child = pexpect.spawn(scpStr)
+		##child.expect("password:")
+		##child.sendline("PiPhysics")
+		#os.system(scpStr)
+		#print("Copied file")
+		
+	
+	def receiveFile(self, fname):
+		'''
+		Receive an image or video from the Pi.
+		'''
+		
+		print("Downloading file...")
+		os.system("nc 192.168.1.1 60000 > ../../Images/" + fname)
+		print("Downloaded file")
 		
 	
 	def sendCommand(self):
@@ -263,9 +295,9 @@ class cameraModuleClient:
 			
 		# Caputre photo
 		elif command == "I":
-			self.processStrParameter("Filename")
+			filename = self.processStrParameter("Filename")
 			self.printStats()
-			# Need to copy image from Pi to client computer
+			self.receiveFile(filename)
 				
 		# Network stream
 		elif command == "N":
