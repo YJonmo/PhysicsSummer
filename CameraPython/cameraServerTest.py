@@ -21,19 +21,21 @@ while True:
 		camCommand.initNetwork()
 	else:
 		try:
-		# Process and perform command from network
+			# Process and perform command from network
 			command = camCommand.receiveCommand()
 			camCommand.performCommand(command)
+			
+			# Close network if quit command called
+			if command == "Q":
+				time.sleep(1)
+				camCommand.closeNetwork()
+			
 		except:
 			e = sys.exc_info()[0]
 			print("Error: %s" % e)
+			camCommand.camera.stop_preview()
 			time.sleep(1)
 			camCommand.closeNetwork()
 		
-		# Close network if quit command called
-		if command == "Q":
-			time.sleep(1)
-			camCommand.closeNetwork()
-	
 # Free the camera resources
 camCommand.closeCamera()

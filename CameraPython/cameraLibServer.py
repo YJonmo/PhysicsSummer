@@ -33,7 +33,7 @@ DURATION_MIN = 0
 DURATION_MAX = sys.maxint
 FRAMERATE_MIN = 1
 FRAMERATE_MAX = 90
-IMAGE_TYPES = []
+IMAGE_TYPES = ['jpeg', 'jpg', 'png', 'gif', 'bmp']
 
 
 class cameraModuleServer:
@@ -399,10 +399,16 @@ class cameraModuleServer:
 				if value == "":
 					value = default
 					break
-				else:
-					#break # Will add condition to test for correct filetype
+				elif parameter == "Image filename":
+					# Check image filename is of correct filetype
 					fpart = value.split('.',1)
 					ftype = fpart[-1]
+					print(ftype)
+					if ftype in IMAGE_TYPES:
+						break
+				else:
+					# All video extensions supported, so no need to check
+					break
 		
 		return value
 	
@@ -427,7 +433,8 @@ class cameraModuleServer:
 		framerate = str(self.camera.framerate)
 		brightness = str(self.camera.brightness)
 		contrast = str(self.camera.contrast)
-		gain = str(self.camera.iso)
+		again = str(self.camera.analog_gain)
+		dgain = str(self.camera.digital_gain)
 		sharpness = str(self.camera.sharpness)
 		saturation = str(self.camera.saturation)
 		xt = str(self.camera.exposure_speed)
@@ -438,7 +445,8 @@ class cameraModuleServer:
 			self.send_msg(self.hostSock, framerate)
 			self.send_msg(self.hostSock, brightness)
 			self.send_msg(self.hostSock, contrast)
-			self.send_msg(self.hostSock, gain)
+			self.send_msg(self.hostSock, again)
+			self.send_msg(self.hostSock, dgain)
 			self.send_msg(self.hostSock, sharpness)
 			self.send_msg(self.hostSock, saturation)
 			self.send_msg(self.hostSock, xt)
@@ -448,7 +456,8 @@ class cameraModuleServer:
 			print("Framerate: " + framerate)
 			print("Brightness: " + brightness)
 			print("Contrast: " + contrast)
-			print("Gain: " + gain)
+			print("Analog gain: " + again)
+			print("Digital gain: " + dgain)
 			print("Sharpness: " + sharpness)
 			print("Saturation: " + saturation)
 			print("Exposure time: " + xt)
