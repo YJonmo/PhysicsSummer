@@ -24,8 +24,6 @@ To run the program:
 
 ## To-Do
 
--Implement copying of images and videos from the Raspberry Pi to a client computer
-
--Minimise the number of errors
+-A number of things to change and fix
 
 -Lots and lots of testing
