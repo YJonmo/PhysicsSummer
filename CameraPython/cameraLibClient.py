@@ -217,9 +217,14 @@ class cameraModuleClient:
 			print("Command failed")
 		else:
 			print(confirm)
-			
-		# Receive finish confirmation message from the Pi.
-		confirm = self.recv_msg(self.client_socket)
+		
+		try:
+			# Receive finish confirmation message from the Pi.
+			confirm = self.recv_msg(self.client_socket)
+		except KeyboardInterrupt:
+			confirm = "Recording finished"
+			self.send_msg(self.client_socket, "Stop")
+		
 		if confirm == None:
 			print("Command failed")
 		else:
@@ -337,7 +342,7 @@ class cameraModuleClient:
 				
 		# Network stream
 		elif command == "N":
-			print("Note: Duration of 0 records indefinately, press Esc to exit recording")
+			print("Note: Duration of 0 records indefinately, press Ctrl+C to exit recording")
 			duration = int(self.processIntParameter("Duration (seconds)"))
 			self.networkStreamServer(duration)
 			
@@ -356,7 +361,7 @@ class cameraModuleClient:
 		
 		# Capture stream
 		elif command == "V":
-			print("Note: Duration of 0 records indefinitely, press Esc to exit recording")
+			print("Note: Duration of 0 records indefinitely, press Ctrl+C to exit recording")
 			self.processIntParameter("Duration (seconds)")
 			filename = self.processStrParameter("Video filename")
 			self.printStats()
