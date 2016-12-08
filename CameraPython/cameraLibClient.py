@@ -45,7 +45,7 @@ class cameraModuleClient:
 		# Start stream to VLC
 		cmdline = ['vlc', '--demux', 'h264', '-']
 		player = subprocess.Popen(cmdline, stdin=subprocess.PIPE)
-		while (time.time() - startTime) < duration:
+		while True:#(time.time() - startTime) < duration:
 			# Send data to VLC input
 			data = connection.read(1024)
 			if not data:
@@ -54,7 +54,10 @@ class cameraModuleClient:
 		
 		# Free connection resources
 		connection.close()
+		self.client_socket.close()
 		player.terminate()
+		self.client_socket = socket.socket()
+		self.client_socket.connect(('192.168.1.1', 8000))
 		
 	
 	def send_msg(self, sock, msg):
@@ -243,16 +246,21 @@ class cameraModuleClient:
 			dnum, dden = dgain.split('/')
 			dgain = str(float(dnum)/float(dden))
 		
+		# Convert contrast, sharpness, saturation to percentage
+		contrast = str((int(contrast)+100)/2)
+		sharpness = str((int(sharpness)+100)/2)
+		saturation = str((int(saturation)+100)/2)
+		
 		# Print the received properties
 		print("\nProperties: ")
 		print("    Resolution: " + resolution)
 		print("    Framerate: " + framerate + " fps")
-		print("    Brightness: " + brightness)
-		print("    Contrast: " + contrast)
+		print("    Brightness: " + brightness + " %")
+		print("    Contrast: " + contrast + " %")
 		print("    Analog gain: " + str(float(again)) + " dB")
 		print("    Digital gain: " + str(float(dgain)) + " dB")
-		print("    Sharpness: " + sharpness)
-		print("    Saturation: " + saturation)
+		print("    Sharpness: " + sharpness + " %")
+		print("    Saturation: " + saturation + " %")
 		print("    Exposure time: " + xt + " microseconds\n")
 		
 	
