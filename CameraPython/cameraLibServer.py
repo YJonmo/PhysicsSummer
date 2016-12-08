@@ -14,6 +14,8 @@ import struct
 import os
 import sys
 import datetime
+import select
+import subprocess
 
 
 BRIGHTNESS_MIN = 0
@@ -283,7 +285,7 @@ class cameraModuleServer:
 		self.host = '192.168.1.1'
 		self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		self.server_socket.bind((self.host, 8000))
-		self.server_socket.listen(5)
+		self.server_socket.listen(0)
 		
 		# Wait for a computer to connect
 		print("Waiting for connection...")
@@ -644,6 +646,19 @@ class cameraModuleServer:
 		else:
 			print("Not a command")
 		
+	
+	def errorChk(self):
+		'''
+		Process to check for a drop in the socket connection.
+		'''
+		while True:
+			#ready_to_read, ready_to_write, in_error = select.select([self.hostSock,], [self.hostSock,], [], 5)
+			#response = os.system("ping -c 1 192.168.1.7")
+			response = subprocess.Popen(['ping','-c','1','192.168.1.7'], stdout = subprocess.PIPE).communicate()[0]
+			#print(response)
+			if "0 received" in response:
+				raise Exception("LostConnection")
+			time.sleep(1)
 	
 	def closeCamera(self):
 		'''

@@ -8,6 +8,7 @@ Date: 23rd November 2016
 '''
 
 import cameraLibServer
+from multiprocessing import Process
 import time
 import sys
 
@@ -19,6 +20,10 @@ while True:
 	if camCommand.network == 0:
 		# Initialise the network
 		camCommand.initNetwork()
+		
+		# Initialise socket checking process
+		errSock = Process(target = camCommand.errorChk)
+		errSock.start()
 	else:
 		try:
 			# Process and perform command from network
@@ -26,9 +31,10 @@ while True:
 			camCommand.performCommand(command)
 			
 			# Close network if quit command called
-			if command == "Q":
+			if command == "Q" or not errSock.is_alive():
 				time.sleep(1)
 				camCommand.closeNetwork()
+				errSock.terminate()
 		
 		except:
 			e = sys.exc_info()[0]
@@ -36,6 +42,7 @@ while True:
 			camCommand.camera.stop_preview()
 			time.sleep(1)
 			camCommand.closeNetwork()
+			errSock.terminate()
 		
-# Free the camera resources
+# Free the camera resources (will never reach here though (will change))
 camCommand.closeCamera()
