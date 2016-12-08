@@ -7,6 +7,7 @@ Date: 21st November 2016
 
 
 from picamera import PiCamera
+from multiprocessing import Process
 import socket
 import time
 import struct
@@ -30,9 +31,11 @@ WIDTH_MAX = 3280
 HEIGHT_MIN = 64
 HEIGHT_MAX = 2464
 DURATION_MIN = 0
-DURATION_MAX = sys.maxint
-FRAMERATE_MIN = 1
+DURATION_MAX = float("inf")
+FRAMERATE_MIN = 0
 FRAMERATE_MAX = 90
+EXPOSURE_MIN = 0
+EXPOSURE_MAX = float("inf")
 IMAGE_TYPES = ['jpeg', 'jpg', 'png', 'gif', 'bmp']
 
 
@@ -179,8 +182,9 @@ class cameraModuleServer:
 				self.camera.stop_preview()
 			finally:
 				# Free connection resources
-				print("AAA")
 				connection.close()
+				self.closeNetwork()
+				self.initNetwork()
 		
 	
 	def send_msg(self, sock, msg):
@@ -307,8 +311,11 @@ class cameraModuleServer:
 			
 		elif parameter == "Exposure time":
 			default = self.camera.shutter_speed
-			minimum = 0
-			maximum = int(1000000/self.camera.framerate)
+			minimum = EXPOSURE_MIN
+			if self.camera.framerate == 0:
+				maximum = EXPOSURE_MAX
+			else:
+				maximum = int(1000000/self.camera.framerate)
 			
 		elif parameter == "Width":
 			default = self.camera.resolution[0]
@@ -500,25 +507,25 @@ class cameraModuleServer:
 		
 		# Set brightness
 		if command == "B":
-			brightness = int(self.inputParameter("Brightness"))
+			brightness = int(float(self.inputParameter("Brightness")))
 			self.setBrightness(brightness)
 			self.confirmCompletion("Brightness changed")
 			
 		# Set contrast
 		elif command == "C":
-			contrast = int(self.inputParameter("Contrast"))
+			contrast = int(float(self.inputParameter("Contrast")))
 			self.setContrast(contrast)
 			self.confirmCompletion("Contrast changed")
 			
 		# Set framerate
 		elif command == "F":
-			rate = int(self.inputParameter("Framerate"))
+			rate = float(self.inputParameter("Framerate"))
 			self.setFrameRate(rate)
 			self.confirmCompletion("Framerate changed")
 		
 		# Set gain
 		elif command == "G":
-			gain = int(self.inputParameter("Gain"))
+			gain = int(float(self.inputParameter("Gain")))
 			self.setGain(gain)
 			self.confirmCompletion("Gain changed")
 			
@@ -539,7 +546,7 @@ class cameraModuleServer:
 		# Network stream
 		elif command == "N":
 			if self.network == 1:
-				duration = int(self.inputParameter("Duration"))
+				duration = float(self.inputParameter("Duration"))
 				self.networkStreamClient(self.hostSock, duration)
 			else:
 				print("Not connected to network")
@@ -552,27 +559,27 @@ class cameraModuleServer:
 				
 		# Set resolution
 		elif command == "R":
-			width = int(self.inputParameter("Width"))
+			width = int(float(self.inputParameter("Width")))
 			self.confirmCompletion("Resolution width changed")
-			height = int(self.inputParameter("Height"))
+			height = int(float(self.inputParameter("Height")))
 			self.confirmCompletion("Resolution height changed")
 			self.setResolution(width, height)
 			
 		# Set sharpness
 		elif command == "S":
-			sharpness = int(self.inputParameter("Sharpness"))
+			sharpness = int(float(self.inputParameter("Sharpness")))
 			self.setSharpness(sharpness)
 			self.confirmCompletion("Sharpness changed")
 			
 		# Set saturation
 		elif command == "T":
-			saturation = int(self.inputParameter("Saturation"))
+			saturation = int(float(self.inputParameter("Saturation")))
 			self.setSaturation(saturation)
 			self.confirmCompletion("Saturation changed")
 		
 		# Capture stream
 		elif command == "V":
-			duration = int(self.inputParameter("Duration"))
+			duration = float(self.inputParameter("Duration"))
 			self.confirmCompletion("Duration set")
 			filename = self.inputStrParameter("Video filename")
 			self.confirmCompletion("Recording started...")
@@ -584,7 +591,7 @@ class cameraModuleServer:
 		
 		# Change exposure time
 		elif command == "X":
-			xt = int(self.inputParameter("Exposure time"))
+			xt = int(float(self.inputParameter("Exposure time")))
 			self.setExposureTime(xt)
 			self.confirmCompletion("Exposure time changed")
 			

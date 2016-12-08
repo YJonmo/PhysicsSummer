@@ -29,7 +29,7 @@ while True:
 			if command == "Q":
 				time.sleep(1)
 				camCommand.closeNetwork()
-			
+		
 		except:
 			e = sys.exc_info()[0]
 			print("Error: %s" % e)
