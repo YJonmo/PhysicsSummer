@@ -222,8 +222,9 @@ class cameraModuleClient:
 			# Receive finish confirmation message from the Pi.
 			confirm = self.recv_msg(self.client_socket)
 		except KeyboardInterrupt:
-			confirm = "Recording finished"
+			# Send message to stop recording if Ctrl+C is pressed
 			self.send_msg(self.client_socket, "Stop")
+			confirm = self.recv_msg(self.client_socket)
 		
 		if confirm == None:
 			print("Command failed")
