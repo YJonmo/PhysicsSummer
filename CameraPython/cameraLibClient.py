@@ -12,6 +12,7 @@ import subprocess
 import time
 import struct
 import os
+import sys
 
 
 IMAGE_TYPES = ['jpeg', 'jpg', 'png', 'gif', 'bmp']
@@ -42,17 +43,22 @@ class cameraModuleClient:
 		# Make a file-like object for the connection
 		connection = self.client_socket.makefile('rb')
 		
-		# Start stream to VLC
-		cmdline = ['vlc', '--demux', 'h264', '-']
-		player = subprocess.Popen(cmdline, stdin=subprocess.PIPE)
-		while True:#(time.time() - startTime) < duration:
-			# Send data to VLC input
-			data = connection.read(1024)
-			if not data:
-				break
-			player.stdin.write(data)
+		try:
+			# Start stream to VLC
+			cmdline = ['vlc', '--demux', 'h264', '-']
+			player = subprocess.Popen(cmdline, stdin=subprocess.PIPE)
+			while True:
+				# Send data to VLC input
+				data = connection.read(1024)
+				if not data:
+					break
+				player.stdin.write(data)
+		except KeyboardInterrupt:
+			self.send_msg(self.client_socket, "Stop")
+			time.sleep(1)
 		
 		# Free connection resources
+		print("Network stream closed")
 		connection.close()
 		self.client_socket.close()
 		player.terminate()
@@ -153,7 +159,8 @@ class cameraModuleClient:
 					elif float(value) > float(maximum):
 						print("Value is greater than maximum")
 					elif value == "inf":
-						print("Can't choose infinity")
+						value = str(sys.maxint)
+						break
 					else:
 						break
 				except ValueError:
@@ -343,7 +350,7 @@ class cameraModuleClient:
 				
 		# Network stream
 		elif command == "N":
-			print("Note: Duration of 0 records indefinately, press Ctrl+C to exit recording")
+			print("Note: Press Ctrl+C to exit recording")
 			duration = int(self.processIntParameter("Duration (seconds)"))
 			self.networkStreamServer(duration)
 			
@@ -362,7 +369,7 @@ class cameraModuleClient:
 		
 		# Capture stream
 		elif command == "V":
-			print("Note: Duration of 0 records indefinitely, press Ctrl+C to exit recording")
+			print("Note: Press Ctrl+C to exit recording")
 			self.processIntParameter("Duration (seconds)")
 			filename = self.processStrParameter("Video filename")
 			self.printStats()
