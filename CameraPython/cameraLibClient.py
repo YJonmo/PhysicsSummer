@@ -128,9 +128,14 @@ class cameraModuleClient:
 		'''
 		
 		# Receive default, min, max parameters from Pi
-		default = int(self.recv_msg(self.client_socket))
-		minimum = int(self.recv_msg(self.client_socket))
-		maximum = int(self.recv_msg(self.client_socket))
+		default = self.recv_msg(self.client_socket)
+		minimum = self.recv_msg(self.client_socket)
+		maximum = self.recv_msg(self.client_socket)
+		
+		# Convert default fractions into decimal
+		if "/" in default:
+			num, den = default.split('/')
+			default = str(float(num)/float(den))
 		
 		# Input parameter value from terminal
 		while True:
@@ -143,10 +148,12 @@ class cameraModuleClient:
 			else:
 				try:
 					# Condition for exceeding min/max bounds
-					if int(value) < minimum:
+					if float(value) < float(minimum):
 						print("Value is less than minimum")
-					elif int(value) > maximum:
+					elif float(value) > float(maximum):
 						print("Value is greater than maximum")
+					elif value == "inf":
+						print("Can't choose infinity")
 					else:
 						break
 				except ValueError:
