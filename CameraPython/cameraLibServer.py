@@ -123,6 +123,25 @@ class cameraModuleServer:
 		self.camera.iso = gain
 		
 	
+	def waitProcess(self, duration):
+		'''
+		Threaded process to wait for the duration of a recording, and to throw errors in event of camera failing.
+		'''
+		
+		self.camera.wait_recording(duration)
+		
+	
+	def stopProcess(self):
+		'''
+		Threaded process to stop recording if there is an interrupt from a network computer.
+		'''
+		
+		while True:
+			msg = self.recv_msg(self.hostSock)
+			if msg == "Stop":
+				break
+		
+	
 	def capturePhoto(self, fname):
 		'''
 		Capture a photo and store on Pi.
@@ -145,6 +164,10 @@ class cameraModuleServer:
 		Capture a video and store on Pi.
 		'''
 		
+		# Set up camera wait processes
+		p1 = Process(target = self.waitProcess, args=(duration,))
+		p2 = Process(target = self.stopProcess)
+		
 		# Locate the Videos folder
 		floc = "../../Videos/" + fname
 		
@@ -154,7 +177,16 @@ class cameraModuleServer:
 		
 		# Record the camera for length <duration>, and store in file <fname>
 		self.camera.start_recording("../../Videos/input.h264")
-		self.camera.wait_recording(duration)
+		
+		# Multiprocessing to determine when to stop recording
+		p1.start()
+		p2.start()
+		while p1.is_alive() and p2.is_alive():
+			continue
+		p1.terminate()
+		p2.terminate()
+		
+		# Stop recording once one process has finished
 		self.camera.stop_recording()
 		self.camera.stop_preview()
 		
@@ -168,6 +200,10 @@ class cameraModuleServer:
 		'''
 		
 		if self.network == 1:
+			# Set up camera wait processes
+			p1 = Process(target = self.waitProcess, args=(duration,))
+			p2 = Process(target = self.stopProcess)
+			
 			# Create a file-like object for the connection
 			connection = sock.makefile('wb')
 			try:
@@ -177,7 +213,16 @@ class cameraModuleServer:
 				
 				# Record the camera for length <duration>
 				self.camera.start_recording(connection, format = 'h264')
-				self.camera.wait_recording(duration)
+				
+				# Multiprocessing to determine when to stop recording
+				p1.start()
+				p2.start()
+				while p1.is_alive() and p2.is_alive():
+					continue
+				p1.terminate()
+				p2.terminate()
+				
+				# Stop recording once one process has finished
 				self.camera.stop_recording()
 				self.camera.stop_preview()
 			finally:
@@ -356,6 +401,7 @@ class cameraModuleServer:
 			# Process parameter inputs from terminal
 			while True:
 				value = str(raw_input(parameter + " (Default: " + str(default) + ", Min: " + str(minimum) + ", Max: " + str(maximum) + "): "))
+				
 				# Set default value if there is no input
 				if value == "":
 					value = default
