@@ -388,7 +388,7 @@ class cameraModuleServer:
 			default = None
 			minimum = None
 			maximum = None
-		
+
 		if self.network == 1:
 			# Send default, min, and max to network computer
 			self.send_msg(self.hostSock, str(default))
@@ -647,6 +647,23 @@ class cameraModuleServer:
 			print("Not a command")
 		
 	
+	def cmdRun(self):
+		'''
+		Process to receive and perform commands.
+		'''
+		
+		while True:
+			# Process and perform command from network
+			command = self.receiveCommand()
+			self.performCommand(command)
+			
+			# Close network if quit command called
+			if command == "Q":
+				#time.sleep(1)
+				#self.closeNetwork()
+				raise Exception("ClosedNetwork")
+		
+	
 	def errorChk(self):
 		'''
 		Process to check for a drop in the socket connection.
@@ -660,6 +677,7 @@ class cameraModuleServer:
 				raise Exception("LostConnection")
 			time.sleep(1)
 	
+
 	def closeCamera(self):
 		'''
 		Release the camera resources.
