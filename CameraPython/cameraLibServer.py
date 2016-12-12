@@ -50,7 +50,8 @@ class cameraModuleServer:
 		
 		# Create an instance of the Picamera class
 		self.camera = PiCamera()
-		
+		PiCamera.CAPTURE_TIMEOUT = 600
+
 		# Initalise network variable
 		self.network = 0
 		
@@ -79,6 +80,16 @@ class cameraModuleServer:
 		must be greater than (1/framerate). A shutter speed of zero will 
 		result in an automatically determined exposure time.
 		'''
+		
+		# Find the maximum exposure time which is limited by the camera framerate
+		if self.camera.framerate != 0:
+			maxSpeed = int(1000000/self.camera.framerate)
+		else:
+			maxSpeed = 1000000
+		
+		if speed > maxSpeed:
+			# Change the framerate to allow the set exposure time
+			self.camera.framerate = 1000000/float(speed)
 		
 		# Change the shutter speed of the camera (in microseconds)
 		self.camera.shutter_speed = speed
@@ -166,10 +177,6 @@ class cameraModuleServer:
 		Capture a video and store on Pi.
 		'''
 		
-		# Set up camera wait processes
-		p1 = Process(target = self.waitProcess, args=(duration,))
-		p2 = Process(target = self.stopProcess)
-		
 		# Locate the Videos folder
 		floc = "../../Videos/" + fname
 		
@@ -180,13 +187,23 @@ class cameraModuleServer:
 		# Record the camera for length <duration>, and store in file <fname>
 		self.camera.start_recording("../../Videos/input.h264")
 		
-		# Multiprocessing to determine when to stop recording
-		p1.start()
-		p2.start()
-		while p1.is_alive() and p2.is_alive():
-			continue
-		p1.terminate()
-		p2.terminate()
+		if self.network == 1:
+			# Set up camera wait processes
+			p1 = Process(target = self.waitProcess, args=(duration,))
+			p2 = Process(target = self.stopProcess)
+		
+			# Multiprocessing to determine when to stop recording
+			p1.start()
+			p2.start()
+			while p1.is_alive() and p2.is_alive():
+				continue
+			p1.terminate()
+			p2.terminate()
+		else:
+			try:
+				self.camera.wait_recording(duration)
+			except KeyboardInterrupt:
+				pass
 		
 		# Stop recording once one process has finished
 		self.camera.stop_recording()
@@ -373,10 +390,11 @@ class cameraModuleServer:
 		elif parameter == "Exposure time":
 			default = self.camera.shutter_speed
 			minimum = EXPOSURE_MIN
-			if self.camera.framerate == 0:
-				maximum = EXPOSURE_MAX
-			else:
-				maximum = int(1000000/self.camera.framerate)
+			maximum = EXPOSURE_MAX
+			#if self.camera.framerate == 0:
+			#	maximum = EXPOSURE_MAX
+			#else:
+			#	maximum = int(1000000/self.camera.framerate)
 			
 		elif parameter == "Width":
 			default = self.camera.resolution[0]
@@ -429,6 +447,9 @@ class cameraModuleServer:
 							print("Value is less than minimum")
 						elif int(value) > maximum:
 							print("Value is greater than maximum")
+						elif value == "inf":
+							value = str(sys.maxint)
+							break
 						else:
 							break
 					except ValueError:
@@ -471,10 +492,18 @@ class cameraModuleServer:
 				elif parameter == "Image filename":
 					# Check image filename is of correct filetype
 					fpart = value.split('.',1)
-					ftype = fpart[-1]
-					print(ftype)
+
+					# Check file has an extension
+					if len(fpart) > 1:
+						ftype = fpart[-1]
+					else:
+						ftype = ""
+					
+					# Continue only if file extension is correct
 					if ftype in IMAGE_TYPES:
 						break
+					else:
+						print("Image filename must have one of these extensions: " + str(IMAGE_TYPES))
 				else:
 					# All video extensions supported, so no need to check
 					break
@@ -520,16 +549,31 @@ class cameraModuleServer:
 			self.send_msg(self.hostSock, saturation)
 			self.send_msg(self.hostSock, xt)
 		else:
+			# Convert gain fractions into decimal
+			if "/" in again:
+				anum, aden = again.split('/')
+				again = str(float(anum)/float(aden))
+				
+			if "/" in dgain:
+				dnum, dden = dgain.split('/')
+				dgain = str(float(dnum)/float(dden))
+			
+			# Convert contrast, sharpness, saturation to percentage
+			contrast = str((int(contrast)+100)/2)
+			sharpness = str((int(sharpness)+100)/2)
+			saturation = str((int(saturation)+100)/2)
+			
 			# Print the properties to the Pi terminal
-			print("Resolution: " + resolution)
-			print("Framerate: " + framerate)
-			print("Brightness: " + brightness)
-			print("Contrast: " + contrast)
-			print("Analog gain: " + again)
-			print("Digital gain: " + dgain)
-			print("Sharpness: " + sharpness)
-			print("Saturation: " + saturation)
-			print("Exposure time: " + xt)
+			print("\nProperties: " + resolution)
+			print("    Resolution: " + resolution)
+			print("    Framerate: " + framerate + " fps")
+			print("    Brightness: " + brightness + " %")
+			print("    Contrast: " + contrast + " %")
+			print("    Analog gain: " + again + " dB")
+			print("    Digital gain: " + dgain + " dB")
+			print("    Sharpness: " + sharpness + " %")
+			print("    Saturation: " + saturation + " %")
+			print("    Exposure time: " + xt + " microseconds\n")
 		
 	
 	def sendFile(self, fname, typ):
@@ -661,37 +705,6 @@ class cameraModuleServer:
 			print("Not a command")
 		
 	
-	def cmdRun(self):
-		'''
-		Process to receive and perform commands.
-		'''
-		
-		while True:
-			# Process and perform command from network
-			command = self.receiveCommand()
-			self.performCommand(command)
-			
-			# Close network if quit command called
-			if command == "Q":
-				#time.sleep(1)
-				#self.closeNetwork()
-				raise Exception("ClosedNetwork")
-		
-	
-	def errorChk(self):
-		'''
-		Process to check for a drop in the socket connection.
-		'''
-		while True:
-			#ready_to_read, ready_to_write, in_error = select.select([self.hostSock,], [self.hostSock,], [], 5)
-			#response = os.system("ping -c 1 192.168.1.7")
-			response = subprocess.Popen(['ping','-c','1','192.168.1.7'], stdout = subprocess.PIPE).communicate()[0]
-			#print(response)
-			if "0 received" in response:
-				raise Exception("LostConnection")
-			time.sleep(1)
-	
-
 	def closeCamera(self):
 		'''
 		Release the camera resources.
