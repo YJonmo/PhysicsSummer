@@ -222,6 +222,9 @@ class cameraModuleServer:
 			# Set up camera wait processes
 			p1 = Process(target = self.waitProcess, args=(duration,))
 			p2 = Process(target = self.stopProcess)
+
+			# Send framerate to client
+			self.send_msg(sock, str(self.camera.framerate))
 			
 			# Create a file-like object for the connection
 			connection = sock.makefile('wb')
@@ -348,6 +351,7 @@ class cameraModuleServer:
 		print("    H: Help")
 		print("    I: Capture an image")
 		print("    N: Stream to network")
+		print("    P: Get camera settings")
 		print("    Q: Quit program")
 		print("    R: Set resolution")
 		print("    S: Set sharpness")
@@ -391,10 +395,6 @@ class cameraModuleServer:
 			default = self.camera.shutter_speed
 			minimum = EXPOSURE_MIN
 			maximum = EXPOSURE_MAX
-			#if self.camera.framerate == 0:
-			#	maximum = EXPOSURE_MAX
-			#else:
-			#	maximum = int(1000000/self.camera.framerate)
 			
 		elif parameter == "Width":
 			default = self.camera.resolution[0]
@@ -653,10 +653,15 @@ class cameraModuleServer:
 		elif command == "N":
 			if self.network == 1:
 				duration = float(self.inputParameter("Duration"))
+				self.confirmCompletion("Duration set")
 				self.networkStreamClient(self.hostSock, duration)
 			else:
 				print("Not connected to network")
-				
+		
+		# Get camera settings
+		elif command == "P":
+			self.printStats()
+		
 		# Quit program
 		elif command == "Q":
 			if self.network == 1:

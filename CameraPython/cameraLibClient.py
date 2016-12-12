@@ -37,15 +37,15 @@ class cameraModuleClient:
 		Recieve a video stream from the Pi, and playback through VLC.
 		'''
 		
-		# Initialise time
-		startTime = time.time()
+		# Determine the framerate of the stream
+		frate = self.recv_msg(self.client_socket)
 		
 		# Make a file-like object for the connection
 		connection = self.client_socket.makefile('rb')
 		
 		try:
 			# Start stream to VLC
-			cmdline = ['vlc', '--demux', 'h264', '-']
+			cmdline = ['vlc', '--demux', 'h264', '--h264-fps', frate, '-']
 			player = subprocess.Popen(cmdline, stdin=subprocess.PIPE)
 			while True:
 				# Send data to VLC input
@@ -120,6 +120,7 @@ class cameraModuleClient:
 		print("    H: Help")
 		print("    I: Capture an image")
 		print("    N: Stream to network")
+		print("    P: Get camera settings")
 		print("    Q: Quit program")
 		print("    R: Set resolution")
 		print("    S: Set sharpness")
@@ -306,7 +307,7 @@ class cameraModuleClient:
 		'''
 		
 		# List of commands
-		opt = ["B","C","F","G","H","I","N","Q","R","S","T","V","X"]
+		opt = ["B","C","F","G","H","I","N","P","Q","R","S","T","V","X"]
 		
 		# Input command from terminal
 		command = 0
@@ -353,6 +354,10 @@ class cameraModuleClient:
 			print("Note: Press Ctrl+C to exit recording")
 			duration = self.processIntParameter("Duration (seconds)")
 			self.networkStreamServer(duration)
+		
+		# Print camera settings
+		elif command == "P":
+			self.printStats()
 			
 		# Change resolution
 		elif command == "R":
