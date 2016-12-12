@@ -351,7 +351,7 @@ class cameraModuleClient:
 		# Network stream
 		elif command == "N":
 			print("Note: Press Ctrl+C to exit recording")
-			duration = int(self.processIntParameter("Duration (seconds)"))
+			duration = self.processIntParameter("Duration (seconds)")
 			self.networkStreamServer(duration)
 			
 		# Change resolution

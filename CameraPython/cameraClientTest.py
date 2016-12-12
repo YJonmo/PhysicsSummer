@@ -12,16 +12,17 @@ import cameraLibClient
 # Initialise the camera module server
 camCommand = cameraLibClient.cameraModuleClient()
 
-# Print a list of commands
-camCommand.printCommands()
+try:
+	# Print a list of commands
+	camCommand.printCommands()
 
-# Continuously ask for commands to send to the Raspberry Pi from the terminal.
-while True:
-	command = camCommand.sendCommand()
-	
-	# Exit program if quit command called
-	if command == "Q":
-		break
-
-# Close connection
-camCommand.closeServer()
+	# Continuously ask for commands to send to the Raspberry Pi from the terminal.
+	while True:
+		command = camCommand.sendCommand()
+		
+		# Exit program if quit command called
+		if command == "Q":
+			break
+finally:
+	# Close connection
+	camCommand.closeServer()
