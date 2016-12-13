@@ -34,15 +34,17 @@ try:
 					time.sleep(1)
 					camCommand.closeNetwork()
 			
-			except picamera.exc.PiCameraAlreadyRecording:
-				# Restart the camera if a camera cannot start due to resources not properly being freed
-				camCommand.closeCamera()
-				camCommand.__init__()
+			#except picamera.exc:#.PiCameraAlreadyRecording:
+			#	# Restart the camera if a camera cannot start due to resources not properly being freed
+			#	camCommand.closeCamera()
+			#	camCommand.__init__()
 				
 			except:
 				e = sys.exc_info()[0]
 				print("Error: %s" % e)
-				camCommand.camera.stop_preview()
+				#camCommand.camera.stop_preview()
+				camCommand.closeCamera()
+				camCommand.__init__()
 				time.sleep(1)
 				camCommand.closeNetwork()
 finally:	

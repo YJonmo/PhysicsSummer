@@ -325,6 +325,7 @@ class cameraModuleServer:
 		print("Waiting for connection...")
 		(self.hostSock, self.address) = self.server_socket.accept()
 		print("Connection accepted")
+		self.server_socket.close()
 		self.network = 1
 		
 	
@@ -334,7 +335,7 @@ class cameraModuleServer:
 		'''
 		
 		self.hostSock.close()
-		self.server_socket.close()
+		#self.server_socket.close()
 		self.network = 0
 		
 	

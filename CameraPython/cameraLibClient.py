@@ -16,6 +16,31 @@ import sys
 
 
 IMAGE_TYPES = ['jpeg', 'jpg', 'png', 'gif', 'bmp']
+COLOUR = True
+
+
+if COLOUR:
+	BLACK = "\033[30m"
+	RED = "\033[31m"
+	GREEN = "\033[32m"
+	YELLOW = "\033[33m"
+	BLUE = "\033[34m"
+	MAGENTA = "\033[35m"
+	CYAN = "\033[36m"
+	WHITE = "\033[37m"
+	YELLOWFLASH = "\033[33;5m"
+	CLEAR = "\033[0m"
+else:
+	BLACK = "\033[0m"
+	RED = "\033[0m"
+	GREEN = "\033[0m"
+	YELLOW = "\033[0m"
+	BLUE = "\033[0m"
+	MAGENTA = "\033[0m"
+	CYAN = "\033[0m"
+	WHITE = "\033[0m"
+	YELLOWFLASH = "\033[0m"
+	CLEAR = "\033[0m"
 
 
 class cameraModuleClient:
@@ -27,9 +52,9 @@ class cameraModuleClient:
 		
 		# Initialise the socket connection
 		self.client_socket = socket.socket()
-		print("Waiting for connection...")
+		print(YELLOWFLASH + "Waiting for connection..." + CLEAR)
 		self.client_socket.connect(('192.168.1.1', 8000))
-		print("Connection accepted")
+		print(GREEN + "Connection accepted" + CLEAR)
 		
 	
 	def networkStreamServer(self, duration):
@@ -58,7 +83,7 @@ class cameraModuleClient:
 			time.sleep(1)
 		
 		# Free connection resources
-		print("Network stream closed")
+		print(GREEN + "Network stream closed" + CLEAR)
 		connection.close()
 		self.client_socket.close()
 		player.terminate()
@@ -113,20 +138,20 @@ class cameraModuleClient:
 		'''
 		
 		print("\nList of commands: ")
-		print("    B: Set brightness")
-		print("    C: Set contrast")
-		print("    F: Set framerate")
-		print("    G: Set gain")
-		print("    H: Help")
-		print("    I: Capture an image")
-		print("    N: Stream to network")
-		print("    P: Get camera settings")
-		print("    Q: Quit program")
-		print("    R: Set resolution")
-		print("    S: Set sharpness")
-		print("    T: Set saturation")
-		print("    V: Capture a video")
-		print("    X: Set exposure time\n")
+		print(RED + "    B: Set brightness" + CLEAR)
+		print(RED + "    C: Set contrast" + CLEAR)
+		print(YELLOW + "    F: Set framerate" + CLEAR)
+		print(YELLOW + "    G: Set gain" + CLEAR)
+		print(GREEN + "    H: Help" + CLEAR)
+		print(GREEN + "    I: Capture an image" + CLEAR)
+		print(CYAN + "    N: Stream to network" + CLEAR)
+		print(CYAN + "    P: Get camera settings" + CLEAR)
+		print(BLUE + "    Q: Quit program" + CLEAR)
+		print(BLUE + "    R: Set resolution" + CLEAR)
+		print(MAGENTA + "    S: Set sharpness" + CLEAR)
+		print(MAGENTA + "    T: Set saturation" + CLEAR)
+		print(RED + "    V: Capture a video" + CLEAR)
+		print(RED + "    X: Set exposure time\n" + CLEAR)
 		
 	
 	def processIntParameter(self, parameter):
@@ -156,9 +181,9 @@ class cameraModuleClient:
 				try:
 					# Condition for exceeding min/max bounds
 					if float(value) < float(minimum):
-						print("Value is less than minimum")
+						print(RED + "Value is less than minimum" + CLEAR)
 					elif float(value) > float(maximum):
-						print("Value is greater than maximum")
+						print(RED + "Value is greater than maximum" + CLEAR)
 					elif value == "inf":
 						value = str(sys.maxint)
 						break
@@ -166,7 +191,7 @@ class cameraModuleClient:
 						break
 				except ValueError:
 					# Condition for parameter inputs that are not integers
-					print("Not a number")
+					print(RED + "Not a number" + CLEAR)
 		
 		# Send parameter value to Pi
 		self.send_msg(self.client_socket, value)
@@ -174,9 +199,10 @@ class cameraModuleClient:
 		# Receive confirmation message from the Pi.
 		confirm = self.recv_msg(self.client_socket)
 		if confirm == None:
-			print("Command failed")
+			#print("Command failed")
+			raise Exception("Command Failed (May need to lower resolution or framerate)")
 		else:
-			print(confirm)
+			print(GREEN + confirm + CLEAR)
 			
 		return value
 		
@@ -211,7 +237,7 @@ class cameraModuleClient:
 				if ftype in IMAGE_TYPES:
 					break
 				else:
-					print("Image filename must have one of these extensions: " + str(IMAGE_TYPES))
+					print(RED + "Image filename must have one of these extensions: " + str(IMAGE_TYPES) + CLEAR)
 			else:
 				# All video extensions supported, so no need to check
 				break
@@ -222,9 +248,10 @@ class cameraModuleClient:
 		# Receive start confirmation message from the Pi.
 		confirm = self.recv_msg(self.client_socket)
 		if confirm == None:
-			print("Command failed")
+			#print("Command failed")
+			raise Exception("Command Failed (May need to lower resolution or framerate)")
 		else:
-			print(confirm)
+			print(YELLOWFLASH + confirm + CLEAR)
 		
 		try:
 			# Receive finish confirmation message from the Pi.
@@ -235,9 +262,10 @@ class cameraModuleClient:
 			confirm = self.recv_msg(self.client_socket)
 		
 		if confirm == None:
-			print("Command failed")
+			#print("Command failed")
+			raise Exception("Command Failed (May need to lower resolution or framerate)")
 		else:
-			print(confirm)
+			print(GREEN + confirm + CLEAR)
 			
 		return value
 		
@@ -274,15 +302,15 @@ class cameraModuleClient:
 		
 		# Print the received properties
 		print("\nProperties: ")
-		print("    Resolution: " + resolution)
-		print("    Framerate: " + framerate + " fps")
-		print("    Brightness: " + brightness + " %")
-		print("    Contrast: " + contrast + " %")
-		print("    Analog gain: " + str(float(again)) + " dB")
-		print("    Digital gain: " + str(float(dgain)) + " dB")
-		print("    Sharpness: " + sharpness + " %")
-		print("    Saturation: " + saturation + " %")
-		print("    Exposure time: " + xt + " microseconds\n")
+		print(RED + "    Resolution: " + resolution + CLEAR)
+		print(YELLOW + "    Framerate: " + framerate + " fps" + CLEAR)
+		print(GREEN + "    Brightness: " + brightness + " %" + CLEAR)
+		print(GREEN + "    Contrast: " + contrast + " %" + CLEAR)
+		print(CYAN + "    Analog gain: " + str(float(again)) + " dB" + CLEAR)
+		print(BLUE + "    Digital gain: " + str(float(dgain)) + " dB" + CLEAR)
+		print(BLUE + "    Sharpness: " + sharpness + " %" + CLEAR)
+		print(MAGENTA + "    Saturation: " + saturation + " %" + CLEAR)
+		print(RED + "    Exposure time: " + xt + " microseconds\n" + CLEAR)
 		
 	
 	def receiveFile(self, fname, typ):
@@ -290,7 +318,7 @@ class cameraModuleClient:
 		Receive an image or video from the Pi.
 		'''
 		
-		print("Downloading file...")
+		print(YELLOWFLASH + "Downloading file..." + CLEAR)
 		
 		# Must have Netcat installed on the command-line
 		if typ == "Image":
@@ -298,7 +326,7 @@ class cameraModuleClient:
 		elif typ == "Video":
 			os.system("nc 192.168.1.1 60000 > ../../Videos/" + fname)
 		
-		print("Downloaded file")
+		print(GREEN + "Downloaded file" + CLEAR)
 		
 	
 	def sendCommand(self):
@@ -314,9 +342,9 @@ class cameraModuleClient:
 		while command not in opt:
 			command = str(raw_input("Input camera command: ")).upper()
 			if command not in opt:
-				print("Invalid command")
+				print(RED + "Invalid command" + CLEAR)
 			else:
-				print("Command sent: " + command)
+				print(GREEN + "Command sent: " + command + CLEAR)
 		
 		# Send command
 		self.send_msg(self.client_socket, command)
@@ -336,7 +364,7 @@ class cameraModuleClient:
 		
 		# Set gain
 		elif command == "G":
-			print("Note: Gain of 0 automatically sets the gain")
+			print(CYAN + "Note: Gain of 0 automatically sets the gain" + CLEAR)
 			self.processIntParameter("Gain")
 			
 		# Help
@@ -351,7 +379,7 @@ class cameraModuleClient:
 				
 		# Network stream
 		elif command == "N":
-			print("Note: Press Ctrl+C to exit recording")
+			print(CYAN + "Note: Press Ctrl+C to exit recording" + CLEAR)
 			duration = self.processIntParameter("Duration (seconds)")
 			self.networkStreamServer(duration)
 		
@@ -374,7 +402,7 @@ class cameraModuleClient:
 		
 		# Capture stream
 		elif command == "V":
-			print("Note: Press Ctrl+C to exit recording")
+			print(CYAN + "Note: Press Ctrl+C to exit recording" + CLEAR)
 			self.processIntParameter("Duration (seconds)")
 			filename = self.processStrParameter("Video filename")
 			self.printStats()
@@ -382,7 +410,7 @@ class cameraModuleClient:
 		
 		# Change exposure time
 		elif command == "X":
-			print("Note: Exposure time of 0 automatically sets the exposure time")
+			print(CYAN + "Note: Exposure time of 0 automatically sets the exposure time" + CLEAR)
 			self.processIntParameter("Exposure time (microseconds)")
 		
 		return command
@@ -394,5 +422,5 @@ class cameraModuleClient:
 		'''
 		
 		# Close the connection and socket
-		print("Closing socket...")
+		print(YELLOWFLASH + "Closing socket..." + CLEAR)
 		self.client_socket.close()
