@@ -47,10 +47,14 @@ class DetectPi:
 		the maximum voltage.
 		'''
 		
+		# Ensure port is of type list
+		if type(Port) == str:
+            Port = [Port]
+		
 		# Convert DAQT7 DAC ports to DAC Pi channels
-		if Port = "DAC0":
+		if "DAC0" in Port:
 			channel = 1
-		elif Port = "DAC1":
+		elif "DAC1" in Port:
 			channel = 2
 		
 		# Set DAC output voltage <Volt> on channel <channel>
@@ -65,10 +69,14 @@ class DetectPi:
 		or channel 2. 
 		'''
 		
+		# Ensure port is of type list
+		if type(Port) == str:
+            Port = [Port]
+        
 		# Convert DAQT7 AIN ports to ADC Pi channels
-		if Port = "AIN0":
+		if "AIN0" in Port:
 			channel = 1
-		elif Port = "AIN1":
+		elif "AIN1" in Port:
 			channel = 2
 		
 		# Read voltage from channel <channel> in single ended mode
@@ -82,6 +90,10 @@ class DetectPi:
 		Read analogue input values from an ADC pin, in stream mode.
 		'''
 		
+		# Ensure port is of type list
+		if type(Port) == str:
+            Port = [Port]
+		
 		# Initialise array and time values
 		Read = [0, 1, 2]
 		StartingMoment = 0
@@ -89,15 +101,20 @@ class DetectPi:
 		scansPerRead = int(scansPerRead)
 		
 		# Determine timing characteristics
-		duration = scansPerRead/scanRate
-		dt = 1/scanRate
+		duration = scansPerRead/float(scanRate)
+		dt = 1/float(scanRate)
 		StartingMoment = time.time()
+		
+		# Allow for alternation between multiple ports
+		portIndex = 0
+		portLength = len(Port)
 		
 		# Loop for the duration
 		while (time.time()-StartingMoment) < duration:
 			# Read the ADC value and append to an array
-			voltRead = self.readPort(Port)[0]
+			voltRead = self.readPort(Port[portIndex])[0]
 			Read[0].append(voltRead)
+			portIndex = (portIndex + 1) % portLength
 			
 			# Wait for the program to run at the correct frequency
 			lastReadTime = readTime
@@ -107,7 +124,7 @@ class DetectPi:
 			
 		# Calculate and print elapsed time
 		FinishingMoment = time.time()
-		print ('Elapsed time %f seconds' %(FinishingMoment - StartingMoment))
+		print ('Elapsed time %f seconds' % (FinishingMoment - StartingMoment))
 		
 		return Read, StartingMoment, FinishingMoment
 		

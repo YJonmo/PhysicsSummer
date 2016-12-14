@@ -18,6 +18,8 @@ This folder contains Python code to control the Raspberry Pi camera module.
 
 - pividTest.py: A set of test functions for the video mode of the camera module.
 
+- launcher.sh: A bash script which allows the python camera module server to be launched on the Raspberry Pi at boot.
+
 ## Raspberry Pi Installation
 
 The code requires the MP4Box package to place the raw video in a container, in order to playback at the correct framerate. This can be installed by:
@@ -82,6 +84,14 @@ To enable wifi, run the command:
 To run the python server script, type:
 
 	python cameraServerTest.py
+
+Alternatively, the python server script can be setup to run at boot. This can be setup by running the command:
+
+	sudo crontab -e
+
+The crontab file can then be edited to contain the following line:
+
+	@reboot sh /home/pi/Documents/PhysicsSummer/CameraPython/launcher.sh
 
 ## Remote Computer Installation
 
