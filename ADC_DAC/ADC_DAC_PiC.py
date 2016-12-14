@@ -22,7 +22,7 @@ class DetectPi:
 		'''
 		
 		# Import the adc_dac C library
-		self.adclib = ctypes.CDLL('/home/pi/Documents/ABElectronics_C_Libraries/ADCDACPi/libABE_ADCDACPi.so')
+		self.adclib = ctypes.CDLL('/home/pi/Documents/PhysicsSummer/ADC_DAC/libABE_ADCDACPi.so')
 		
 		# Create instance of ADCDACPi, with gain set to 1
 		self.adclib.open_adc()
@@ -116,7 +116,7 @@ class DetectPi:
 		# Determine timing characteristics
 		duration = scansPerRead/float(scanRate)
 		dt = 1/float(scanRate)
-		StartingMoment = time.time()
+		
 		
 		# Allow for alternation between multiple ports
 		portIndex = 0
@@ -124,6 +124,7 @@ class DetectPi:
 		
 		print(channel)
 		# Loop for the duration
+		StartingMoment = time.time()
 		while (time.time()-StartingMoment) < duration:
 			# Read the ADC value and append to an array
 			#voltRead = self.adclib.read_adc_voltage(Port[portIndex])[0]

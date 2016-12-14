@@ -21,7 +21,7 @@
 static const char *adcdevice = "/dev/spidev0.0";
 static const char *dacdevice = "/dev/spidev0.1";
 static uint8_t mode = SPI_MODE_0; // SPI_MODE_0
-static uint32_t speed = 10000000; // SPI bus speed
+static uint32_t speed = 2500000; // SPI bus speed
 
 static uint8_t adctx[] = { 0x01, 0x80, 0x00 }; // transmit buffer for the ADC
 static char adcrx[3]; // receive buffer for the adc;
