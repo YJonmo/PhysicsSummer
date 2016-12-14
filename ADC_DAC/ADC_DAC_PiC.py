@@ -97,6 +97,16 @@ class DetectPi:
 		if type(Port) == str:
 			Port = [Port]
 		
+		# Convert DAQ ports to ADC channels
+		channel = []
+		for p in Port:
+			if p == "AIN0":
+				channel.append(1)
+			elif p == "AIN1":
+				channel.append(2)
+			else:
+				channel.append(1)
+		
 		# Initialise array and time values
 		Read = [0]
 		StartingMoment = 0
@@ -110,13 +120,15 @@ class DetectPi:
 		
 		# Allow for alternation between multiple ports
 		portIndex = 0
-		portLength = len(Port)
+		portLength = len(channel)
 		
+		print(channel)
 		# Loop for the duration
 		while (time.time()-StartingMoment) < duration:
 			# Read the ADC value and append to an array
 			#voltRead = self.adclib.read_adc_voltage(Port[portIndex])[0]
-			voltRead = self.adclib.read_adc_voltage(ctypes.c_int(0), ctypes.c_int(0))
+			voltRead = self.adclib.read_adc_voltage(ctypes.c_int(channel[portIndex]), ctypes.c_int(0))
+			#voltRead = self.adclib.read_adc_voltage(ctypes.c_int(0), ctypes.c_int(0))
 			Read.append(voltRead)
 			portIndex = (portIndex + 1) % portLength
 			
@@ -129,6 +141,7 @@ class DetectPi:
 		# Calculate and print elapsed time
 		FinishingMoment = time.time()
 		print ('Elapsed time %f seconds' % (FinishingMoment - StartingMoment))
+		print(np.mean(Read))
 		
 		return Read, StartingMoment, FinishingMoment
 		

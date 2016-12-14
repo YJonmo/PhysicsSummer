@@ -23,11 +23,29 @@ portAll = ['AIN0','AIN1']
 #rate = 1/float(time2 - time1)
 #print(rate)
 
-# Stream read a single port
+# Stream read from channel 0
 scansPerRead = 100000
 scanRate = 10000
 print("Starting stream")
 read, start, end = adcmod.streamRead(scanRate,scansPerRead,port1)
+print("Scans: " + str(len(read)))
+print("Rate: " + str(len(read)/float(end-start)) + " Hz")
+print("Stream ended")
+
+# Stream read from channel 1
+scansPerRead = 100000
+scanRate = 10000
+print("Starting stream")
+read, start, end = adcmod.streamRead(scanRate,scansPerRead,port2)
+print("Scans: " + str(len(read)))
+print("Rate: " + str(len(read)/float(end-start)) + " Hz")
+print("Stream ended")
+
+# Stream read from both channels
+scansPerRead = 100000
+scanRate = 10000
+print("Starting stream")
+read, start, end = adcmod.streamRead(scanRate,scansPerRead,portAll)
 print("Scans: " + str(len(read)))
 print("Rate: " + str(len(read)/float(end-start)) + " Hz")
 print("Stream ended")
