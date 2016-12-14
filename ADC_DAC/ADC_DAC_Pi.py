@@ -49,7 +49,7 @@ class DetectPi:
 		
 		# Ensure port is of type list
 		if type(Port) == str:
-            Port = [Port]
+			Port = [Port]
 		
 		# Convert DAQT7 DAC ports to DAC Pi channels
 		if "DAC0" in Port:
@@ -71,8 +71,8 @@ class DetectPi:
 		
 		# Ensure port is of type list
 		if type(Port) == str:
-            Port = [Port]
-        
+			Port = [Port]
+		
 		# Convert DAQT7 AIN ports to ADC Pi channels
 		if "AIN0" in Port:
 			channel = 1
@@ -92,7 +92,7 @@ class DetectPi:
 		
 		# Ensure port is of type list
 		if type(Port) == str:
-            Port = [Port]
+			Port = [Port]
 		
 		# Initialise array and time values
 		Read = [0, 1, 2]
