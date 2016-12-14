@@ -43,8 +43,11 @@ try:
 				e = sys.exc_info()[0]
 				print("Error: %s" % e)
 				#camCommand.camera.stop_preview()
-				camCommand.closeCamera()
-				camCommand.__init__()
+				try:
+					camCommand.closeCamera()
+					camCommand.__init__()
+				except:
+					print("Cannot close camera")
 				time.sleep(1)
 				camCommand.closeNetwork()
 finally:	

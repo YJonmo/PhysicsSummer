@@ -88,48 +88,49 @@ class DetectPi:
 		return np.float(voltRead), time.time()
 		
 	
-	#def streamRead(self, scanRate, scansPerRead, Port):
-		#'''
-		#Read analogue input values from an ADC pin, in stream mode.
-		#'''
+	def streamRead(self, scanRate, scansPerRead, Port):
+		'''
+		Read analogue input values from an ADC pin, in stream mode.
+		'''
 		
-		## Ensure port is of type list
-		#if type(Port) == str:
-			#Port = [Port]
+		# Ensure port is of type list
+		if type(Port) == str:
+			Port = [Port]
 		
-		## Initialise array and time values
-		#Read = [0, 1, 2]
-		#StartingMoment = 0
-		#FinishingMoment = 0
-		#scansPerRead = int(scansPerRead)
+		# Initialise array and time values
+		Read = [0]
+		StartingMoment = 0
+		FinishingMoment = 0
+		scansPerRead = int(scansPerRead)
 		
-		## Determine timing characteristics
-		#duration = scansPerRead/float(scanRate)
-		#dt = 1/float(scanRate)
-		#StartingMoment = time.time()
+		# Determine timing characteristics
+		duration = scansPerRead/float(scanRate)
+		dt = 1/float(scanRate)
+		StartingMoment = time.time()
 		
-		## Allow for alternation between multiple ports
-		#portIndex = 0
-		#portLength = len(Port)
+		# Allow for alternation between multiple ports
+		portIndex = 0
+		portLength = len(Port)
 		
-		## Loop for the duration
-		#while (time.time()-StartingMoment) < duration:
-			## Read the ADC value and append to an array
-			#voltRead = self.readPort(Port[portIndex])[0]
-			#Read[0].append(voltRead)
-			#portIndex = (portIndex + 1) % portLength
+		# Loop for the duration
+		while (time.time()-StartingMoment) < duration:
+			# Read the ADC value and append to an array
+			#voltRead = self.adclib.read_adc_voltage(Port[portIndex])[0]
+			voltRead = self.adclib.read_adc_voltage(ctypes.c_int(0), ctypes.c_int(0))
+			Read.append(voltRead)
+			portIndex = (portIndex + 1) % portLength
 			
-			## Wait for the program to run at the correct frequency
+			# Wait for the program to run at the correct frequency
 			#lastReadTime = readTime
 			#readTime = time.time()
 			#if readTime - lastReadTime < dt:
 				#time.sleep(dt - readTime + lastReadTime)
 			
-		## Calculate and print elapsed time
-		#FinishingMoment = time.time()
-		#print ('Elapsed time %f seconds' % (FinishingMoment - StartingMoment))
+		# Calculate and print elapsed time
+		FinishingMoment = time.time()
+		print ('Elapsed time %f seconds' % (FinishingMoment - StartingMoment))
 		
-		#return Read, StartingMoment, FinishingMoment
+		return Read, StartingMoment, FinishingMoment
 		
 	
 	def close(self):
