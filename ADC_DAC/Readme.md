@@ -23,3 +23,7 @@ The ADC_DAC code requires the ADCDACPi library. This can be installed by running
 	cd Documents
 	git clone https://github.com/abelectronicsuk/ABElectronics_Python_Libraries.git
 	export PYTHONPATH=${PYTHONPATH}:~/Documents/ABElectronics_Python_Libraries/ADCDACPi/
+
+The ADC_DAC_PiC code requires the ABE_ADCDACPi library .so file. This file can be obtained by compiling the library:
+
+	gcc -shared -o libABE_ADCDACPi.so -fPIC ABE_ADCDACPi.c
