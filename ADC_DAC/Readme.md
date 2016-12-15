@@ -4,7 +4,17 @@ This folder contains python code to run the ADC_DAC module on the Raspberry Pi.
 
 ## Files
 
-- ADC_DAC_Pi.py: Library adaptation of the DAQT7_Objective library for the Raspberry Pi.
+- ADC_DAC_Pi.py: Pure Python library adaptation of the DAQT7_Objective library for the Raspberry Pi. Achieves a sample rate of 12 kHz.
+
+- ADC_DAC_PiC.py: C version of the library adaptation using a Python wrapper. Achieves a sample rate of 30 kHz.
+
+- ADCTest.py: Test for the ADC_DAC_Pi library.
+
+- ADCTestC.py: Test for the ADC_DAC_PiC library.
+
+- ABE_ADCDACPi.c: C library to interface with the ADC_DAC module.
+
+- ABE_ADCDACPi.h: Header file for the C library.
 
 ## Raspberry Pi Installation
 
