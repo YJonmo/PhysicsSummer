@@ -54,6 +54,8 @@ class cameraModuleServer:
 
 		# Initalise network variable
 		self.network = 0
+		self.start = 0
+		self.end = 0
 		
 	
 	def setResolution(self, width, height):
@@ -169,6 +171,64 @@ class cameraModuleServer:
 		
 		# Capture an image and store in file <fname>
 		self.camera.capture(floc)
+		self.camera.stop_preview()
+	
+	def getFilenames(self):
+		'''
+		Generator function which allows the image capture to wait for the trigger, and yields the filename.
+		'''
+		
+		while True:
+			#trigger = self.recv_msg(self.hostSock)
+			#if trigger == "T":
+				##print("Capturing image...")
+				#floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
+				#yield floc
+			#elif trigger == "Q":
+				#break
+			floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
+			yield floc
+			floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
+			yield floc
+			floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
+			self.start = time.time()
+			yield floc
+			break
+		
+	
+	def captureTrigger(self):
+		'''
+		Fast capture of a series of images given a trigger.
+		'''
+		
+		# Camera setup
+		self.camera.start_preview()
+		time.sleep(2)
+		print("Camera setup")
+		
+		#while True:
+			## Wait for trigger (in this case it is a message from a network computer, however this can be changed to a GPIO or ADC input)
+			#trigger = self.recv_msg(self.hostSock)
+			
+			## Quit from command
+			#if trigger == "Q":
+				#break
+			
+			## Capture upon trigger
+			#elif trigger == "T":
+			#print("Capturing image...")
+			#start = time.time()
+			
+			#self.camera.capture(floc)
+		self.camera.capture_sequence(self.getFilenames(), use_video_port=True)
+		self.end = time.time()
+		print("Latency: " + str(self.end - self.start))
+			
+			#end = time.time()
+			#print("Latency: " + str(end-start))
+			#print("Image captured")
+		
+		# Stop camera
 		self.camera.stop_preview()
 		
 	
@@ -287,21 +347,22 @@ class cameraModuleServer:
 		# Helper function to recv n bytes or return None if EOF is hit
 		data = ''
 		while len(data) < n:
-			# Set socket timeout to 5 seconds
-			sock.settimeout(5)
-			eflag = 0
-			while eflag == 0:
-				try:
-					# Attempt to receive data without blocking
-					packet = sock.recv(n - len(data))
-					eflag = 1
-				except socket.timeout:
-					# Ping the client address every 5 seconds to ensure that the client is still connected to avoid hanging
-					response = subprocess.Popen(['ping','-c','1','192.168.1.7'], stdout = subprocess.PIPE).communicate()[0]
-					if "0 received" in response:
-						# Raise an exception and restart the connection if the client has left the connection
-						raise Exception("LostConnection")
-					eflag = 0
+			## Set socket timeout to 5 seconds
+			#sock.settimeout(5)
+			#eflag = 0
+			#while eflag == 0:
+				#try:
+					## Attempt to receive data without blocking
+					#packet = sock.recv(n - len(data))
+					#eflag = 1
+				#except socket.timeout:
+					## Ping the client address every 5 seconds to ensure that the client is still connected to avoid hanging
+					#response = subprocess.Popen(['ping','-c','1','192.168.1.7'], stdout = subprocess.PIPE).communicate()[0]
+					#if "0 received" in response:
+						## Raise an exception and restart the connection if the client has left the connection
+						#raise Exception("LostConnection")
+					#eflag = 0
+			packet = sock.recv(n - len(data))
 			if not packet:
 				return None
 			data += packet
@@ -356,7 +417,8 @@ class cameraModuleServer:
 		print("    Q: Quit program")
 		print("    R: Set resolution")
 		print("    S: Set sharpness")
-		print("    T: Set saturation")
+		print("    T: Capture with trigger")
+		print("    U: Set saturation")
 		print("    V: Capture a video")
 		print("    X: Set exposure time\n")
 		
@@ -682,9 +744,13 @@ class cameraModuleServer:
 			sharpness = int(float(self.inputParameter("Sharpness")))
 			self.setSharpness(sharpness)
 			self.confirmCompletion("Sharpness changed")
+		
+		# Capture with trigger
+		elif command == "T":
+			self.captureTrigger()
 			
 		# Set saturation
-		elif command == "T":
+		elif command == "U":
 			saturation = int(float(self.inputParameter("Saturation")))
 			self.setSaturation(saturation)
 			self.confirmCompletion("Saturation changed")
