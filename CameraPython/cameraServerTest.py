@@ -33,17 +33,13 @@ try:
 				if command == "Q":
 					time.sleep(1)
 					camCommand.closeNetwork()
-			
-			#except picamera.exc:#.PiCameraAlreadyRecording:
-			#	# Restart the camera if a camera cannot start due to resources not properly being freed
-			#	camCommand.closeCamera()
-			#	camCommand.__init__()
 				
 			except:
+				# Restart the server if an error occurs
 				e = sys.exc_info()[0]
 				print("Error: %s" % e)
-				#camCommand.camera.stop_preview()
 				try:
+					# Occasionally the camera will fail when trying to close
 					camCommand.closeCamera()
 					camCommand.__init__()
 				except:

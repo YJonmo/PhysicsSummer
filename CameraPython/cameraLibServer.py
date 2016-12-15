@@ -179,21 +179,29 @@ class cameraModuleServer:
 		'''
 		
 		while True:
-			#trigger = self.recv_msg(self.hostSock)
-			#if trigger == "T":
-				##print("Capturing image...")
-				#floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
-				#yield floc
-			#elif trigger == "Q":
-				#break
+			# Take an initial image to lower latency
 			floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
 			yield floc
-			floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
-			yield floc
-			floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
-			self.start = time.time()
-			yield floc
-			break
+			print("Camera ready for trigger")
+			
+			# Wait for the trigger (this can be changed to ADC or GPIO input)
+			if self.network == 1:
+				trigger = self.recv_msg(self.hostSock)
+			else:
+				trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
+			
+			# Yield the filename to capture the image
+			if trigger == "T":
+				self.start = time.time()
+				floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
+				yield floc
+				
+				# Exit for latency test
+				break
+			
+			# Quit trigger mode
+			elif trigger == "Q":
+				break
 		
 	
 	def captureTrigger(self):
@@ -204,32 +212,15 @@ class cameraModuleServer:
 		# Camera setup
 		self.camera.start_preview()
 		time.sleep(2)
-		print("Camera setup")
 		
-		#while True:
-			## Wait for trigger (in this case it is a message from a network computer, however this can be changed to a GPIO or ADC input)
-			#trigger = self.recv_msg(self.hostSock)
-			
-			## Quit from command
-			#if trigger == "Q":
-				#break
-			
-			## Capture upon trigger
-			#elif trigger == "T":
-			#print("Capturing image...")
-			#start = time.time()
-			
-			#self.camera.capture(floc)
+		# Use generator function to wait for trigger and capture image with low latency.
 		self.camera.capture_sequence(self.getFilenames(), use_video_port=True)
 		self.end = time.time()
-		print("Latency: " + str(self.end - self.start))
-			
-			#end = time.time()
-			#print("Latency: " + str(end-start))
-			#print("Image captured")
-		
-		# Stop camera
+
+		# Close the camera preview port
 		self.camera.stop_preview()
+		
+		# Need to download images here
 		
 	
 	def captureStream(self, duration, fname):
@@ -347,21 +338,21 @@ class cameraModuleServer:
 		# Helper function to recv n bytes or return None if EOF is hit
 		data = ''
 		while len(data) < n:
-			## Set socket timeout to 5 seconds
-			#sock.settimeout(5)
-			#eflag = 0
-			#while eflag == 0:
-				#try:
-					## Attempt to receive data without blocking
-					#packet = sock.recv(n - len(data))
-					#eflag = 1
-				#except socket.timeout:
-					## Ping the client address every 5 seconds to ensure that the client is still connected to avoid hanging
-					#response = subprocess.Popen(['ping','-c','1','192.168.1.7'], stdout = subprocess.PIPE).communicate()[0]
-					#if "0 received" in response:
-						## Raise an exception and restart the connection if the client has left the connection
-						#raise Exception("LostConnection")
-					#eflag = 0
+			# Set socket timeout to 5 seconds
+			sock.settimeout(5)
+			eflag = 0
+			while eflag == 0:
+				try:
+					# Attempt to receive data without blocking
+					packet = sock.recv(n - len(data))
+					eflag = 1
+				except socket.timeout:
+					# Ping the client address every 5 seconds to ensure that the client is still connected to avoid hanging
+					response = subprocess.Popen(['ping','-c','1','192.168.1.7'], stdout = subprocess.PIPE).communicate()[0]
+					if "0 received" in response:
+						# Raise an exception and restart the connection if the client has left the connection
+						raise Exception("LostConnection")
+					eflag = 0
 			packet = sock.recv(n - len(data))
 			if not packet:
 				return None
