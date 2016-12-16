@@ -7,7 +7,8 @@ Date: 21st November 2016
 
 
 from picamera import PiCamera
-from multiprocessing import Process
+from multiprocessing import Process, Value
+from PIL import Image
 import socket
 import time
 import struct
@@ -16,6 +17,7 @@ import sys
 import datetime
 import select
 import subprocess
+import io
 
 
 BRIGHTNESS_MIN = 0
@@ -56,6 +58,7 @@ class cameraModuleServer:
 		self.network = 0
 		self.start = 0
 		self.end = 0
+		self.ind = 0
 		
 	
 	def setResolution(self, width, height):
@@ -172,36 +175,63 @@ class cameraModuleServer:
 		# Capture an image and store in file <fname>
 		self.camera.capture(floc)
 		self.camera.stop_preview()
+		
 	
 	def getFilenames(self):
 		'''
 		Generator function which allows the image capture to wait for the trigger, and yields the filename.
 		'''
 		
+		## Take an initial image to lower latency
+		#temp = io.BytesIO()
+		##floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
+		#yield temp
+		#print("Camera ready for trigger")
+		
+		#while True:
+			## Wait for the trigger (this can be changed to ADC or GPIO input)
+			#if self.network == 1:
+				#trigger = self.recv_msg(self.hostSock)
+			#else:
+				#trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
+			
+			## Yield the filename to capture the image
+			#if trigger == "T":
+				#self.start = time.time()
+				#floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
+				#yield floc
+				#floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
+				#yield floc
+			
+			## Quit trigger mode
+			#elif trigger == "Q":
+				#break
+		
+		stream = io.BytesIO()
+		
+		#trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
+		self.start = time.time()
 		while True:
-			# Take an initial image to lower latency
-			floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
-			yield floc
-			print("Camera ready for trigger")
+			yield stream
 			
-			# Wait for the trigger (this can be changed to ADC or GPIO input)
-			if self.network == 1:
-				trigger = self.recv_msg(self.hostSock)
-			else:
-				trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
-			
-			# Yield the filename to capture the image
-			if trigger == "T":
-				self.start = time.time()
-				floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
-				yield floc
+			#stream.seek(0)
+			#floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
+			#img = Image.open(stream)
+			#img.save(floc)
+			#img.close()
 				
-				# Exit for latency test
-				break
+			stream.seek(0)
+			stream.truncate()
 			
-			# Quit trigger mode
-			elif trigger == "Q":
+			#trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
+			
+			#if trigger == "Q":
+			#	break
+			
+			if self.ind > 10:
 				break
+			self.ind += 1
+			
 		
 	
 	def captureTrigger(self):
@@ -214,7 +244,7 @@ class cameraModuleServer:
 		time.sleep(2)
 		
 		# Use generator function to wait for trigger and capture image with low latency.
-		self.camera.capture_sequence(self.getFilenames(), use_video_port=True)
+		self.camera.capture_sequence(self.getFilenames(), 'yuv', burst=True)
 		self.end = time.time()
 
 		# Close the camera preview port
@@ -618,7 +648,7 @@ class cameraModuleServer:
 			saturation = str((int(saturation)+100)/2)
 			
 			# Print the properties to the Pi terminal
-			print("\nProperties: " + resolution)
+			print("\nProperties: ")
 			print("    Resolution: " + resolution)
 			print("    Framerate: " + framerate + " fps")
 			print("    Brightness: " + brightness + " %")
