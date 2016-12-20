@@ -118,8 +118,6 @@ However, remotely running the picamCommand script will not allow video streaming
 
 ## Current issues
 
-- The remote computer is not able to receive messages from the Raspberry Pi after streaming video to VLC is completed.
+- The video port is used in trigger mode to achieve a latency of between 10-30 milliseconds. However, each image taken does not correspond to the correct timestamp.
 
-- Program can crash if the user does something silly.
-
-- Does not check whether the image/video filename is of a correct filetype (i.e. .jpg, .png, .mp4, etc.)
+- Using the still port with burst in trigger mode fixes the incorrect image issue. However, the latency in this case is between 100-300 milliseconds.

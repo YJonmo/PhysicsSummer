@@ -27,3 +27,9 @@ The ADC_DAC code requires the ADCDACPi library. This can be installed by running
 The ADC_DAC_PiC code requires the ABE_ADCDACPi library .so file. This file can be obtained by compiling the library:
 
 	gcc -shared -o libABE_ADCDACPi.so -fPIC ABE_ADCDACPi.c
+
+## Current progress
+
+- The Python wrapped C version of the code is able to achieve a sample rate of just over 30 kHz.
+
+- Moving a bunch Python-side code to the C-side could increase the sample rate to 50-100 kHz.
