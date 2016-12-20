@@ -109,49 +109,65 @@ else:
 		print(0, DAQ_Ending[0] - DAQ_Starting[0], No_DAC_Sample)
 		DAQ_Time = np.linspace(0, DAQ_Ending[0] - DAQ_Starting[0], No_DAC_Sample)
 		print(max(DAQ_Time))
+		DAQ_Stack = []
+		DAQ_Stack2 = []
 		
-		if len(StreamPort) == 1:
-			DAQ_Time = [DAQ_Time]
-			DAQ_Signal = [DAQ_Signal]
-		
-		elif len(StreamPort) == 2:
-			DAQ_Stack1 = DAQ_Signal[0::2]
-			DAQ_Stack2 = DAQ_Signal[1::2]
-			del(DAQ_Signal)
-			DAQ_Signal = np.zeros(shape=(len(StreamPort), No_DAC_Sample/len(StreamPort) ), dtype = float )
-			DAQ_Signal[0] = DAQ_Stack1
-			#for it in range(len(DAQ_Stack1)):
-			#	DAQ_Stack2[it] -= DAQ_Stack1[it]
-			DAQ_Signal[1] = DAQ_Stack2
-			
-			DAQ_Stack1 = DAQ_Time[0::2]
-			DAQ_Stack2 = DAQ_Time[1::2]
-			del(DAQ_Time)
-			DAQ_Time = np.zeros(shape=(len(StreamPort), No_DAC_Sample/len(StreamPort) ), dtype = float )
-			DAQ_Time[0] = DAQ_Stack1
-			DAQ_Time[1] = DAQ_Stack2
-			print(max(DAQ_Signal[0]),max(DAQ_Signal[1]),max(DAQ_Time[0]),max(DAQ_Time[1]))
+		#if len(StreamPort) == 1:
 			#DAQ_Time = [DAQ_Time]
 			#DAQ_Signal = [DAQ_Signal]
+		
+		#elif len(StreamPort) == 2:
+			#DAQ_Stack1 = DAQ_Signal[0::2]
+			#DAQ_Stack2 = DAQ_Signal[1::2]
+			#del(DAQ_Signal)
+			#DAQ_Signal = np.zeros(shape=(len(StreamPort), No_DAC_Sample/len(StreamPort) ), dtype = float )
+			#DAQ_Signal[0] = DAQ_Stack1
+			##for it in range(len(DAQ_Stack1)):
+			##	DAQ_Stack2[it] -= DAQ_Stack1[it]
+			#DAQ_Signal[1] = DAQ_Stack2
 			
-		elif len(StreamPort) == 3:	 
-			DAQ_Stack1 = DAQ_Signal[0::2]
-			DAQ_Stack2 = DAQ_Signal[1::2]
-			DAQ_Stack3 = DAQ_Signal[2::2]
-			del(DAQ_Signal)
-			DAQ_Signal = np.zeros(shape=(len(StreamPort), No_DAC_Sample/len(StreamPort) ), dtype = float )
-			DAQ_Signal[0] = DAQ_Stack1
-			DAQ_Signal[1] = DAQ_Stack2
-			DAQ_Signal[2] = DAQ_Stack3
+			#DAQ_Stack1 = DAQ_Time[0::2]
+			#DAQ_Stack2 = DAQ_Time[1::2]
+			#del(DAQ_Time)
+			#DAQ_Time = np.zeros(shape=(len(StreamPort), No_DAC_Sample/len(StreamPort) ), dtype = float )
+			#DAQ_Time[0] = DAQ_Stack1
+			#DAQ_Time[1] = DAQ_Stack2
+			#print(max(DAQ_Signal[0]),max(DAQ_Signal[1]),max(DAQ_Time[0]),max(DAQ_Time[1]))
+			##DAQ_Time = [DAQ_Time]
+			##DAQ_Signal = [DAQ_Signal]
 			
-			DAQ_Stack1 = DAQ_Time[0::2]
-			DAQ_Stack2 = DAQ_Time[1::2]
-			DAQ_Stack3 = DAQ_Time[2::2]
-			del(DAQ_Time)
-			DAQ_Time = np.zeros(shape=(len(StreamPort), No_DAC_Sample/len(StreamPort) ), dtype = float )
-			DAQ_Time[0] = DAQ_Stack1
-			DAQ_Time[1] = DAQ_Stack2
-			DAQ_Time[2] = DAQ_Stack3
+		#elif len(StreamPort) == 3:	 
+			#DAQ_Stack1 = DAQ_Signal[0::2]
+			#DAQ_Stack2 = DAQ_Signal[1::2]
+			#DAQ_Stack3 = DAQ_Signal[2::2]
+			#del(DAQ_Signal)
+			#DAQ_Signal = np.zeros(shape=(len(StreamPort), No_DAC_Sample/len(StreamPort) ), dtype = float )
+			#DAQ_Signal[0] = DAQ_Stack1
+			#DAQ_Signal[1] = DAQ_Stack2
+			#DAQ_Signal[2] = DAQ_Stack3
+			
+			#DAQ_Stack1 = DAQ_Time[0::2]
+			#DAQ_Stack2 = DAQ_Time[1::2]
+			#DAQ_Stack3 = DAQ_Time[2::2]
+			#del(DAQ_Time)
+			#DAQ_Time = np.zeros(shape=(len(StreamPort), No_DAC_Sample/len(StreamPort) ), dtype = float )
+			#DAQ_Time[0] = DAQ_Stack1
+			#DAQ_Time[1] = DAQ_Stack2
+			#DAQ_Time[2] = DAQ_Stack3
+			
+		for i in range(len(StreamPort)):
+			DAQ_Stack.append(np.zeros(shape=(len(StreamPort), No_DAC_Sample/len(StreamPort) ), dtype = float ))
+			DAQ_Stack[i] = DAQ_Signal[i::len(StreamPort)]
+		
+		del(DAQ_Signal)
+		DAQ_Signal = DAQ_Stack
+		
+		for i in range(len(StreamPort)):
+			DAQ_Stack2.append(np.zeros(shape=(len(StreamPort), No_DAC_Sample/len(StreamPort) ), dtype = float ))
+			DAQ_Stack2[i] = DAQ_Time[i::len(StreamPort)]
+		
+		del(DAQ_Time)
+		DAQ_Time = DAQ_Stack2
 		
 		SaveDataDAQ(DAQ_Time,DAQ_Signal) 
 		
