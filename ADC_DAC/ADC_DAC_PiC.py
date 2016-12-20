@@ -24,11 +24,13 @@ class DetectPi:
 		# Import the adc_dac C library
 		self.adclib = ctypes.CDLL('/home/pi/Documents/PhysicsSummer/ADC_DAC/libABE_ADCDACPi.so')
 		
-		# Create instance of ADCDACPi, with gain set to 1
+		# Initialise ADC and DAC SPI
 		self.adclib.open_adc()
+		self.adclib.open_dac()
 		
-		# Set reference voltage to 3.3 V
+		# Set reference voltage to 3.3 V and DAC gain to 2
 		self.adclib.set_adc_refvoltage(ctypes.c_double(3.3))
+		self.adclib.set_dac_gain(ctypes.c_int(2))
 		
 		return
 		
@@ -42,28 +44,28 @@ class DetectPi:
 		return
 		
 	
-	#def writePort(self, Port, Volt):
-		#'''
-		#Write values to a DAC pin. Values may be written to either channel 1 
-		#or channel 2. The maximum voltage is specified by the gain factor.
-		#Note: Setting a voltage of 5 V will return an error for exceeding 
-		#the maximum voltage.
-		#'''
+	def writePort(self, Port, Volt):
+		'''
+		Write values to a DAC pin. Values may be written to either channel 1 
+		or channel 2. The maximum voltage is specified by the gain factor.
+		Note: Setting a voltage of 5 V will return an error for exceeding 
+		the maximum voltage.
+		'''
 		
-		## Ensure port is of type list
-		#if type(Port) == str:
-			#Port = [Port]
+		# Ensure port is of type list
+		if type(Port) == str:
+			Port = [Port]
 		
-		## Convert DAQT7 DAC ports to DAC Pi channels
-		#if "DAC0" in Port:
-			#channel = 1
-		#elif "DAC1" in Port:
-			#channel = 2
+		# Convert DAQT7 DAC ports to DAC Pi channels
+		if "DAC0" in Port:
+			channel = 1
+		elif "DAC1" in Port:
+			channel = 2
 		
-		## Set DAC output voltage <Volt> on channel <channel>
-		#self.adcdac.set_dac_voltage(channel, Volt)
+		# Set DAC output voltage <Volt> on channel <channel>
+		self.adclib.set_dac_voltage(ctypes.c_double(Volt), ctypes.c_int(channel))
 		
-		#return
+		return
 		
 	
 	def readPort(self, Port):
@@ -117,19 +119,15 @@ class DetectPi:
 		duration = scansPerRead/float(scanRate)
 		dt = 1/float(scanRate)
 		
-		
 		# Allow for alternation between multiple ports
 		portIndex = 0
 		portLength = len(channel)
 		
-		print(channel)
 		# Loop for the duration
 		StartingMoment = time.time()
 		while (time.time()-StartingMoment) < duration:
 			# Read the ADC value and append to an array
-			#voltRead = self.adclib.read_adc_voltage(Port[portIndex])[0]
 			voltRead = self.adclib.read_adc_voltage(ctypes.c_int(channel[portIndex]), ctypes.c_int(0))
-			#voltRead = self.adclib.read_adc_voltage(ctypes.c_int(0), ctypes.c_int(0))
 			Read.append(voltRead)
 			portIndex = (portIndex + 1) % portLength
 			
@@ -153,6 +151,7 @@ class DetectPi:
 		'''
 		
 		self.adclib.close_adc()
+		self.adclib.close_dac()
 
 
 		

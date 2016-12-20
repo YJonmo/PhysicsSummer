@@ -244,7 +244,7 @@ class cameraModuleServer:
 		time.sleep(2)
 		
 		# Use generator function to wait for trigger and capture image with low latency.
-		self.camera.capture_sequence(self.getFilenames(), 'yuv', burst=True)
+		self.camera.capture_sequence(self.getFilenames(), 'yuv', use_video_port=True)
 		self.end = time.time()
 
 		# Close the camera preview port
@@ -355,7 +355,7 @@ class cameraModuleServer:
 		if not raw_msglen:
 			return None
 		msglen = struct.unpack('>I', raw_msglen)[0]
-		
+
 		# Read the message data
 		return self.recvall(sock, msglen)
 		
@@ -369,20 +369,20 @@ class cameraModuleServer:
 		data = ''
 		while len(data) < n:
 			# Set socket timeout to 5 seconds
-			sock.settimeout(5)
-			eflag = 0
-			while eflag == 0:
-				try:
-					# Attempt to receive data without blocking
-					packet = sock.recv(n - len(data))
-					eflag = 1
-				except socket.timeout:
-					# Ping the client address every 5 seconds to ensure that the client is still connected to avoid hanging
-					response = subprocess.Popen(['ping','-c','1','192.168.1.7'], stdout = subprocess.PIPE).communicate()[0]
-					if "0 received" in response:
-						# Raise an exception and restart the connection if the client has left the connection
-						raise Exception("LostConnection")
-					eflag = 0
+			#sock.settimeout(5)
+			#eflag = 0
+			#while eflag == 0:
+				#try:
+					## Attempt to receive data without blocking
+					#packet = sock.recv(n - len(data))
+					#eflag = 1
+				#except socket.timeout:
+					## Ping the client address every 5 seconds to ensure that the client is still connected to avoid hanging
+					#response = subprocess.Popen(['ping','-c','1','192.168.1.7'], stdout = subprocess.PIPE).communicate()[0]
+					#if "0 received" in response:
+						## Raise an exception and restart the connection if the client has left the connection
+						#raise Exception("LostConnection")
+					#eflag = 0
 			packet = sock.recv(n - len(data))
 			if not packet:
 				return None

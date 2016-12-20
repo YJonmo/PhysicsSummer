@@ -13,7 +13,7 @@ cam = cameraLibServer.cameraModuleServer()
 # Properties setup
 cam.setResolution(640,480)
 cam.setFrameRate(90)
-cam.setExposureTime(800)
+cam.setExposureTime(10000)
 
 # Enter trigger mode
 cam.captureTrigger()

@@ -9,9 +9,3 @@ Code for the Raspberry Pi. This includes an adaptation of the DAQT7_Objective li
 - CameraC++: This folder contains C++ code to control the camera module. It is no longer updated.
 
 - CameraPython: This folder contains Python code to control the camera module. It also allows the camera module to be controlled from a remote computer.
-
-## To-Do
-
--A number of things in the Python camera library to change and fix.
-
--Lots and lots of testing.
