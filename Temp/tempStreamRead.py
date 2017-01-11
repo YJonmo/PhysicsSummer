@@ -157,7 +157,7 @@ else:
 			
 		for i in range(len(StreamPort)):
 			DAQ_Stack.append(np.zeros(shape=(len(StreamPort), No_DAC_Sample/len(StreamPort) ), dtype = float ))
-			DAQ_Stack[i] = DAQ_Signal[i::len(StreamPort)]
+			DAQ_Stack[i] = np.array(DAQ_Signal[i::len(StreamPort)])*-92.6+467.6-4.3
 		
 		del(DAQ_Signal)
 		DAQ_Signal = DAQ_Stack
