@@ -53,6 +53,7 @@ def SaveDataSpec(WaveLength, Intensities,Spec_Index):                          #
 
    
 def Spec_Read_Process(No_Spec_Sample):
+    print("Starting Spec...")
     I = 0   
     Wave_len = len(Spec1.Handle.wavelengths())
     while (I < No_Spec_Sample):
@@ -63,16 +64,18 @@ def Spec_Read_Process(No_Spec_Sample):
         Spec_Is_Read.value = 1        
         #print ("spectrometer Index is %i" % Spec_Index[0])
         I = I + 1
+    print("Finished spec")
     Spec_Is_Done.value = 1
 
-
 def DAQ_Read_Process(DAQ_SamplingRate, ScansPerRead, Port):
-    print("Starting")
+    print("Starting DAQ...")
     Read, DAQ_Starting[0], DAQ_Ending[0] = DAQ1.streamRead(DAQ_SamplingRate, ScansPerRead, Port)
- 
+    #print(DAQ1.Handle)
+    #DAQ1.streamRead(DAQ_SamplingRate, ScansPerRead, Port)
+    
     print len(Read[0])
     DAQ_Signal[0:len(Read[0])] = np.asarray(Read[0])
-    
+    print("Finished DAQ")
         
     '''
     # ######## A function for reading the DAQ analogue inpute on AINX ########
@@ -172,13 +175,18 @@ if __name__ == "__main__":
     
         ################################## Start the the processes ###########################################
         if (Spec1.Error == 0):
+            #pass
             Pros_Spec = Process(target=Spec_Read_Process, args=(No_Spec_Sample,))
             Pros_Spec.start()
-        if (DAQ1.Error == 0):    
+            #Spec_Read_Process(No_Spec_Sample)
+        if (DAQ1.Error == 0):
+            #pass
             #Pros_DAQ = Process(target=DAQ_Read_Process, args=(DAQ_SamplingRate, ScansPerRead, StreamPort))
-            #Pros_DAQ.start()
-            DAQ_Read_Process(DAQ_SamplingRate, ScansPerRead, StreamPort)
+            Pros_DAQ = Process(target=DAQ1.streamRead, args=(DAQ_SamplingRate, ScansPerRead, StreamPort))
+            Pros_DAQ.start()
+            #DAQ_Read_Process(DAQ_SamplingRate, ScansPerRead, StreamPort)
         if (Power_meter.Error == 0):
+            #pass
             Pros_Power = Process(target=Power_Read_Process, args=(No_Power_Sample,))
             Pros_Power.start()
         
@@ -217,27 +225,21 @@ if __name__ == "__main__":
             Spec1.close()
         ##################################################################################################    
         if (DAQ1.Error == 0):
-            print(0, DAQ_Ending[0] - DAQ_Starting[0], No_DAC_Sample)
-            #DAQ_Time = np.linspace(DAQ_Starting[0], (No_DAC_Sample*1)/float(DAQ_SamplingRate), No_DAC_Sample)
-            DAQ_Time = np.linspace(0, DAQ_Ending[0] - DAQ_Starting[0], No_DAC_Sample)
-            print(max(DAQ_Time))
+            DAQ_Time = np.linspace(DAQ_Starting[0], (No_DAC_Sample*1)/float(DAQ_SamplingRate), No_DAC_Sample)
             if len(StreamPort) == 2:
-                #DAQ_Stack1 = DAQ_Signal[0::2]
-                #DAQ_Stack2 = DAQ_Signal[1::2]
-                #del(DAQ_Signal)
-                #DAQ_Signal = np.zeros(shape=(len(StreamPort), No_DAC_Sample/len(StreamPort) ), dtype = float )
-                #DAQ_Signal[0] = DAQ_Stack1
-                #DAQ_Signal[1] = DAQ_Stack2
+                DAQ_Stack1 = DAQ_Signal[0::2]
+                DAQ_Stack2 = DAQ_Signal[1::2]
+                del(DAQ_Signal)
+                DAQ_Signal = np.zeros(shape=(len(StreamPort), No_DAC_Sample/len(StreamPort) ), dtype = float )
+                DAQ_Signal[0] = DAQ_Stack1
+                DAQ_Signal[1] = DAQ_Stack2
                 
-                #DAQ_Stack1 = DAQ_Time[0::2]
-                #DAQ_Stack2 = DAQ_Time[1::2]
-                #del(DAQ_Time)
-                #DAQ_Time = np.zeros(shape=(len(StreamPort), No_DAC_Sample/len(StreamPort) ), dtype = float )
-                #DAQ_Time[0] = DAQ_Stack1
-                #DAQ_Time[1] = DAQ_Stack2
-                #print(max(DAQ_Signal[0]),max(DAQ_Signal[1]),max(DAQ_Time[0]),max(DAQ_Time[1]))
-                DAQ_Time = [DAQ_Time]
-                DAQ_Signal = [DAQ_Signal]
+                DAQ_Stack1 = DAQ_Time[0::2]
+                DAQ_Stack2 = DAQ_Time[1::2]
+                del(DAQ_Time)
+                DAQ_Time = np.zeros(shape=(len(StreamPort), No_DAC_Sample/len(StreamPort) ), dtype = float )
+                DAQ_Time[0] = DAQ_Stack1
+                DAQ_Time[1] = DAQ_Stack2
                 
                 
             elif len(StreamPort) == 3:     
@@ -258,10 +260,6 @@ if __name__ == "__main__":
                 DAQ_Time[0] = DAQ_Stack1
                 DAQ_Time[1] = DAQ_Stack2
                 DAQ_Time[2] = DAQ_Stack3
-            
-            elif len(StreamPort) == 1:
-                DAQ_Time = [DAQ_Time]
-                DAQ_Signal = [DAQ_Signal]
                     
             SaveDataDAQ(DAQ_Time,DAQ_Signal) 
             

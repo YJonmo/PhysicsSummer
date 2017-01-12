@@ -76,7 +76,7 @@ else:
 		   print ('\n')
 
 	if (DAQ1.Error == 0):
-		StreamPort = ['AIN0', 'AIN1']		  
+		StreamPort = ['AIN1','AIN14']#['AIN0', 'AIN1']		  
 							 
 		# This sampling rate in HZ is for when the internal buffer of DAQ is used
 		# Check this link to see what sampling rates are appropriate:

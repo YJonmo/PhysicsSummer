@@ -149,12 +149,13 @@ class DetectDAQT7:
         Reading analogue inpute values (0 to 10 v) in the AIN ports, in stream mode (using the internal buffer of the DAQ).
         scanRate should be below 100000 when using one port only. Using two ports (e.g., AIN0 and AIN1, then it should be below 45000). Please refer to the manual.         
         '''
-        Read = [0, 1,2]
+        Read = [0, 1, 2]
         StartingMoment = 0 
         FinishingMoment = 0
         if type(Port) == str:
             Port = [Port]
         try:
+
             aScanList = self.Handle.namesToAddresses(len(Port), Port)[0]
             
             aNames = ["AIN_ALL_NEGATIVE_CH", "AIN_ALL_RANGE", "STREAM_SETTLING_US", "STREAM_RESOLUTION_INDEX"]
@@ -162,18 +163,21 @@ class DetectDAQT7:
             #ljm.eWriteNames(handle, len(aNames), aNames, aValues)
             
             aValues = [self.Handle.constants.GND, 10.0, 0, 0] #single-ended, +/-10V, 0 (default), 0 (default)
-            
-            self.Handle.eWriteNames(self.Handle.handle, 4, aNames, aValues)
+            print("AAA")
+            #self.Handle.eWriteNames(self.Handle.handle, 4, aNames, aValues)
+            print("BBB")
             '''
             aNames = ["AIN1_RANGE"]
             aValues = [0.1] #single-ended, +/-10V, 0 (default), 0 (default)
             self.Handle.eWriteNames(self.Handle.handle, 1, aNames, aValues)
             '''
-            
+
             #scansPerRead = int(scanRate*2)
             scansPerRead = int(scansPerRead)
             #scansPerRead = 32764
+            print("CCC")
             scanRate = self.Handle.eStreamStart(self.Handle.handle, scansPerRead, len(Port), aScanList, scanRate)
+            print("DDD")
             print("\nStream started with a scan rate of %0.0f Hz." % scanRate)
             StartingMoment = time.time()
             Read = self.Handle.eStreamRead(self.Handle.handle)

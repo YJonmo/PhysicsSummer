@@ -214,11 +214,11 @@ class cameraModuleServer:
 		while True:
 			yield stream
 			
-			#stream.seek(0)
-			#floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
-			#img = Image.open(stream)
-			#img.save(floc)
-			#img.close()
+			stream.seek(0)
+			floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
+			img = Image.open(stream)
+			img.save(floc)
+			img.close()
 				
 			stream.seek(0)
 			stream.truncate()
