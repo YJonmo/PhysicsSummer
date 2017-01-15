@@ -163,9 +163,8 @@ class DetectDAQT7:
             #ljm.eWriteNames(handle, len(aNames), aNames, aValues)
             
             aValues = [self.Handle.constants.GND, 10.0, 0, 0] #single-ended, +/-10V, 0 (default), 0 (default)
-            print("AAA")
             #self.Handle.eWriteNames(self.Handle.handle, 4, aNames, aValues)
-            print("BBB")
+
             '''
             aNames = ["AIN1_RANGE"]
             aValues = [0.1] #single-ended, +/-10V, 0 (default), 0 (default)
@@ -175,9 +174,9 @@ class DetectDAQT7:
             #scansPerRead = int(scanRate*2)
             scansPerRead = int(scansPerRead)
             #scansPerRead = 32764
-            print("CCC")
+
             scanRate = self.Handle.eStreamStart(self.Handle.handle, scansPerRead, len(Port), aScanList, scanRate)
-            print("DDD")
+
             print("\nStream started with a scan rate of %0.0f Hz." % scanRate)
             StartingMoment = time.time()
             Read = self.Handle.eStreamRead(self.Handle.handle)
