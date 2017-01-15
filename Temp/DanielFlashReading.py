@@ -254,6 +254,7 @@ if __name__ == "__main__":
             SaveDataDAQ(DAQ_Time,DAQ_Signal) 
             
             for I in range(len(DAQ_Signal)):
+				print(np.mean(DAQ_Signal[I]))
                 plt.plot(DAQ_Time[I], DAQ_Signal[I])
                 
             #plt.title('Photo diode')
