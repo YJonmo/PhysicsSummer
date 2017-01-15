@@ -53,6 +53,7 @@ def SaveDataSpec(WaveLength, Intensities,Spec_Index):                          #
 
    
 def Spec_Read_Process(No_Spec_Sample):
+    print("Starting Spec...")
     I = 0   
     Wave_len = len(Spec1.Handle.wavelengths())
     while (I < No_Spec_Sample):
@@ -63,15 +64,18 @@ def Spec_Read_Process(No_Spec_Sample):
         Spec_Is_Read.value = 1        
         #print ("spectrometer Index is %i" % Spec_Index[0])
         I = I + 1
+    print("Finished spec")
     Spec_Is_Done.value = 1
 
-
 def DAQ_Read_Process(DAQ_SamplingRate, ScansPerRead, Port):
+    print("Starting DAQ...")
     Read, DAQ_Starting[0], DAQ_Ending[0] = DAQ1.streamRead(DAQ_SamplingRate, ScansPerRead, Port)
- 
+    #print(DAQ1.Handle)
+    #DAQ1.streamRead(DAQ_SamplingRate, ScansPerRead, Port)
+    
     print len(Read[0])
     DAQ_Signal[0:len(Read[0])] = np.asarray(Read[0])
-    
+    print("Finished DAQ")
         
     '''
     # ######## A function for reading the DAQ analogue inpute on AINX ########
@@ -150,7 +154,7 @@ if __name__ == "__main__":
             DAQ_SamplingRate = 10000                     # this sampling rate in HZ is for when the internal buffer of DAQ is used
                                                          # check this link to see what sampling rates are appropriate:
                                                          # https://labjack.com/support/datasheets/t7/appendix-a-1          
-            ScansPerRead = int(DAQ_SamplingRate*DurationOfReading/float(2))
+            ScansPerRead = int(DAQ_SamplingRate*DurationOfReading)#/float(2))
             #No_DAC_Sample = DAQ_SamplingRate*4           # if you are using only on AIN then: No_DAC_Sample = DAQ_SamplingRate*2 
                                                          # if you are using two AINs then: No_DAC_Sample = DAQ_SamplingRate*4
             No_DAC_Sample = ScansPerRead*len(StreamPort)
@@ -171,12 +175,18 @@ if __name__ == "__main__":
     
         ################################## Start the the processes ###########################################
         if (Spec1.Error == 0):
+            #pass
             Pros_Spec = Process(target=Spec_Read_Process, args=(No_Spec_Sample,))
             Pros_Spec.start()
-        if (DAQ1.Error == 0):    
-            Pros_DAQ = Process(target=DAQ_Read_Process, args=(DAQ_SamplingRate, ScansPerRead, StreamPort))
+            #Spec_Read_Process(No_Spec_Sample)
+        if (DAQ1.Error == 0):
+            #pass
+            #Pros_DAQ = Process(target=DAQ_Read_Process, args=(DAQ_SamplingRate, ScansPerRead, StreamPort))
+            Pros_DAQ = Process(target=DAQ1.streamRead, args=(DAQ_SamplingRate, ScansPerRead, StreamPort))
             Pros_DAQ.start()
+            #DAQ_Read_Process(DAQ_SamplingRate, ScansPerRead, StreamPort)
         if (Power_meter.Error == 0):
+            #pass
             Pros_Power = Process(target=Power_Read_Process, args=(No_Power_Sample,))
             Pros_Power.start()
         
