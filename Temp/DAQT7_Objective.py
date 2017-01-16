@@ -180,8 +180,9 @@ class DetectDAQT7:
             print("\nStream started with a scan rate of %0.0f Hz." % scanRate)
             StartingMoment = time.time()
             Read = self.Handle.eStreamRead(self.Handle.handle)
-            self.Handle.eStreamStop(self.Handle.handle)
             FinishingMoment = time.time()
+            self.Handle.eStreamStop(self.Handle.handle)
+            #FinishingMoment = time.time()
             #Signal = Read[0]
             #curSkip = Signal.count(-9999.0)
             print ('Elapsed time %f seconds' %(FinishingMoment - StartingMoment))
