@@ -153,8 +153,9 @@ if __name__ == "__main__":
             StreamPort = ['AIN0', 'AIN1']          
             DAQ_SamplingRate = 10000                     # this sampling rate in HZ is for when the internal buffer of DAQ is used
                                                          # check this link to see what sampling rates are appropriate:
-                                                         # https://labjack.com/support/datasheets/t7/appendix-a-1          
-            ScansPerRead = int(round(DAQ_SamplingRate*DurationOfReading,-2))#/float(2))
+                                                         # https://labjack.com/support/datasheets/t7/appendix-a-1 
+            # Round to nearest hundered in order to avoid error when averaging         
+            ScansPerRead = int(round(DAQ_SamplingRate*DurationOfReading,-2))
             #No_DAC_Sample = DAQ_SamplingRate*4           # if you are using only on AIN then: No_DAC_Sample = DAQ_SamplingRate*2 
                                                          # if you are using two AINs then: No_DAC_Sample = DAQ_SamplingRate*4
             No_DAC_Sample = ScansPerRead*len(StreamPort)
@@ -259,12 +260,8 @@ if __name__ == "__main__":
             SaveDataDAQ(DAQ_Time,DAQ_Signal) 
             
             for I in range(len(DAQ_Signal)):
-                print(np.mean(DAQ_Signal[I]*Conv), np.std(DAQ_Signal[I]*Conv))
-                #N = 20
-                #plt.plot(np.convolve(DAQ_Signal[I], np.ones((N,))/N, mode='valid'))
-                #np.mean(arr.reshape(-1, 3), axis=1)
+				# Remove noise from the plot by averaging every 100 samples
                 plt.plot(np.mean(DAQ_Time[I].reshape(-1, 100), axis=1),np.mean(DAQ_Signal[I].reshape(-1, 100), axis=1))
-                #plt.plot(DAQ_Time[I], DAQ_Signal[I])
             
             plt.title('DAQ Analogue Input')
             plt.xlabel('Time (s)')
@@ -272,10 +269,11 @@ if __name__ == "__main__":
             plt.legend(['Photodiode', 'Thermocouple'])
             plt.show()
             
+            # Convert DAQ analogue voltage into temperature
             DAQ_Temp = DAQ_Signal[1]*Conv
             plt.plot(DAQ_Time[1],DAQ_Temp)
             plt.plot(np.mean(DAQ_Time[1].reshape(-1, 100), axis=1),np.mean(DAQ_Temp.reshape(-1, 100), axis=1))
-            plt.title('Temperature')
+            plt.title('Original vs Average Temperature')
             plt.xlabel('Time (s)')
             plt.ylabel('Temperature ($^\circ$C)')
             plt.ylim([0,50])
