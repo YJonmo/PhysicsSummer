@@ -259,8 +259,10 @@ if __name__ == "__main__":
             
             for I in range(len(DAQ_Signal)):
                 print(np.mean(DAQ_Signal[I]*Conv), np.std(DAQ_Signal[I]*Conv))
-                N = 20
-                plt.plot(np.convolve(DAQ_Signal[I], np.ones((N,))/N, mode='valid'))
+                #N = 20
+                #plt.plot(np.convolve(DAQ_Signal[I], np.ones((N,))/N, mode='valid'))
+                #np.mean(arr.reshape(-1, 3), axis=1)
+                plt.plot(DAQ_Time[I], np.mean(DAQ_Signal[I].reshape(-1, 100), axis=1))
                 #plt.plot(DAQ_Time[I], DAQ_Signal[I])
                 
             #plt.title('Photo diode')
