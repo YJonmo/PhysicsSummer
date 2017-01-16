@@ -154,7 +154,7 @@ if __name__ == "__main__":
             DAQ_SamplingRate = 10000                     # this sampling rate in HZ is for when the internal buffer of DAQ is used
                                                          # check this link to see what sampling rates are appropriate:
                                                          # https://labjack.com/support/datasheets/t7/appendix-a-1          
-            ScansPerRead = int(DAQ_SamplingRate*DurationOfReading)#/float(2))
+            ScansPerRead = int(DAQ_SamplingRate*DurationOfReading/float(2))
             #No_DAC_Sample = DAQ_SamplingRate*4           # if you are using only on AIN then: No_DAC_Sample = DAQ_SamplingRate*2 
                                                          # if you are using two AINs then: No_DAC_Sample = DAQ_SamplingRate*4
             No_DAC_Sample = ScansPerRead*len(StreamPort)
