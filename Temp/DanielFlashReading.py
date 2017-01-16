@@ -19,7 +19,7 @@ Time_Index = np.zeros(shape=(1, No_iterations ), dtype = float )
 
 # Op-amp gain calculation to convert thermometer voltage into temperature
 R1 = 10.16e3
-R2 = 108.9
+R2 = 137.2
 Gain = 1 + (R1/R2)
 Conv = 1000.0/Gain
 
