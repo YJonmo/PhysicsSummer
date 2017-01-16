@@ -262,7 +262,7 @@ if __name__ == "__main__":
                 #N = 20
                 #plt.plot(np.convolve(DAQ_Signal[I], np.ones((N,))/N, mode='valid'))
                 #np.mean(arr.reshape(-1, 3), axis=1)
-                plt.plot(DAQ_Time[I], np.mean(DAQ_Signal[I].reshape(-1, 100), axis=1))
+                plt.plot(np.mean(DAQ_Signal[I].reshape(-1, 100), axis=1))
                 #plt.plot(DAQ_Time[I], DAQ_Signal[I])
                 
             #plt.title('Photo diode')
