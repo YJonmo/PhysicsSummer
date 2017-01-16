@@ -325,6 +325,13 @@ class cameraModuleClient:
 		# Must have Netcat installed on the command-line
 		if typ == "Image":
 			os.system("nc 192.168.1.1 60000 > ../../Images/" + fname)
+		elif typ == "Trigger":
+			while True:
+				fnm = self.recv_msg(self.client_socket)
+				if fnm == "Q":
+					break
+				else:
+					os.system("nc 192.168.1.1 60000 > " + fnm)
 		elif typ == "Video":
 			os.system("nc 192.168.1.1 60000 > ../../Videos/" + fname)
 		
@@ -414,6 +421,7 @@ class cameraModuleClient:
 		# Capture with trigger
 		elif command == "T":
 			self.sendTrigger()
+			self.receiveFile("", "Trigger")
 			
 		# Set saturation
 		elif command == "U":

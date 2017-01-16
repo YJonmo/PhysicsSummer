@@ -59,6 +59,7 @@ class cameraModuleServer:
 		self.start = 0
 		self.end = 0
 		self.ind = 0
+		self.fnames = []
 		
 	
 	def setResolution(self, width, height):
@@ -207,30 +208,58 @@ class cameraModuleServer:
 			#elif trigger == "Q":
 				#break
 		
+		self.fnames = []
+		self.ind = 0
 		stream = io.BytesIO()
 		
-		#trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
-		self.start = time.time()
 		while True:
-			yield stream
+			# Wait for the trigger (this can be changed to ADC or GPIO input)
+			if self.network == 1:
+				trigger = self.recv_msg(self.hostSock)
+			else:
+				trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
 			
-			stream.seek(0)
-			floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
-			img = Image.open(stream)
-			img.save(floc)
-			img.close()
-				
-			stream.seek(0)
-			stream.truncate()
+			# Yield the filename to capture the image
+			if trigger == "T":
+				yield stream
+				print("Captured")
+				stream.seek(0)
+				floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
+				self.fnames.append(floc)
+				img = Image.open(stream)
+				img.save(floc)
+				img.close()
+					
+				stream.seek(0)
+				stream.truncate()
 			
-			#trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
-			
-			#if trigger == "Q":
-			#	break
-			
-			if self.ind > 10:
+			# Quit trigger mode
+			elif trigger == "Q":
 				break
-			self.ind += 1
+		
+		##trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
+		#self.start = time.time()
+		#while True:
+			#yield stream
+			
+			#stream.seek(0)
+			#floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
+			#self.fnames.append(floc)
+			#img = Image.open(stream)
+			#img.save(floc)
+			#img.close()
+				
+			#stream.seek(0)
+			#stream.truncate()
+			
+			##trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
+			
+			##if trigger == "Q":
+			##	break
+			
+			#if self.ind > 10:
+				#break
+			#self.ind += 1
 			
 		
 	
@@ -244,7 +273,8 @@ class cameraModuleServer:
 		time.sleep(2)
 		
 		# Use generator function to wait for trigger and capture image with low latency.
-		self.camera.capture_sequence(self.getFilenames(), 'yuv', use_video_port=True)
+		#self.camera.capture_sequence(self.getFilenames(), 'yuv', use_video_port=True)
+		self.camera.capture_sequence(self.getFilenames(), 'jpeg', use_video_port=True)
 		self.end = time.time()
 
 		# Close the camera preview port
@@ -668,6 +698,9 @@ class cameraModuleServer:
 		# Send the image via Netcat
 		if typ == "Image":
 			os.system("nc -l 60000 < ../../Images/" + fname)
+		elif typ == "Trigger":
+			self.send_msg(self.hostSock, fname)
+			os.system("nc -l 60000 < " + fname)
 		elif typ == "Video":
 			os.system("nc -l 60000 < ../../Videos/" + fname)
 		
@@ -769,6 +802,10 @@ class cameraModuleServer:
 		# Capture with trigger
 		elif command == "T":
 			self.captureTrigger()
+			if self.network == 1:
+				for name in self.fnames:
+					self.sendFile(name, "Trigger")
+				self.send_msg(self.hostSock, "Q")
 			
 		# Set saturation
 		elif command == "U":
