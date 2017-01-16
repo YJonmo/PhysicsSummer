@@ -265,7 +265,18 @@ if __name__ == "__main__":
                 #np.mean(arr.reshape(-1, 3), axis=1)
                 plt.plot(np.mean(DAQ_Time[I].reshape(-1, 100), axis=1),np.mean(DAQ_Signal[I].reshape(-1, 100), axis=1))
                 #plt.plot(DAQ_Time[I], DAQ_Signal[I])
-                
+            
+            plt.title('DAQ Analogue Input')
+            plt.xlabel('Time (s)')
+            plt.ylabel('Voltage (V)')
+            plt.legend(['Photodiode', 'Thermocouple'])
+            plt.show()
+            
+            plt.plot(np.mean(DAQ_Time[1].reshape(-1, 100), axis=1),np.mean(DAQ_Signal[1]*Conv.reshape(-1, 100), axis=1))
+            plt.title('Temperature')
+            plt.xlabel('Time (s)')
+            plt.ylabel('Temperature ($^\circ$ C)')
+            plt.show()
             #plt.title('Photo diode')
             #plt.xlabel('Time (s)')
             #plt.ylabel('Voltage (v)')
@@ -297,7 +308,7 @@ if __name__ == "__main__":
             
         
         ##################################################################################################
-        plt.show()
+        #plt.show()
         
         
 
