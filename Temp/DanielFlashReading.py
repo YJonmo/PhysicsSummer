@@ -219,7 +219,8 @@ if __name__ == "__main__":
             Spec1.close()
         ##################################################################################################    
         if (DAQ1.Error == 0):
-            DAQ_Time = np.linspace(DAQ_Starting[0], (No_DAC_Sample*1)/float(DAQ_SamplingRate), No_DAC_Sample)
+            #DAQ_Time = np.linspace(DAQ_Starting[0], (No_DAC_Sample*1)/float(DAQ_SamplingRate), No_DAC_Sample)
+            DAQ_Time = np.linspace(0, DAQ_Ending[0] - DAQ_Starting[0], No_DAC_Sample)
             if len(StreamPort) == 2:
                 DAQ_Stack1 = DAQ_Signal[0::2]
                 DAQ_Stack2 = DAQ_Signal[1::2]
@@ -262,7 +263,7 @@ if __name__ == "__main__":
                 #N = 20
                 #plt.plot(np.convolve(DAQ_Signal[I], np.ones((N,))/N, mode='valid'))
                 #np.mean(arr.reshape(-1, 3), axis=1)
-                plt.plot(np.mean(DAQ_Signal[I].reshape(-1, 100), axis=1))
+                plt.plot(np.mean(DAQ_Time[I].reshape(-1, 100), axis=1),np.mean(DAQ_Signal[I].reshape(-1, 100), axis=1))
                 #plt.plot(DAQ_Time[I], DAQ_Signal[I])
                 
             #plt.title('Photo diode')
