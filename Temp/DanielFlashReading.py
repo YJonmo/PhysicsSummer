@@ -272,7 +272,8 @@ if __name__ == "__main__":
             plt.legend(['Photodiode', 'Thermocouple'])
             plt.show()
             
-            plt.plot(np.mean(DAQ_Time[1].reshape(-1, 100), axis=1),np.mean(DAQ_Signal[1]*Conv.reshape(-1, 100), axis=1))
+            DAQ_Temp = DAQ_Signal[1]*Conv
+            plt.plot(np.mean(DAQ_Time[1].reshape(-1, 100), axis=1),np.mean(DAQ_Temp.reshape(-1, 100), axis=1))
             plt.title('Temperature')
             plt.xlabel('Time (s)')
             plt.ylabel('Temperature ($^\circ$ C)')
