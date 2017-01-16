@@ -19,7 +19,7 @@ Time_Index = np.zeros(shape=(1, No_iterations ), dtype = float )
 
 # Op-amp gain calculation to convert thermometer voltage into temperature
 R1 = 10.16e3
-R2 = 137.2
+R2 = 108.9
 Gain = 1 + (R1/R2)
 Conv = 1000.0/Gain
 
@@ -259,7 +259,9 @@ if __name__ == "__main__":
             
             for I in range(len(DAQ_Signal)):
                 print(np.mean(DAQ_Signal[I]*Conv), np.std(DAQ_Signal[I]*Conv))
-                plt.plot(DAQ_Time[I], DAQ_Signal[I])
+                N = 20
+                plt.plot(DAQ_Time[I], np.convolve(DAQ_Signal[I], np.ones((N,))/N, mode='valid'))
+                #plt.plot(DAQ_Time[I], DAQ_Signal[I])
                 
             #plt.title('Photo diode')
             #plt.xlabel('Time (s)')
