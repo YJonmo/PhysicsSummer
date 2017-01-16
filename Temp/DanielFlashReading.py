@@ -17,7 +17,10 @@ No_iterations = 10
     
 Time_Index = np.zeros(shape=(1, No_iterations ), dtype = float )
 
-
+# Op-amp gain calculation to convert thermometer voltage into temperature
+R1 = 10.16e3
+R2 = 108.9
+G = 1 + (R1/R2)
 
 def SaveDataPWR(TimeIndex, Power):  
                         # This function save the recorded date in the HDF5 format. You don't need to call it when using for testing.
@@ -254,7 +257,7 @@ if __name__ == "__main__":
             SaveDataDAQ(DAQ_Time,DAQ_Signal) 
             
             for I in range(len(DAQ_Signal)):
-                print(np.mean(DAQ_Signal[I]))
+                print(np.mean(DAQ_Signal[I]*G), np.std(DAQ_Signal[I]*G))
                 plt.plot(DAQ_Time[I], DAQ_Signal[I])
                 
             #plt.title('Photo diode')
