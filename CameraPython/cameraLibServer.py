@@ -235,7 +235,34 @@ class cameraModuleServer:
 			
 			# Quit trigger mode
 			elif trigger == "Q":
+				yield stream
+				print("Captured")
+				stream.seek(0)
+				floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
+				self.fnames.append(floc)
+				img = Image.open(stream)
+				img.save(floc)
+				img.close()
+					
+				stream.seek(0)
+				stream.truncate()
+				
+				yield stream
+				print("Captured")
+				stream.seek(0)
+				floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
+				self.fnames.append(floc)
+				img = Image.open(stream)
+				img.save(floc)
+				img.close()
+					
+				stream.seek(0)
+				stream.truncate()
+				
 				break
+		
+		self.fnames.pop(0)
+		self.fnames.pop(0)
 		
 		##trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
 		#self.start = time.time()
