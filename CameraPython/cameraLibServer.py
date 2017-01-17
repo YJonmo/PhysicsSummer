@@ -206,7 +206,7 @@ class cameraModuleServer:
 				
 				# Save the triggered image
 				stream.seek(0)
-				floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
+				floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
 				if len(self.dates) >= 2:
 					fname = self.dates[self.ind-2]
 				else:
@@ -229,7 +229,7 @@ class cameraModuleServer:
 				# the two images stored here are actually the previous two triggerd images.
 				yield stream
 				stream.seek(0)
-				floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
+				floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
 				if len(self.dates) >= 2:
 					fname = self.dates[self.ind-2]
 				else:
@@ -246,7 +246,7 @@ class cameraModuleServer:
 				
 				yield stream
 				stream.seek(0)
-				floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
+				floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
 				if len(self.dates) >= 2:
 					fname = self.dates[self.ind-2]
 				else:
