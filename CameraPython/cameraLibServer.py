@@ -225,8 +225,10 @@ class cameraModuleServer:
 			
 			# Yield the stream to capture the image
 			if trigger == "T":
+				self.start = time.time()
 				yield stream
-				print("Captured")
+				print("Captured in " + str(time.time() - self.start) + " seconds")
+				
 				stream.seek(0)
 				floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
 				if len(self.dates) >= 2:
@@ -246,7 +248,6 @@ class cameraModuleServer:
 			# Quit trigger mode
 			elif trigger == "Q":
 				yield stream
-				print("Captured")
 				stream.seek(0)
 				floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
 				if len(self.dates) >= 2:
@@ -264,7 +265,6 @@ class cameraModuleServer:
 				stream.truncate()
 				
 				yield stream
-				print("Captured")
 				stream.seek(0)
 				floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
 				if len(self.dates) >= 2:
