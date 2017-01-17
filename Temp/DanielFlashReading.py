@@ -268,10 +268,13 @@ if __name__ == "__main__":
             plt.ylabel('Voltage (V)')
             plt.legend(['Photodiode', 'Thermocouple'])
             plt.show()
-
-            plt.plot(np.absolute(np.fft.fft(DAQ_Signal[1])))
+            
+            plt.plot(np.fft.fftfreq(len(DAQ_Signal[1]),1.0/DAQ_SamplingRate), np.absolute(np.fft.fft(DAQ_Signal[1])))
+            plt.title('Temperature noise FFT')
+            plt.xlabel('Frequency (Hz)')
+            plt.ylabel('Amplitude')
             plt.ylim([0,1000])
-            plt.xlim([1,25000])
+            plt.xlim([1,5000])
             plt.show()
             
             # Convert DAQ analogue voltage into temperature
