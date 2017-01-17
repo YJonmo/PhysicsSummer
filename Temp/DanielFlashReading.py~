@@ -268,16 +268,21 @@ if __name__ == "__main__":
             plt.ylabel('Voltage (V)')
             plt.legend(['Photodiode', 'Thermocouple'])
             plt.show()
+
+            plt.plot(np.fft.fft(DAQ_Signal[1]))
+            #plt.ylim([0,1000])
+            plt.xlim([1,25000])
+            plt.show()
             
             # Convert DAQ analogue voltage into temperature
             DAQ_Temp = DAQ_Signal[1]*Conv
             plt.plot(DAQ_Time[1],DAQ_Temp)
             plt.plot(np.mean(DAQ_Time[1].reshape(-1, 100), axis=1),np.mean(DAQ_Temp.reshape(-1, 100), axis=1))
-            plt.title('Original vs Average Temperature')
+            plt.title('Original vs Averaged Temperature')
             plt.xlabel('Time (s)')
             plt.ylabel('Temperature ($^\circ$C)')
             plt.ylim([0,50])
-            plt.legend(['Original Temperature','Filtered Temperature'])
+            plt.legend(['Original Temperature','Averaged Temperature'])
             plt.show()
             #plt.title('Photo diode')
             #plt.xlabel('Time (s)')

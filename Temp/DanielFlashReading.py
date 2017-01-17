@@ -268,6 +268,11 @@ if __name__ == "__main__":
             plt.ylabel('Voltage (V)')
             plt.legend(['Photodiode', 'Thermocouple'])
             plt.show()
+
+            plt.plot(np.absolute(np.fft.fft(DAQ_Signal[1])))
+            plt.ylim([0,1000])
+            plt.xlim([1,25000])
+            plt.show()
             
             # Convert DAQ analogue voltage into temperature
             DAQ_Temp = DAQ_Signal[1]*Conv
