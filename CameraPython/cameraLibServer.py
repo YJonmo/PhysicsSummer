@@ -186,31 +186,6 @@ class cameraModuleServer:
 		Generator function which allows the image capture to wait for the trigger, and yields the filename.
 		'''
 		
-		## Take an initial image to lower latency
-		#temp = io.BytesIO()
-		##floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
-		#yield temp
-		#print("Camera ready for trigger")
-		
-		#while True:
-			## Wait for the trigger (this can be changed to ADC or GPIO input)
-			#if self.network == 1:
-				#trigger = self.recv_msg(self.hostSock)
-			#else:
-				#trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
-			
-			## Yield the filename to capture the image
-			#if trigger == "T":
-				#self.start = time.time()
-				#floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
-				#yield floc
-				#floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
-				#yield floc
-			
-			## Quit trigger mode
-			#elif trigger == "Q":
-				#break
-		
 		self.fnames = []
 		self.dates = []
 		self.ind = 0
@@ -229,6 +204,7 @@ class cameraModuleServer:
 				yield stream
 				print("Captured in " + str(time.time() - self.start) + " seconds")
 				
+				# Save the triggered image
 				stream.seek(0)
 				floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
 				if len(self.dates) >= 2:
@@ -242,11 +218,15 @@ class cameraModuleServer:
 				img.save(fname)
 				img.close()
 					
+				# Clear the image stream
 				stream.seek(0)
 				stream.truncate()
 			
 			# Quit trigger mode
 			elif trigger == "Q":
+				# Take and store image twice on quitting. For some reason, 
+				# the stored images are always two behind the trigger, so 
+				# the two images stored here are actually the previous two triggerd images.
 				yield stream
 				stream.seek(0)
 				floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
@@ -283,33 +263,9 @@ class cameraModuleServer:
 				
 				break
 		
+		# Remove the first two images, as they are identical to the third
 		self.fnames.pop(0)
 		self.fnames.pop(0)
-		
-		##trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
-		#self.start = time.time()
-		#while True:
-			#yield stream
-			
-			#stream.seek(0)
-			#floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
-			#self.fnames.append(floc)
-			#img = Image.open(stream)
-			#img.save(floc)
-			#img.close()
-				
-			#stream.seek(0)
-			#stream.truncate()
-			
-			##trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
-			
-			##if trigger == "Q":
-			##	break
-			
-			#if self.ind > 10:
-				#break
-			#self.ind += 1
-			
 		
 	
 	def captureTrigger(self):
@@ -322,7 +278,6 @@ class cameraModuleServer:
 		time.sleep(2)
 		
 		# Use generator function to wait for trigger and capture image with low latency.
-		#self.camera.capture_sequence(self.getFilenames(), 'yuv', use_video_port=True)
 		self.camera.capture_sequence(self.getFilenames(), 'jpeg', use_video_port=True)
 		self.end = time.time()
 
