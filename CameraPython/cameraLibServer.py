@@ -54,12 +54,15 @@ class cameraModuleServer:
 		self.camera = PiCamera()
 		PiCamera.CAPTURE_TIMEOUT = 600
 
-		# Initalise network variable
+		# Initialise network variable
 		self.network = 0
+		
+		# Initialise trigger mode variables
 		self.start = 0
 		self.end = 0
 		self.ind = 0
 		self.fnames = []
+		self.dates = []
 		
 	
 	def setResolution(self, width, height):
@@ -209,6 +212,7 @@ class cameraModuleServer:
 				#break
 		
 		self.fnames = []
+		self.dates = []
 		self.ind = 0
 		stream = io.BytesIO()
 		
@@ -219,15 +223,21 @@ class cameraModuleServer:
 			else:
 				trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
 			
-			# Yield the filename to capture the image
+			# Yield the stream to capture the image
 			if trigger == "T":
 				yield stream
 				print("Captured")
 				stream.seek(0)
 				floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
-				self.fnames.append(floc)
+				if len(self.dates) >= 2:
+					fname = self.dates[self.ind-2]
+				else:
+					fname = "Temp" + str(len(self.dates)) + ".jpg"
+				self.dates.append(floc)
+				self.fnames.append(fname)
+				self.ind += 1
 				img = Image.open(stream)
-				img.save(floc)
+				img.save(fname)
 				img.close()
 					
 				stream.seek(0)
@@ -239,9 +249,15 @@ class cameraModuleServer:
 				print("Captured")
 				stream.seek(0)
 				floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
-				self.fnames.append(floc)
+				if len(self.dates) >= 2:
+					fname = self.dates[self.ind-2]
+				else:
+					fname = "Temp" + str(len(self.dates)) + ".jpg"
+				self.dates.append(floc)
+				self.fnames.append(fname)
+				self.ind += 1
 				img = Image.open(stream)
-				img.save(floc)
+				img.save(fname)
 				img.close()
 					
 				stream.seek(0)
@@ -251,9 +267,15 @@ class cameraModuleServer:
 				print("Captured")
 				stream.seek(0)
 				floc = "../../Images2/Image" + datetime.datetime.now().isoformat() + ".jpg"
-				self.fnames.append(floc)
+				if len(self.dates) >= 2:
+					fname = self.dates[self.ind-2]
+				else:
+					fname = "Temp" + str(len(self.dates)) + ".jpg"
+				self.dates.append(floc)
+				self.fnames.append(fname)
+				self.ind += 1
 				img = Image.open(stream)
-				img.save(floc)
+				img.save(fname)
 				img.close()
 					
 				stream.seek(0)
