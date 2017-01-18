@@ -24,28 +24,28 @@ try:
 			# Initialise the network
 			camCommand.initNetwork()
 		else:
-			try:
-				# Process and perform command from network
-				command = camCommand.receiveCommand()
-				camCommand.performCommand(command)
-				
-				# Close network if quit command called
-				if command == "Q":
-					time.sleep(1)
-					camCommand.closeNetwork()
-				
-			except:
-				# Restart the server if an error occurs
-				e = sys.exc_info()[0]
-				print("Error: %s" % e)
-				try:
-					# Occasionally the camera will fail when trying to close
-					camCommand.closeCamera()
-					camCommand.__init__()
-				except:
-					print("Cannot close camera")
+			#try:
+			# Process and perform command from network
+			command = camCommand.receiveCommand()
+			camCommand.performCommand(command)
+			
+			# Close network if quit command called
+			if command == "Q":
 				time.sleep(1)
 				camCommand.closeNetwork()
+				
+			#except:
+				## Restart the server if an error occurs
+				#e = sys.exc_info()[0]
+				#print("Error: %s" % e)
+				#try:
+					## Occasionally the camera will fail when trying to close
+					#camCommand.closeCamera()
+					#camCommand.__init__()
+				#except:
+					#print("Cannot close camera")
+				#time.sleep(1)
+				#camCommand.closeNetwork()
 finally:	
 	# Free the camera resources
 	print("Closing camera...")

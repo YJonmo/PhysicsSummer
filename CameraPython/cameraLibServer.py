@@ -63,6 +63,11 @@ class cameraModuleServer:
 		self.ind = 0
 		self.fnames = []
 		self.dates = []
+		self.trigflag = 0
+		self.trigcount = 0
+		
+		# Initialise trigger
+		self.trigger = Value('i', 0)
 		
 	
 	def setResolution(self, width, height):
@@ -284,8 +289,78 @@ class cameraModuleServer:
 
 		# Close the camera preview port
 		self.camera.stop_preview()
+	
+	
+	def paraTrigger(self):
+		'''
+		Trigger function executed in parallel to capture function.
+		'''
 		
-		# Need to download images here
+		if self.network == 1:
+			trig = self.recv_msg(self.hostSock)
+		else:
+			trig = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
+		
+		if trig == "T":
+			self.trigger.value = 1
+		elif trig == "Q":
+			self.trigger.value = 2
+		
+	
+	def captureTriggerImproved(self):
+		'''
+		Fast capture of a series of images given a trigger. Uses capture_continuous instead of capture_sequence.
+		'''
+		
+		# Camera setup
+		self.camera.start_preview()
+		time.sleep(2)
+		
+		stream = io.BytesIO()
+		
+		self.fnames = []
+		self.ind = 0
+		self.trigflag = 0
+		self.trigcount = 0
+		
+		self.trigger.value = 0
+		pt = Process(target = self.paraTrigger)
+		pt.start()
+		
+		for frm in self.camera.capture_continuous(stream, format='jpeg', use_video_port=True):
+			
+			stream.truncate()
+			stream.seek(0)
+			
+			if self.trigflag == 1:
+				self.trigcount += 1
+			
+			if self.trigcount >= 4:
+				# Capture image
+				if self.trigger.value == 1:
+					print("Captured")
+					fname = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
+					self.fnames.append(fname)
+					self.ind += 1
+					img = Image.open(stream)
+					img.save(fname)
+					img.close()
+				
+				# Quit trigger mode
+				elif self.trigger.value == 2:
+					pt.terminate()
+					self.trigger.value = 0
+					break
+				
+				pt.terminate()
+				self.trigger.value = 0
+				pt = Process(target = self.paraTrigger)
+				pt.start()
+				self.trigflag = 0
+				self.trigcount = 0
+			
+			if not pt.is_alive():
+				self.trigflag = 1
 		
 	
 	def captureStream(self, duration, fname):
@@ -806,7 +881,7 @@ class cameraModuleServer:
 		
 		# Capture with trigger
 		elif command == "T":
-			self.captureTrigger()
+			self.captureTriggerImproved()
 			if self.network == 1:
 				for name in self.fnames:
 					self.sendFile(name, "Trigger")
