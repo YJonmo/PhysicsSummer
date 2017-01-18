@@ -199,6 +199,7 @@ class cameraModuleServer:
 				trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
 			
 			# Yield the stream to capture the image
+			time.sleep(0.125)
 			if trigger == "T":
 				self.start = time.time()
 				yield stream
@@ -226,7 +227,7 @@ class cameraModuleServer:
 			elif trigger == "Q":
 				# Take and store image twice on quitting. For some reason, 
 				# the stored images are always two behind the trigger, so 
-				# the two images stored here are actually the previous two triggerd images.
+				# the two images stored here are actually the previous two triggered images.
 				yield stream
 				stream.seek(0)
 				floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
