@@ -20,4 +20,4 @@ This folder contains modifications to the DanielFlashReading code.
 
 - The StreamRead function is modified to obtain the correct finishing time, in order to display the correct time on the plot x axis.
 
-- The electrical opamp circuit is modified to increase the gain on the temperature input. The potentiometers are set such that R1 = 10.16 kOhms, and R2 = 138.3 kOhms.
+- The electrical opamp circuit is modified to increase the gain on the temperature input. The potentiometers are set such that R1 = 10.16 kOhms, and R2 = 138.3 Ohms.
