@@ -281,11 +281,12 @@ if __name__ == "__main__":
             DAQ_Temp = DAQ_Signal[1]*Conv
             plt.plot(DAQ_Time[1],DAQ_Temp)
             plt.plot(np.mean(DAQ_Time[1].reshape(-1, 100), axis=1),np.mean(DAQ_Temp.reshape(-1, 100), axis=1))
+            plt.plot(DAQ_Time[1][49:-50], np.convolve(DAQ_Temp, np.ones((100,))/100, mode='valid'))
             plt.title('Original vs Averaged Temperature')
             plt.xlabel('Time (s)')
             plt.ylabel('Temperature ($^\circ$C)')
             plt.ylim([0,50])
-            plt.legend(['Original Temperature','Averaged Temperature'])
+            plt.legend(['Original Temperature','Averaged Temperature','Moving Average'])
             plt.show()
             #plt.title('Photo diode')
             #plt.xlabel('Time (s)')

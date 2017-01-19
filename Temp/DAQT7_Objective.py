@@ -163,7 +163,7 @@ class DetectDAQT7:
             #ljm.eWriteNames(handle, len(aNames), aNames, aValues)
             
             aValues = [self.Handle.constants.GND, 10.0, 0, 0] #single-ended, +/-10V, 0 (default), 0 (default)
-            #self.Handle.eWriteNames(self.Handle.handle, 4, aNames, aValues)
+            self.Handle.eWriteNames(self.Handle.handle, 4, aNames, aValues)
 
             '''
             aNames = ["AIN1_RANGE"]

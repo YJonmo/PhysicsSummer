@@ -151,7 +151,7 @@ if __name__ == "__main__":
         if (DAQ1.Error == 0):
             DAQ_Is_Read.value = 0
             StreamPort = ['AIN0', 'AIN1']          
-            DAQ_SamplingRate = 40000                     # this sampling rate in HZ is for when the internal buffer of DAQ is used
+            DAQ_SamplingRate = 10000                     # this sampling rate in HZ is for when the internal buffer of DAQ is used
                                                          # check this link to see what sampling rates are appropriate:
                                                          # https://labjack.com/support/datasheets/t7/appendix-a-1 
             # Round to nearest hundered in order to avoid error when averaging         
@@ -261,7 +261,7 @@ if __name__ == "__main__":
             
             for I in range(len(DAQ_Signal)):
 				# Remove noise from the plot by averaging every 100 samples
-                plt.plot(np.mean(DAQ_Time[I].reshape(-1, 400), axis=1),np.mean(DAQ_Signal[I].reshape(-1, 400), axis=1))
+                plt.plot(np.mean(DAQ_Time[I].reshape(-1, 100), axis=1),np.mean(DAQ_Signal[I].reshape(-1, 100), axis=1))
             
             plt.title('DAQ Analogue Input')
             plt.xlabel('Time (s)')
@@ -280,12 +280,14 @@ if __name__ == "__main__":
             # Convert DAQ analogue voltage into temperature
             DAQ_Temp = DAQ_Signal[1]*Conv
             plt.plot(DAQ_Time[1],DAQ_Temp)
-            plt.plot(np.mean(DAQ_Time[1].reshape(-1, 400), axis=1),np.mean(DAQ_Temp.reshape(-1, 400), axis=1))
+            plt.plot(np.mean(DAQ_Time[1].reshape(-1, 100), axis=1),np.mean(DAQ_Temp.reshape(-1, 100), axis=1))
+            print(len(DAQ_Time[1][49:-50]), len(np.convolve(DAQ_Temp, np.ones((100,))/100, mode='valid')))
+            plt.plot(DAQ_Time[1][49:-50], np.convolve(DAQ_Temp, np.ones((100,))/100, mode='valid'))
             plt.title('Original vs Averaged Temperature')
             plt.xlabel('Time (s)')
             plt.ylabel('Temperature ($^\circ$C)')
             plt.ylim([0,50])
-            plt.legend(['Original Temperature','Averaged Temperature'])
+            plt.legend(['Original Temperature','Averaged Temperature','Moving Average'])
             plt.show()
             #plt.title('Photo diode')
             #plt.xlabel('Time (s)')
