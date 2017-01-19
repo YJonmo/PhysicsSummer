@@ -33,11 +33,12 @@ def SaveDataPWR(TimeIndex, Power):
     file.create_dataset('ThorlabsPM100/TimeIndex', data = TimeIndex)
     file.close()
 
-def SaveDataDAQ(TimeIndex, Voltages):                          # This function save the recorded date in the HDF5 format. You don't need to call it when using for testing.
+def SaveDataDAQ(TimeIndex, Voltages, Temperature):                          # This function save the recorded date in the HDF5 format. You don't need to call it when using for testing.
     File_name = "Chose_a_Name_DAQT7" + str('%s' %datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d-%H-%M-%S'))+ ".hdf5"
     file = h5py.File(File_name, "w")
     Spec_subgroup1 = file.create_group("DAQT7")
     file.create_dataset('DAQT7/Voltages', data = Voltages)
+    file.create_dataset('DAQT7/Temperature', data = Temperature)
     file.create_dataset('DAQT7/TimeIndex', data = TimeIndex)
     #dset.attrs["attr"] = b"Hello"
     Spec_subgroup1.attrs['DAQT7 Details'] = np.string_(DAQ1.getDetails())
@@ -256,8 +257,11 @@ if __name__ == "__main__":
                 DAQ_Time[0] = DAQ_Stack1
                 DAQ_Time[1] = DAQ_Stack2
                 DAQ_Time[2] = DAQ_Stack3
-                    
-            SaveDataDAQ(DAQ_Time,DAQ_Signal) 
+            
+            # Convert DAQ analogue voltage into temperature
+            DAQ_Temp = DAQ_Signal[1]*Conv
+            
+            SaveDataDAQ(DAQ_Time,DAQ_Signal,DAQ_Temp) 
             
             for I in range(len(DAQ_Signal)):
 				# Remove noise from the plot by averaging every 100 samples
@@ -269,25 +273,31 @@ if __name__ == "__main__":
             plt.legend(['Photodiode', 'Thermocouple'])
             plt.show()
             
-            plt.plot(np.fft.fftfreq(len(DAQ_Signal[1]),1.0/DAQ_SamplingRate), np.absolute(np.fft.fft(DAQ_Signal[1])))
-            plt.title('Temperature noise FFT')
-            plt.xlabel('Frequency (Hz)')
-            plt.ylabel('Amplitude')
-            plt.ylim([0,1000])
-            plt.xlim([1,5000])
-            plt.show()
-            
-            # Convert DAQ analogue voltage into temperature
-            DAQ_Temp = DAQ_Signal[1]*Conv
-            plt.plot(DAQ_Time[1],DAQ_Temp)
             plt.plot(np.mean(DAQ_Time[1].reshape(-1, 100), axis=1),np.mean(DAQ_Temp.reshape(-1, 100), axis=1))
-            plt.plot(DAQ_Time[1][49:-50], np.convolve(DAQ_Temp, np.ones((100,))/100, mode='valid'))
-            plt.title('Original vs Averaged Temperature')
+            plt.title('Thermocouple Temperature')
             plt.xlabel('Time (s)')
             plt.ylabel('Temperature ($^\circ$C)')
-            plt.ylim([0,50])
-            plt.legend(['Original Temperature','Averaged Temperature','Moving Average'])
             plt.show()
+            
+            #plt.plot(np.fft.fftfreq(len(DAQ_Signal[1]),1.0/DAQ_SamplingRate), np.absolute(np.fft.fft(DAQ_Signal[1])))
+            #plt.title('Temperature noise FFT')
+            #plt.xlabel('Frequency (Hz)')
+            #plt.ylabel('Amplitude')
+            #plt.ylim([0,1000])
+            #plt.xlim([1,5000])
+            #plt.show()
+            
+            #plt.plot(DAQ_Time[1],DAQ_Temp)
+            #plt.plot(np.mean(DAQ_Time[1].reshape(-1, 100), axis=1),np.mean(DAQ_Temp.reshape(-1, 100), axis=1))
+            #plt.plot(DAQ_Time[1][49:-50], np.convolve(DAQ_Temp, np.ones((100,))/100, mode='valid'))
+            #plt.title('Original vs Averaged Temperature')
+            #plt.xlabel('Time (s)')
+            #plt.ylabel('Temperature ($^\circ$C)')
+            #plt.ylim([0,50])
+            #plt.legend(['Original Temperature','Averaged Temperature','Moving Average'])
+            #plt.show()
+
+
             #plt.title('Photo diode')
             #plt.xlabel('Time (s)')
             #plt.ylabel('Voltage (v)')
