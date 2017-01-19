@@ -182,7 +182,10 @@ class cameraModuleServer:
 		time.sleep(2)
 		
 		# Capture an image and store in file <fname>
-		self.camera.capture(floc)
+		self.start = time.time()
+		self.camera.capture(floc,'jpeg',True)
+		self.end = time.time()
+		print("Captured in : " + str(self.end-self.start) + "seconds")
 		self.camera.stop_preview()
 		
 	
@@ -319,7 +322,9 @@ class cameraModuleServer:
 		stream = io.BytesIO()
 		
 		self.fnames = []
+		self.fcaptures = []
 		self.ind = 0
+		self.frames = 0
 		self.trigflag = 0
 		self.trigcount = 0
 		
@@ -332,35 +337,65 @@ class cameraModuleServer:
 			stream.truncate()
 			stream.seek(0)
 			
-			if self.trigflag == 1:
-				self.trigcount += 1
-			
-			if self.trigcount >= 4:
-				# Capture image
+			if not pt.is_alive():
 				if self.trigger.value == 1:
-					print("Captured")
-					fname = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
-					self.fnames.append(fname)
-					self.ind += 1
-					img = Image.open(stream)
-					img.save(fname)
-					img.close()
-				
-				# Quit trigger mode
+					self.fcaptures.append(self.frames)
+								
 				elif self.trigger.value == 2:
 					pt.terminate()
-					self.trigger.value = 0
 					break
 				
 				pt.terminate()
 				self.trigger.value = 0
 				pt = Process(target = self.paraTrigger)
 				pt.start()
-				self.trigflag = 0
-				self.trigcount = 0
 			
-			if not pt.is_alive():
-				self.trigflag = 1
+			if self.frames in self.fcaptures or (self.frames-1) in self.fcaptures or (self.frames-2) in self.fcaptures or (self.frames-3) in self.fcaptures or (self.frames-4) in self.fcaptures:
+				print("Captured")
+				fname = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
+				self.fnames.append(fname)
+				self.ind += 1
+				img = Image.open(stream)
+				img.save(fname)
+				img.close()
+				
+				stream.seek(0)
+				stream.truncate()
+			
+			self.frames += 1
+			
+			#if self.trigflag == 1:
+				#self.trigcount += 1
+			
+			#if self.trigcount >= 4:
+				## Capture image
+				#if self.trigger.value == 1:
+					#print("Captured")
+					#fname = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
+					#self.fnames.append(fname)
+					#self.ind += 1
+					#img = Image.open(stream)
+					#img.save(fname)
+					#img.close()
+				
+				## Quit trigger mode
+				#elif self.trigger.value == 2:
+					#pt.terminate()
+					#self.trigger.value = 0
+					#break
+				
+				#pt.terminate()
+				#self.trigger.value = 0
+				#pt = Process(target = self.paraTrigger)
+				#pt.start()
+				#self.trigflag = 0
+				#self.trigcount = 0
+			
+			#if not pt.is_alive():
+				#self.trigflag = 1
+			
+			#print(self.frames)
+			#self.frames += 1
 		
 	
 	def captureStream(self, duration, fname):
