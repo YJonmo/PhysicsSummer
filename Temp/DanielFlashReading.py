@@ -17,11 +17,17 @@ No_iterations = 10
     
 Time_Index = np.zeros(shape=(1, No_iterations ), dtype = float )
 
-# Op-amp gain calculation to convert thermometer voltage into temperature
-R1 = 10.16e3
-R2 = 138.3
-Gain = 1 + (R1/R2)
-Conv = 1000.0/Gain
+# Op-amp gain calculation to convert thermometer voltage into temperature (Port AIN1)
+R1a = 175.6e3 #10.16e3
+R2a = 3.83e3 #138.3
+GainA = 1 + (R1a/R2a)
+ConvA = 1000.0/GainA
+
+# Op-amp gain calculation (Port AIN0)
+R1b = 10.15e3
+R2b = 148.5
+GainB = 1 + (R1b/R2b)
+ConvB = 1000.0/GainB
 
 def SaveDataPWR(TimeIndex, Power):  
                         # This function save the recorded date in the HDF5 format. You don't need to call it when using for testing.
@@ -152,7 +158,7 @@ if __name__ == "__main__":
         if (DAQ1.Error == 0):
             DAQ_Is_Read.value = 0
             StreamPort = ['AIN0', 'AIN1']          
-            DAQ_SamplingRate = 10000                     # this sampling rate in HZ is for when the internal buffer of DAQ is used
+            DAQ_SamplingRate = 40000                     # this sampling rate in HZ is for when the internal buffer of DAQ is used
                                                          # check this link to see what sampling rates are appropriate:
                                                          # https://labjack.com/support/datasheets/t7/appendix-a-1 
             # Round to nearest hundered in order to avoid error when averaging         
@@ -259,13 +265,15 @@ if __name__ == "__main__":
                 DAQ_Time[2] = DAQ_Stack3
             
             # Convert DAQ analogue voltage into temperature
-            DAQ_Temp = DAQ_Signal[1]*Conv
+            DAQ_Temp = DAQ_Signal[1]*ConvA
+            DAQ_Temp2 = DAQ_Signal[0]*ConvB
             
             SaveDataDAQ(DAQ_Time,DAQ_Signal,DAQ_Temp) 
             
             for I in range(len(DAQ_Signal)):
 				# Remove noise from the plot by averaging every 100 samples
-                plt.plot(np.mean(DAQ_Time[I].reshape(-1, 100), axis=1),np.mean(DAQ_Signal[I].reshape(-1, 100), axis=1))
+                #plt.plot(np.mean(DAQ_Time[I].reshape(-1, 400), axis=1),np.mean(DAQ_Signal[I].reshape(-1, 400), axis=1))
+                plt.plot(DAQ_Time[I], DAQ_Signal[I])
             
             plt.title('DAQ Analogue Input')
             plt.xlabel('Time (s)')
@@ -273,10 +281,16 @@ if __name__ == "__main__":
             plt.legend(['Photodiode', 'Thermocouple'])
             plt.show()
             
-            plt.plot(np.mean(DAQ_Time[1].reshape(-1, 100), axis=1),np.mean(DAQ_Temp.reshape(-1, 100), axis=1))
+            plt.plot(np.mean(DAQ_Time[1].reshape(-1, 400), axis=1),np.mean(DAQ_Temp.reshape(-1, 400), axis=1))
             plt.title('Thermocouple Temperature')
             plt.xlabel('Time (s)')
             plt.ylabel('Temperature ($^\circ$C)')
+            plt.show()
+            
+            plt.plot(DAQ_Time[0], DAQ_Signal[0])
+            plt.title('Photodiode Voltage')
+            plt.xlabel('Time (s)')
+            plt.ylabel('Voltage (V)')
             plt.show()
             
             #plt.plot(np.fft.fftfreq(len(DAQ_Signal[1]),1.0/DAQ_SamplingRate), np.absolute(np.fft.fft(DAQ_Signal[1])))
