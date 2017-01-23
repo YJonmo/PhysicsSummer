@@ -71,17 +71,22 @@ class cameraModuleClient:
 		try:
 			# Start stream to VLC
 			f = open('vidTest.h264','wb')
-			cmdline = ['vlc', '--demux', 'h264', '--h264-fps', frate, '-']
+			#cmdline = ['vlc', '--demux', 'h264', '--h264-fps', frate, '-']
 			subline = ['./BackGroundSubb_Video', '-vid', 'vidTest.h264']
-			player = subprocess.Popen(cmdline, stdin=subprocess.PIPE)
-			stract = subprocess.Popen(subline)
+			#player = subprocess.Popen(cmdline, stdin=subprocess.PIPE)
+			scount = 0
 			while True:
 				# Send data to VLC input
 				data = connection.read(1024)
 				if not data:
 					break
-				player.stdin.write(data)
+				#player.stdin.write(data)
 				f.write(data)
+				if scount == 100:
+					stract = subprocess.Popen(subline)
+					scount += 1
+				elif scount < 100:
+					scount += 1
 		except KeyboardInterrupt:
 			self.send_msg(self.client_socket, "Stop")
 			time.sleep(1)
@@ -91,7 +96,7 @@ class cameraModuleClient:
 		f.close()
 		connection.close()
 		self.client_socket.close()
-		player.terminate()
+		#player.terminate()
 		stract.terminate()
 		self.client_socket = socket.socket()
 		self.client_socket.connect(('192.168.1.1', 8000))
@@ -364,7 +369,7 @@ class cameraModuleClient:
 		'''
 		
 		# List of commands
-		opt = ["B","C","F","G","H","I","N","P","Q","R","S","T","V","X"]
+		opt = ["B","C","F","G","H","I","N","O","P","Q","R","S","T","V","X"]
 		
 		# Input command from terminal
 		command = 0
@@ -408,6 +413,12 @@ class cameraModuleClient:
 				
 		# Network stream
 		elif command == "N":
+			print(CYAN + "Note: Press Ctrl+C to exit recording" + CLEAR)
+			duration = self.processIntParameter("Duration (seconds)")
+			self.networkStreamServer(duration)
+
+		# Network subtract stream
+		elif command == "O":
 			print(CYAN + "Note: Press Ctrl+C to exit recording" + CLEAR)
 			duration = self.processIntParameter("Duration (seconds)")
 			self.networkStreamServer(duration)
