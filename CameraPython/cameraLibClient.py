@@ -70,9 +70,11 @@ class cameraModuleClient:
 		
 		try:
 			# Start stream to VLC
-			cmdline = ['vlc', '--demux', 'h264', '--h264-fps', frate, '-']
-			player = subprocess.Popen(cmdline, stdin=subprocess.PIPE)
 			f = open('vidTest.h264','wb')
+			cmdline = ['vlc', '--demux', 'h264', '--h264-fps', frate, '-']
+			subline = ['./BackGroundSubb_Video', '-vid', 'vidTest.h264']
+			player = subprocess.Popen(cmdline, stdin=subprocess.PIPE)
+			stract = subprocess.Popen(subline)
 			while True:
 				# Send data to VLC input
 				data = connection.read(1024)
@@ -80,7 +82,6 @@ class cameraModuleClient:
 					break
 				player.stdin.write(data)
 				f.write(data)
-				# Save to file here for image subtraction
 		except KeyboardInterrupt:
 			self.send_msg(self.client_socket, "Stop")
 			time.sleep(1)
@@ -91,6 +92,7 @@ class cameraModuleClient:
 		connection.close()
 		self.client_socket.close()
 		player.terminate()
+		stract.terminate()
 		self.client_socket = socket.socket()
 		self.client_socket.connect(('192.168.1.1', 8000))
 		
