@@ -72,18 +72,22 @@ class cameraModuleClient:
 			# Start stream to VLC
 			cmdline = ['vlc', '--demux', 'h264', '--h264-fps', frate, '-']
 			player = subprocess.Popen(cmdline, stdin=subprocess.PIPE)
+			f = open('vidTest.h264','wb')
 			while True:
 				# Send data to VLC input
 				data = connection.read(1024)
 				if not data:
 					break
 				player.stdin.write(data)
+				f.write(data)
+				# Save to file here for image subtraction
 		except KeyboardInterrupt:
 			self.send_msg(self.client_socket, "Stop")
 			time.sleep(1)
 		
 		# Free connection resources
 		print(GREEN + "Network stream closed" + CLEAR)
+		f.close()
 		connection.close()
 		self.client_socket.close()
 		player.terminate()
