@@ -69,6 +69,7 @@ int main(int argc, char* argv[])
 void processVideo(char* videoFilename) {
     //create the capture object
     VideoCapture capture(videoFilename);
+    //VideoCapture capture(1);
     if(!capture.isOpened()){
         //error in opening the video input
         cerr << "Unable to open video file: " << videoFilename << endl;
@@ -96,7 +97,7 @@ void processVideo(char* videoFilename) {
         imshow("Frame", frame);
         imshow("FG Mask MOG 2", fgMaskMOG2);
         //get the input from the keyboard
-        keyboard = waitKey( 120 );
+        keyboard = waitKey( 34 );
     }
     //delete capture object
     capture.release();
