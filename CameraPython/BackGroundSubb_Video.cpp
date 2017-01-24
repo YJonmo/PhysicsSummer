@@ -69,6 +69,7 @@ int main(int argc, char* argv[])
 void processVideo(char* videoFilename) {
     //create the capture object
     VideoCapture capture(videoFilename);
+    //VideoCapture capture();
     //VideoCapture capture(1);
     if(!capture.isOpened()){
         //error in opening the video input
