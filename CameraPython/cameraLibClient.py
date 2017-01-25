@@ -73,25 +73,28 @@ class cameraModuleClient:
 			# Start stream to VLC
 			#f = open('vidTest.h264','wb')
 			#f = open('/dev/video1','wb')
-			tmpdir = tempfile.mkdtemp()
-			tmpfname = os.path.join(tmpdir, 'myfifo')
-			print(tmpfname)
-			os.mkfifo(tmpfname)
-			print("C")
-			fifotmp = os.open(tmpfname, os.O_RDWR)
-			print(fifotmp)
-			print("A")
+			#tmpdir = tempfile.mkdtemp()
+			#tmpfname = os.path.join(tmpdir, 'myfifo')
+			#print(tmpfname)
+			#os.mkfifo(tmpfname)
+			#print("C")
+			#fifotmp = open(tmpfname, 'wb')
+			#print(fifotmp)
+			#print("A")
 			cmdline = ['vlc', '--demux', 'h264', '--h264-fps', frate, '-']
 			#subline = ['./BackGroundSubb_Video', '-vid', 'vidTest.h264']
 			player = subprocess.Popen(cmdline, stdin=subprocess.PIPE)
+			fifotmp = open("testfifo", 'wb')
 			print("B")
 			#scount = 0
 			while True:
 				# Send data to VLC input
 				data = connection.read(1024)
+				#data = connection.read(1048576)
 				if not data:
 					break
 				player.stdin.write(data)
+				#print(data)
 				fifotmp.write(data)
 				'''f.write(data)
 				if scount == 100:
@@ -107,8 +110,8 @@ class cameraModuleClient:
 		print(GREEN + "Network stream closed" + CLEAR)
 		#f.close()
 		fifotmp.close()
-		os.remove(tmpfname)
-		os.rmdir(tmpdir)
+		#os.remove(tmpfname)
+		#os.rmdir(tmpdir)
 		connection.close()
 		self.client_socket.close()
 		player.terminate()
