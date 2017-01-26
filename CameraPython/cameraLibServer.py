@@ -503,12 +503,8 @@ class cameraModuleServer:
 
 			# Send framerate to client
 			self.send_msg(sock, str(self.camera.framerate))
-			
-			#cmdstream = ['raspivid', '-o', '-', '-t', '0', '-hf', '-w', '640', '-h', '480', '-fps', '30', '|', 'cvlc', '-vvv', 'stream:///dev/stdin', '--sout', "'#rtp{sdp=rtsp://:8554}'", ':demux=h264']
-			#substream = subprocess.Popen(cmdstream)
-			
-			#os.system("raspivid -o - -t 0 -hf -w 640 -h 480 -fps 30 | cvlc -vvv stream:///dev/stdin --sout '#rtp{sdp=rtsp://:8554}' :demux=h264")
-			
+
+			# Save camera properties
 			fr = str(self.camera.framerate)
 			wt = str(self.camera.resolution[0])
 			ht = str(self.camera.resolution[1])
@@ -519,27 +515,28 @@ class cameraModuleServer:
 			saturation = self.camera.saturation
 			xt = self.camera.exposure_speed
 			
+			# Close the camera to enable raspivid command (easier to pipe with)
 			self.camera.close()
-			#cmdstream = "raspivid -n -t 0 -w " + wt + " -h " + ht + " -fps " + fr + " -o - | gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=1 pt=96 ! gdppay ! tcpserversink host=192.168.1.1 port=5000"
-			#os.system(cmdstream)
+			
+			# Stream camera with raspivid and pipe to gstreamer to stream over network
 			cmdstream1 = ['raspivid', '-n', '-t', '0', '-w', wt, '-h', ht, '-fps', fr, '-o', '-']
 			cmdstream2 = ['gst-launch-1.0', '-v', 'fdsrc', '!', 'h264parse', '!', 'rtph264pay', 'config-interval=1', 'pt=96', '!', 'gdppay', '!', 'tcpserversink', 'host=192.168.1.1', 'port=5000']
 			pcmd1 = subprocess.Popen(cmdstream1, stdout=subprocess.PIPE)
 			pcmd2 = subprocess.Popen(cmdstream2, stdin=pcmd1.stdout)
 			
 			# Multiprocessing to determine when to stop recording
-			#pnet = Process(target = self.networkSubprocess)
-			#pnet.start()
 			p1.start()
 			p2.start()
 			while p1.is_alive() and p2.is_alive():
 				continue
 			p1.terminate()
 			p2.terminate()
-			#pnet.terminate()
 			
+			# Terminate the raspivid and gstreamer commands
 			pcmd1.terminate()
 			pcmd2.terminate()
+			
+			# Re-open the camera and return to saved parameters
 			self.camera = PiCamera()
 			self.setResolution(int(wt), int(ht))
 			self.setFrameRate(int(fr))
@@ -651,6 +648,7 @@ class cameraModuleServer:
 		print("    H: Help")
 		print("    I: Capture an image")
 		print("    N: Stream to network")
+		print("    O: Stream with image subtraction")
 		print("    P: Get camera settings")
 		print("    Q: Quit program")
 		print("    R: Set resolution")

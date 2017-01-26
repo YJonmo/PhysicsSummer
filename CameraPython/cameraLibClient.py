@@ -71,75 +71,50 @@ class cameraModuleClient:
 		
 		try:
 			# Start stream to VLC
-			#f = open('vidTest.h264','wb')
-			#f = open('/dev/video1','wb')
-			#tmpdir = tempfile.mkdtemp()
-			#tmpfname = os.path.join(tmpdir, 'myfifo')
-			#print(tmpfname)
-			#os.mkfifo(tmpfname)
-			#print("C")
-			#fifotmp = open(tmpfname, 'wb')
-			#print(fifotmp)
-			#print("A")
 			cmdline = ['vlc', '--demux', 'h264', '--h264-fps', frate, '-']
-			#subline = ['./BackGroundSubb_Video', '-vid', 'vidTest.h264']
 			player = subprocess.Popen(cmdline, stdin=subprocess.PIPE)
-			fifotmp = open("testfifo", 'wb')
-			print("B")
-			#scount = 0
 			while True:
 				# Send data to VLC input
 				data = connection.read(1024)
-				#data = connection.read(1048576)
 				if not data:
 					break
 				player.stdin.write(data)
-				#print(data)
-				fifotmp.write(data)
-				'''f.write(data)
-				if scount == 100:
-					stract = subprocess.Popen(subline)
-					scount += 1
-				elif scount < 100:
-					scount += 1'''
 		except KeyboardInterrupt:
 			self.send_msg(self.client_socket, "Stop")
 			time.sleep(1)
 		
 		# Free connection resources
 		print(GREEN + "Network stream closed" + CLEAR)
-		#f.close()
-		fifotmp.close()
-		#os.remove(tmpfname)
-		#os.rmdir(tmpdir)
 		connection.close()
 		self.client_socket.close()
 		player.terminate()
-		#stract.terminate()
 		self.client_socket = socket.socket()
 		self.client_socket.connect(('192.168.1.1', 8000))
 		
 	
 	def networkStreamSubtract(self, duration):
 		'''
-		Recieve a video stream from the Pi, and playback through VLC.
+		Recieve a video stream from the Pi, and perform image subtraction through openCV.
 		'''
 		
 		# Determine the framerate of the stream
 		frate = self.recv_msg(self.client_socket)
 		
 		try:
+			# Receive a stream from gstreamer, and pipe into the openCV executable.
 			gstcmd = "tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, framerate=" + frate + "/1 ! avdec_h264 ! videoconvert ! appsink"
 			subline = ['./BackGroundSubb_Video', '-vid', gstcmd]
 			player = subprocess.Popen(subline)
+			
+			# Wait for executable to exit
 			player.wait()
-		except KeyboardInterrupt:
+			
+			# Free resources
+			print(GREEN + "Network stream closed" + CLEAR)
+			player.terminate()
+		except:
 			self.send_msg(self.client_socket, "Stop")
 			time.sleep(1)
-		
-		# Free connection resources
-		print(GREEN + "Network stream closed" + CLEAR)
-		player.terminate()
 		
 	
 	def send_msg(self, sock, msg):
@@ -196,6 +171,7 @@ class cameraModuleClient:
 		print("    H: Help")
 		print("    I: Capture an image")
 		print("    N: Stream to network")
+		print("    O: Stream with image subtraction")
 		print("    P: Get camera settings")
 		print("    Q: Quit program")
 		print("    R: Set resolution")
@@ -409,7 +385,7 @@ class cameraModuleClient:
 		'''
 		
 		# List of commands
-		opt = ["B","C","F","G","H","I","N","O","P","Q","R","S","T","V","X"]
+		opt = ["B","C","F","G","H","I","N","O","P","Q","R","S","T","U","V","X"]
 		
 		# Input command from terminal
 		command = 0
