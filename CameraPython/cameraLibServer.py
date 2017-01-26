@@ -489,8 +489,8 @@ class cameraModuleServer:
 				connection.close()
 				self.closeNetwork()
 				self.initNetwork()
-	
-	
+		
+		
 	def networkSubtract(self, sock, duration):
 		'''
 		Stream a video through the network, and allow image subtraction with openCV on the client computer.
@@ -507,17 +507,49 @@ class cameraModuleServer:
 			#cmdstream = ['raspivid', '-o', '-', '-t', '0', '-hf', '-w', '640', '-h', '480', '-fps', '30', '|', 'cvlc', '-vvv', 'stream:///dev/stdin', '--sout', "'#rtp{sdp=rtsp://:8554}'", ':demux=h264']
 			#substream = subprocess.Popen(cmdstream)
 			
-			os.system("raspivid -o - -t 0 -hf -w 640 -h 480 -fps 30 | cvlc -vvv stream:///dev/stdin --sout '#rtp{sdp=rtsp://:8554}' :demux=h264")
+			#os.system("raspivid -o - -t 0 -hf -w 640 -h 480 -fps 30 | cvlc -vvv stream:///dev/stdin --sout '#rtp{sdp=rtsp://:8554}' :demux=h264")
+			
+			fr = str(self.camera.framerate)
+			wt = str(self.camera.resolution[0])
+			ht = str(self.camera.resolution[1])
+			brightness = self.camera.brightness
+			contrast = self.camera.contrast
+			gain = self.camera.iso
+			sharpness = self.camera.sharpness
+			saturation = self.camera.saturation
+			xt = self.camera.exposure_speed
+			
+			self.camera.close()
+			#cmdstream = "raspivid -n -t 0 -w " + wt + " -h " + ht + " -fps " + fr + " -o - | gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=1 pt=96 ! gdppay ! tcpserversink host=192.168.1.1 port=5000"
+			#os.system(cmdstream)
+			cmdstream1 = ['raspivid', '-n', '-t', '0', '-w', wt, '-h', ht, '-fps', fr, '-o', '-']
+			cmdstream2 = ['gst-launch-1.0', '-v', 'fdsrc', '!', 'h264parse', '!', 'rtph264pay', 'config-interval=1', 'pt=96', '!', 'gdppay', '!', 'tcpserversink', 'host=192.168.1.1', 'port=5000']
+			pcmd1 = subprocess.Popen(cmdstream1, stdout=subprocess.PIPE)
+			pcmd2 = subprocess.Popen(cmdstream2, stdin=pcmd1.stdout)
 			
 			# Multiprocessing to determine when to stop recording
+			#pnet = Process(target = self.networkSubprocess)
+			#pnet.start()
 			p1.start()
 			p2.start()
 			while p1.is_alive() and p2.is_alive():
 				continue
 			p1.terminate()
 			p2.terminate()
+			#pnet.terminate()
 			
-			substream.terminate()
+			pcmd1.terminate()
+			pcmd2.terminate()
+			self.camera = PiCamera()
+			self.setResolution(int(wt), int(ht))
+			self.setFrameRate(int(fr))
+			self.setBrightness(brightness)
+			self.setContrast(contrast)
+			self.setGain(gain)
+			self.setSharpness(sharpness)
+			self.setSaturation(saturation)
+			self.setExposureTime(xt)
+			
 		
 	
 	def send_msg(self, sock, msg):

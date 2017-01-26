@@ -120,6 +120,28 @@ class cameraModuleClient:
 		self.client_socket.connect(('192.168.1.1', 8000))
 		
 	
+	def networkStreamSubtract(self, duration):
+		'''
+		Recieve a video stream from the Pi, and playback through VLC.
+		'''
+		
+		# Determine the framerate of the stream
+		frate = self.recv_msg(self.client_socket)
+		
+		try:
+			gstcmd = "tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, framerate=" + frate + "/1 ! avdec_h264 ! videoconvert ! appsink"
+			subline = ['./BackGroundSubb_Video', '-vid', gstcmd]
+			player = subprocess.Popen(subline)
+			player.wait()
+		except KeyboardInterrupt:
+			self.send_msg(self.client_socket, "Stop")
+			time.sleep(1)
+		
+		# Free connection resources
+		print(GREEN + "Network stream closed" + CLEAR)
+		player.terminate()
+		
+	
 	def send_msg(self, sock, msg):
 		'''
 		Send message with a prefixed length.
@@ -439,7 +461,7 @@ class cameraModuleClient:
 		elif command == "O":
 			print(CYAN + "Note: Press Ctrl+C to exit recording" + CLEAR)
 			duration = self.processIntParameter("Duration (seconds)")
-			self.networkStreamServer(duration)
+			self.networkStreamSubtract(duration)
 		
 		# Print camera settings
 		elif command == "P":
