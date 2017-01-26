@@ -69,10 +69,6 @@ int main(int argc, char* argv[])
 void processVideo(char* videoFilename) {
     //create the capture object
     VideoCapture capture(videoFilename);
-    //VideoCapture capture("tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, width=1280, height=720, format=YUY2, framerate=49/1 ! ffdec_h264 ! autoconvert ! appsink sync=false");
-    //VideoCapture capture("tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, width=640, height=480, framerate=90/1 ! avdec_h264 ! videoconvert ! appsink");
-    //VideoCapture capture("/dev/video0");
-    //VideoCapture capture(1);
 
     if(!capture.isOpened()){
         //error in opening the video input
