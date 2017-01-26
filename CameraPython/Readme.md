@@ -30,6 +30,10 @@ Netcat is also required to send image and video files to a remote computer. This
 
 	sudo apt-get install netcat
 
+Gstreamer is required to stream video to the remote computer, in order to perform image subtraction with openCV. This can be installed by:
+
+	sudo apt-get install gstreamer-1.0
+
 The Raspberry Pi uses an ad-hoc wireless network to connect to a remote computer. The ad-hoc wireless network can be created by first backing-up the current wireless settings:
 
 	sudo cp /etc/network/interfaces /etc/network/interfaces-wifi
@@ -116,8 +120,31 @@ Alternatively, the camera module can be controlled by remotely connecting to the
 
 However, remotely running the picamCommand script will not allow video streaming over the network, nor downloading image and video files directly to the remote computer.
 
-## Current issues
+## Image subtraction setup
 
-- The video port is used in trigger mode to achieve a latency of between 10-30 milliseconds. However, each image taken does not correspond to the correct timestamp.
+The C++ code "BackGroundSubb_Video.cpp" is used to perform image subtraction on a network stream using OpenCV.
+The network stream requires gstreamer, which must be installed before installing OpenCV.
+Gstreamer can be installed by running the command:
 
-- Using the still port with burst in trigger mode fixes the incorrect image issue. However, the latency in this case is between 100-300 milliseconds.
+	sudo apt-get install gstreamer-1.0
+
+OpenCV must be installed on the remote computer to run the C++ code.
+To install OpenCV, go to http://opencv.org/downloads.html and download OpenCV 3.2.
+Then, ensure that the following packages are installed:
+
+	sudo apt-get install build-essential libgtk2.0-dev libjpeg-dev libtiff4-dev libjasper-dev libopenexr-dev cmake python-dev python-numpy python-tk libtbb-dev libeigen3-dev yasm libfaac-dev libopencore-amrnb-dev libopencore-amrwb-dev libtheora-dev libvorbis-dev libxvidcore-dev libx264-dev libqt4-dev libqt4-opengl-dev sphinx-common texlive-latex-extra libv4l-dev libdc1394-22-dev libavcodec-dev libavformat-dev libswscale-dev default-jdk ant libvtk5-qt4-dev
+
+Enter the downloaded OpenCV directory, and perform the following commands:
+
+	mkdir build
+	cd build
+	cmake ..
+	make
+	sudo make install
+	sudo ldconfig
+
+If changes are made to the C++ code, the code can be compiled with the following command:
+
+	g++ BackGroundSubb_Video.cpp -o BackGroundSubb_Video -I/usr/local/include/opencv2 -L/usr/local/lib -lopencv_core -lopencv_video -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_imgproc
+
+
