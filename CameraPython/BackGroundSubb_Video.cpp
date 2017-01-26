@@ -50,7 +50,6 @@ int main(int argc, char* argv[])
     pMOG2 = createBackgroundSubtractorMOG2(); //MOG2 approach
     if(strcmp(argv[1], "-vid") == 0) {
         //input data coming from a video
-        cout << "Test" << endl;
         processVideo(argv[2]);
     }
     else if(strcmp(argv[1], "-img") == 0) {
@@ -69,11 +68,9 @@ int main(int argc, char* argv[])
 }
 void processVideo(char* videoFilename) {
     //create the capture object
-    cout << "Test2" << endl;
-    VideoCapture capture(videoFilename);
+    //VideoCapture capture(videoFilename);
     //VideoCapture capture("tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, width=1280, height=720, format=YUY2, framerate=49/1 ! ffdec_h264 ! autoconvert ! appsink sync=false");
-    //VideoCapture capture("tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! avdec_h264 ! videoconvert ! opencvsink");
-    cout << "Test3" << endl;
+    VideoCapture capture("tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, width=640, height=480, framerate=90/1 ! avdec_h264 ! videoconvert ! appsink");
     //VideoCapture capture("/dev/video0");
     //VideoCapture capture(1);
 
@@ -82,9 +79,7 @@ void processVideo(char* videoFilename) {
         cerr << "Unable to open video file: " << videoFilename << endl;
         exit(EXIT_FAILURE);
     }
-    cout << "Waiting..." << endl;
-    keyboard = waitKey( 10000 );
-    cout << "Starting";
+    
     //read input data. ESC or 'q' for quitting
     while( (char)keyboard != 'q' && (char)keyboard != 27 ){
         //read the current frame
@@ -107,7 +102,7 @@ void processVideo(char* videoFilename) {
         imshow("Frame", frame);
         imshow("FG Mask MOG 2", fgMaskMOG2);
         //get the input from the keyboard
-        keyboard = waitKey( 34 );
+        keyboard = waitKey( 10 );
     }
     //delete capture object
     capture.release();
