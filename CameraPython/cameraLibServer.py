@@ -156,6 +156,14 @@ class cameraModuleServer:
 		'''
 		
 		self.camera.wait_recording(duration)
+	
+	
+	def delayProcess(self, duration):
+		'''
+		Threaded process to wait for the duration of a recording, and to throw errors in event of camera failing.
+		'''
+		
+		time.sleep(duration)
 		
 	
 	def stopProcess(self):
@@ -350,7 +358,9 @@ class cameraModuleServer:
 				pt = Process(target = self.paraTrigger)
 				pt.start()
 			
+			#if self.frames in self.fcaptures or (self.frames-1) in self.fcaptures or (self.frames-2) in self.fcaptures or (self.frames-3) in self.fcaptures or (self.frames-4) in self.fcaptures:
 			if self.frames in self.fcaptures or (self.frames-1) in self.fcaptures or (self.frames-2) in self.fcaptures or (self.frames-3) in self.fcaptures or (self.frames-4) in self.fcaptures:
+				a = time.time()
 				print("Captured")
 				fname = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
 				self.fnames.append(fname)
@@ -358,6 +368,7 @@ class cameraModuleServer:
 				img = Image.open(stream)
 				img.save(fname)
 				img.close()
+				print(time.time()-a)
 				
 				stream.seek(0)
 				stream.truncate()
@@ -478,6 +489,35 @@ class cameraModuleServer:
 				connection.close()
 				self.closeNetwork()
 				self.initNetwork()
+	
+	
+	def networkSubtract(self, sock, duration):
+		'''
+		Stream a video through the network, and allow image subtraction with openCV on the client computer.
+		'''
+		
+		if self.network == 1:
+			# Set up camera wait processes
+			p1 = Process(target = self.delayProcess, args=(duration,))
+			p2 = Process(target = self.stopProcess)
+
+			# Send framerate to client
+			self.send_msg(sock, str(self.camera.framerate))
+			
+			#cmdstream = ['raspivid', '-o', '-', '-t', '0', '-hf', '-w', '640', '-h', '480', '-fps', '30', '|', 'cvlc', '-vvv', 'stream:///dev/stdin', '--sout', "'#rtp{sdp=rtsp://:8554}'", ':demux=h264']
+			#substream = subprocess.Popen(cmdstream)
+			
+			os.system("raspivid -o - -t 0 -hf -w 640 -h 480 -fps 30 | cvlc -vvv stream:///dev/stdin --sout '#rtp{sdp=rtsp://:8554}' :demux=h264")
+			
+			# Multiprocessing to determine when to stop recording
+			p1.start()
+			p2.start()
+			while p1.is_alive() and p2.is_alive():
+				continue
+			p1.terminate()
+			p2.terminate()
+			
+			substream.terminate()
 		
 	
 	def send_msg(self, sock, msg):
@@ -887,6 +927,15 @@ class cameraModuleServer:
 				duration = float(self.inputParameter("Duration"))
 				self.confirmCompletion("Duration set")
 				self.networkStreamClient(self.hostSock, duration)
+			else:
+				print("Not connected to network")
+		
+		# Network subtract stream
+		elif command == "O":
+			if self.network == 1:
+				duration = float(self.inputParameter("Duration"))
+				self.confirmCompletion("Duration set")
+				self.networkSubtract(self.hostSock, duration)
 			else:
 				print("Not connected to network")
 		
