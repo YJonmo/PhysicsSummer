@@ -272,6 +272,7 @@ class cameraModuleClient:
 		
 		# Send parameter value to Pi
 		self.send_msg(self.client_socket, value)
+		print(time.time()-1484705222)
 		
 		# Receive start confirmation message from the Pi.
 		confirm = self.recv_msg(self.client_socket)
