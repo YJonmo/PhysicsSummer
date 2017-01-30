@@ -127,6 +127,7 @@ The network stream requires gstreamer, which must be installed before installing
 Gstreamer can be installed by running the command:
 
 	sudo apt-get install gstreamer-1.0
+	sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 
 OpenCV must be installed on the remote computer to run the C++ code.
 To install OpenCV, go to http://opencv.org/downloads.html and download OpenCV 3.2.
