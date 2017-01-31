@@ -7,6 +7,7 @@ Date: 21st November 2016
 
 
 from picamera import PiCamera
+from picamera import PiVideoFrame
 from multiprocessing import Process, Value
 from PIL import Image
 import socket
@@ -18,6 +19,7 @@ import datetime
 import select
 import subprocess
 import io
+import threading
 
 
 BRIGHTNESS_MIN = 0
@@ -43,6 +45,29 @@ EXPOSURE_MAX = float("inf")
 IMAGE_TYPES = ['jpeg', 'jpg', 'png', 'gif', 'bmp']
 
 
+class SplitFrames(object):
+	def __init__(self):
+		self.frame_num = 0
+		self.output = None
+		self.frameout = []
+		self.fnames = []
+
+	def write(self, buf):
+		if buf.startswith(b'\xff\xd8'):
+			# Start of new frame; close the old one (if any) and
+			# open a new output
+			if self.output:
+				self.output.close()
+			
+			if self.frame_num in self.frameout:
+				fname = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
+				self.fnames.append(fname)
+				self.output = io.open(fname, 'wb')
+				self.output.write(buf)
+		
+		self.frame_num += 1
+
+
 class cameraModuleServer:
 	
 	def __init__(self):
@@ -53,6 +78,7 @@ class cameraModuleServer:
 		# Create an instance of the Picamera class
 		self.camera = PiCamera()
 		PiCamera.CAPTURE_TIMEOUT = 600
+		self.camera.clock_mode = "raw"
 
 		# Initialise network variable
 		self.network = 0
@@ -68,6 +94,7 @@ class cameraModuleServer:
 		
 		# Initialise trigger
 		self.trigger = Value('i', 0)
+		
 		
 	
 	def setResolution(self, width, height):
@@ -334,7 +361,8 @@ class cameraModuleServer:
 		self.camera.start_preview()
 		time.sleep(2)
 		
-		stream = io.BytesIO()
+		#stream = io.BytesIO()
+		output = SplitFrames()
 		
 		self.fnames = []
 		self.fcaptures = []
@@ -347,17 +375,16 @@ class cameraModuleServer:
 		pt = Process(target = self.paraTrigger)
 		pt.start()
 		
-		#for frm in self.camera.capture_continuous("../../Images/Test{timestamp}.jpg", format='jpeg', use_video_port=True):
-		for frm in self.camera.capture_continuous(stream, format='jpeg', use_video_port=True):
-			#if self.frames >= 10:
-				#break
-			print(self.camera.frame.timestamp)
-			stream.truncate()
-			stream.seek(0)
+		#camera.annotate_background = PiCamera.color.Color('black')
+		#self.camera.annotate_text = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 			
+		start = time.time()
+		self.camera.start_recording(output, format='mjpeg')
+		while True:
+			print(self.camera.frame.timestamp, self.camera.timestamp)
 			if not pt.is_alive():
 				if self.trigger.value == 1:
-					self.fcaptures.append(self.frames)
+					output.frameout.append(output.frame_num)
 								
 				elif self.trigger.value == 2:
 					pt.terminate()
@@ -367,24 +394,53 @@ class cameraModuleServer:
 				self.trigger.value = 0
 				pt = Process(target = self.paraTrigger)
 				pt.start()
+		
+		self.camera.stop_recording()
+		finish = time.time()
+		self.fnames = output.fnames
+		print('Captured %d frames at %.2ffps' % (output.frame_num, output.frame_num / (finish - start)))
+		
+		##for frm in self.camera.capture_continuous("../../Images/Test{timestamp}.jpg", format='jpeg', use_video_port=True):
+		#for frm in self.camera.capture_continuous(stream, format='jpeg', use_video_port=True):
+			##if self.frames >= 10:
+				##break
 			
-			#if self.frames in self.fcaptures or (self.frames-1) in self.fcaptures or (self.frames-2) in self.fcaptures or (self.frames-3) in self.fcaptures or (self.frames-4) in self.fcaptures:
-			if (self.frames-4) in self.fcaptures:
-				#a = time.time()
-				print("Captured")
-				
-				fname = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
-				self.fnames.append(fname)
-				self.ind += 1
-				img = Image.open(stream)
-				img.save(fname)
-				img.close()
-				#print(time.time()-a)
-				
-				stream.seek(0)
-				stream.truncate()
+			#print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
+			#self.camera.annotate_text = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
 			
-			self.frames += 1
+			#stream.truncate()
+			#stream.seek(0)
+			
+			#if not pt.is_alive():
+				#if self.trigger.value == 1:
+					#self.fcaptures.append(self.frames)
+								
+				#elif self.trigger.value == 2:
+					#pt.terminate()
+					#break
+				
+				#pt.terminate()
+				#self.trigger.value = 0
+				#pt = Process(target = self.paraTrigger)
+				#pt.start()
+			
+			##if self.frames in self.fcaptures or (self.frames-1) in self.fcaptures or (self.frames-2) in self.fcaptures or (self.frames-3) in self.fcaptures or (self.frames-4) in self.fcaptures:
+			#if (self.frames) in self.fcaptures:
+				##a = time.time()
+				#print("Captured")
+				
+				#fname = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
+				#self.fnames.append(fname)
+				#self.ind += 1
+				#img = Image.open(stream)
+				#img.save(fname)
+				#img.close()
+				##print(time.time()-a)
+				
+				#stream.seek(0)
+				#stream.truncate()
+			
+			#self.frames += 1
 			
 			
 			#if self.trigflag == 1:
@@ -698,22 +754,22 @@ class cameraModuleServer:
 		'''
 		
 		print("\nList of commands: ")
-		print("    B: Set brightness")
-		print("    C: Set contrast")
-		print("    F: Set framerate")
-		print("    G: Set gain")
-		print("    H: Help")
-		print("    I: Capture an image")
-		print("    N: Stream to network")
-		print("    O: Stream with image subtraction")
-		print("    P: Get camera settings")
-		print("    Q: Quit program")
-		print("    R: Set resolution")
-		print("    S: Set sharpness")
-		print("    T: Capture with trigger")
-		print("    U: Set saturation")
-		print("    V: Capture a video")
-		print("    X: Set exposure time\n")
+		print("	B: Set brightness")
+		print("	C: Set contrast")
+		print("	F: Set framerate")
+		print("	G: Set gain")
+		print("	H: Help")
+		print("	I: Capture an image")
+		print("	N: Stream to network")
+		print("	O: Stream with image subtraction")
+		print("	P: Get camera settings")
+		print("	Q: Quit program")
+		print("	R: Set resolution")
+		print("	S: Set sharpness")
+		print("	T: Capture with trigger")
+		print("	U: Set saturation")
+		print("	V: Capture a video")
+		print("	X: Set exposure time\n")
 		
 	
 	def inputParameter(self, parameter):
@@ -921,15 +977,15 @@ class cameraModuleServer:
 			
 			# Print the properties to the Pi terminal
 			print("\nProperties: ")
-			print("    Resolution: " + resolution)
-			print("    Framerate: " + framerate + " fps")
-			print("    Brightness: " + brightness + " %")
-			print("    Contrast: " + contrast + " %")
-			print("    Analog gain: " + again + " dB")
-			print("    Digital gain: " + dgain + " dB")
-			print("    Sharpness: " + sharpness + " %")
-			print("    Saturation: " + saturation + " %")
-			print("    Exposure time: " + xt + " microseconds\n")
+			print("	Resolution: " + resolution)
+			print("	Framerate: " + framerate + " fps")
+			print("	Brightness: " + brightness + " %")
+			print("	Contrast: " + contrast + " %")
+			print("	Analog gain: " + again + " dB")
+			print("	Digital gain: " + dgain + " dB")
+			print("	Sharpness: " + sharpness + " %")
+			print("	Saturation: " + saturation + " %")
+			print("	Exposure time: " + xt + " microseconds\n")
 		
 	
 	def sendFile(self, fname, typ):
