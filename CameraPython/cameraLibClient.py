@@ -272,7 +272,7 @@ class cameraModuleClient:
 		
 		# Send parameter value to Pi
 		self.send_msg(self.client_socket, value)
-		print(time.time()-1484705222)
+		#print(time.time()-1484705222)
 		
 		# Receive start confirmation message from the Pi.
 		confirm = self.recv_msg(self.client_socket)
@@ -455,6 +455,10 @@ class cameraModuleClient:
 		
 		# Capture with trigger
 		elif command == "T":
+			#print(CYAN + "Note: Option 1 uses the video port, which means there is a latency of 0-300 ms," + CLEAR)
+			#print(CYAN + "      but allows images to be taken in rapid succession." + CLEAR)
+			#print(CYAN + "      Option 2 uses the still port, which has a latency of 10-30 ms," + CLEAR)
+			#print(CYAN + "      but requires ~500 ms after capture to process and store the image." + CLEAR)
 			self.sendTrigger()
 			self.receiveFile("", "Trigger")
 			
