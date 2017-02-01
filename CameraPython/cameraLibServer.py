@@ -357,7 +357,7 @@ class cameraModuleServer:
 	
 	def captureTriggerV1(self):
 		'''
-		Fast capture of a series of images given a trigger. Uses capture_continuous instead of capture_sequence.
+		Fast capture of a series of images given a trigger. Uses video mode instead of still mode.
 		'''
 		
 		# Camera setup
@@ -368,28 +368,28 @@ class cameraModuleServer:
 		output = SplitFrames(self.camera)
 		
 		self.fnames = []
-		self.fcaptures = []
-		self.ind = 0
-		self.frames = 0
-		self.trigflag = 0
-		self.trigcount = 0
+		#self.fcaptures = []
+		#self.ind = 0
+		#self.frames = 0
+		#self.trigflag = 0
+		#self.trigcount = 0
 		self.trigtime = []
 		
 		self.trigger.value = 0
 		pt = Process(target = self.paraTrigger)
 		pt.start()
 		
-		old = 0
-		new = 0
+		#old = 0
+		#new = 0
 		
 		#camera.annotate_background = PiCamera.color.Color('black')
 		#self.camera.annotate_text = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 			
-		start = time.time()
+		#start = time.time()
 		self.camera.start_recording(output, format='mjpeg')
 		while True:
 			#print(self.camera.frame.timestamp, self.camera.timestamp)
-			print(self.camera.frame.index, self.camera.frame.timestamp, self.camera.timestamp)
+			#print(self.camera.frame.index, output.frame_num, self.camera.frame.timestamp, self.camera.timestamp)
 			#old = self.camera.frame.timestamp
 			#if new != old:
 			#	self.camera.annotate_text = str(self.camera.frame.timestamp)
@@ -409,13 +409,13 @@ class cameraModuleServer:
 			
 			if len(self.trigtime) > 0:
 				if self.camera.frame.timestamp > self.trigtime[0]:
-					output.frameout.append(output.frame_num)
+					output.frameout.append(self.camera.frame.index)
 					self.trigtime.pop(0)
 		
 		self.camera.stop_recording()
-		finish = time.time()
+		#finish = time.time()
 		self.fnames = output.fnames
-		print('Captured %d frames at %.2ffps' % (output.frame_num, output.frame_num / (finish - start)))
+		#print('Captured %d frames at %.2ffps' % (output.frame_num, output.frame_num / (finish - start)))
 		
 		##for frm in self.camera.capture_continuous("../../Images/Test{timestamp}.jpg", format='jpeg', use_video_port=True):
 		#for frm in self.camera.capture_continuous(stream, format='jpeg', use_video_port=True):
