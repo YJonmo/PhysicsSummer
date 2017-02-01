@@ -373,8 +373,10 @@ class cameraModuleClient:
 		
 		while True:
 			trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
-			print(time.time()-1484705222)
 			self.send_msg(self.client_socket, trigger)
+			
+			if trigger == "T":
+				print("Capturing")
 			
 			if trigger == "Q":
 				break

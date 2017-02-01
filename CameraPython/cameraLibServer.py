@@ -43,6 +43,7 @@ FRAMERATE_MAX = 90
 EXPOSURE_MIN = 0
 EXPOSURE_MAX = float("inf")
 IMAGE_TYPES = ['jpeg', 'jpg', 'png', 'gif', 'bmp']
+IMAGE_OFFSET = 0 # Possibly need to set to 3-4
 
 
 class SplitFrames(object):
@@ -60,7 +61,8 @@ class SplitFrames(object):
 			if self.output:
 				self.output.close()
 			
-			if self.frame_num in self.frameout:
+			# Offset the frame number to account for image delay in video mode.
+			if (self.frame_num - IMAGE_OFFSET) in self.frameout:
 				print("Saving: " + str(self.frame_num))
 				fname = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
 				self.fnames.append(fname)
