@@ -214,130 +214,15 @@ class cameraModuleServer:
 		
 		# Locate the Images folder
 		floc = "../../Images/" + fname
-		#stream = io.BytesIO()
 		
 		# Warm the camera up
 		self.camera.start_preview()
 		time.sleep(2)
 		
-		#for i in range(0,10):
-			## Capture an image and store in file <fname>
-			#self.start = time.time()
-			##self.camera.capture(floc,'jpeg',True)
-			#self.camera.capture(stream,'yuv')#,use_video_port=True)
-			#self.end = time.time()
-			#print("Captured in : " + str(self.end-self.start) + "seconds")
-			#stream.truncate()
-			#stream.seek(0)
-		
+		# Capture the image
 		self.camera.capture(floc,'jpeg')
 		self.camera.stop_preview()
 		
-	
-	def getFilenames(self):
-		'''
-		Generator function which allows the image capture to wait for the trigger, and yields the filename.
-		'''
-		
-		self.fnames = []
-		self.dates = []
-		self.ind = 0
-		stream = io.BytesIO()
-		
-		while True:
-			# Wait for the trigger (this can be changed to ADC or GPIO input)
-			if self.network == 1:
-				trigger = self.recv_msg(self.hostSock)
-			else:
-				trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
-			
-			# Yield the stream to capture the image
-			time.sleep(0.125)
-			if trigger == "T":
-				self.start = time.time()
-				yield stream
-				print("Captured in " + str(time.time() - self.start) + " seconds")
-				
-				# Save the triggered image
-				stream.seek(0)
-				floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
-				if len(self.dates) >= 2:
-					fname = self.dates[self.ind-2]
-				else:
-					fname = "Temp" + str(len(self.dates)) + ".jpg"
-				self.dates.append(floc)
-				self.fnames.append(fname)
-				self.ind += 1
-				img = Image.open(stream)
-				img.save(fname)
-				img.close()
-					
-				# Clear the image stream
-				stream.seek(0)
-				stream.truncate()
-			
-			# Quit trigger mode
-			elif trigger == "Q":
-				# Take and store image twice on quitting. For some reason, 
-				# the stored images are always two behind the trigger, so 
-				# the two images stored here are actually the previous two triggered images.
-				yield stream
-				stream.seek(0)
-				floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
-				if len(self.dates) >= 2:
-					fname = self.dates[self.ind-2]
-				else:
-					fname = "Temp" + str(len(self.dates)) + ".jpg"
-				self.dates.append(floc)
-				self.fnames.append(fname)
-				self.ind += 1
-				img = Image.open(stream)
-				img.save(fname)
-				img.close()
-					
-				stream.seek(0)
-				stream.truncate()
-				
-				yield stream
-				stream.seek(0)
-				floc = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
-				if len(self.dates) >= 2:
-					fname = self.dates[self.ind-2]
-				else:
-					fname = "Temp" + str(len(self.dates)) + ".jpg"
-				self.dates.append(floc)
-				self.fnames.append(fname)
-				self.ind += 1
-				img = Image.open(stream)
-				img.save(fname)
-				img.close()
-					
-				stream.seek(0)
-				stream.truncate()
-				
-				break
-		
-		# Remove the first two images, as they are identical to the third
-		self.fnames.pop(0)
-		self.fnames.pop(0)
-		
-	
-	def captureTrigger(self):
-		'''
-		Fast capture of a series of images given a trigger.
-		'''
-		
-		# Camera setup
-		self.camera.start_preview()
-		time.sleep(2)
-		
-		# Use generator function to wait for trigger and capture image with low latency.
-		self.camera.capture_sequence(self.getFilenames(), 'jpeg', use_video_port=True)
-		self.end = time.time()
-
-		# Close the camera preview port
-		self.camera.stop_preview()
-	
 	
 	def paraTrigger(self):
 		'''
@@ -348,7 +233,7 @@ class cameraModuleServer:
 			trig = self.recv_msg(self.hostSock)
 		else:
 			trig = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
-		print("Triggered")
+
 		if trig == "T":
 			self.trigger.value = 1
 		elif trig == "Q":
@@ -364,134 +249,48 @@ class cameraModuleServer:
 		self.camera.start_preview()
 		time.sleep(2)
 		
-		#stream = io.BytesIO()
+		# Initialise the custom output
 		output = SplitFrames(self.camera)
 		
+		# Initialise arrays to store frame info
 		self.fnames = []
-		#self.fcaptures = []
-		#self.ind = 0
-		#self.frames = 0
-		#self.trigflag = 0
-		#self.trigcount = 0
 		self.trigtime = []
 		
+		# Start the trigger process
 		self.trigger.value = 0
 		pt = Process(target = self.paraTrigger)
 		pt.start()
 		
-		#old = 0
-		#new = 0
-		
-		#camera.annotate_background = PiCamera.color.Color('black')
-		#self.camera.annotate_text = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-			
-		#start = time.time()
+		# Start recording
 		self.camera.start_recording(output, format='mjpeg')
+		
 		while True:
-			#print(self.camera.frame.timestamp, self.camera.timestamp)
-			#print(self.camera.frame.index, output.frame_num, self.camera.frame.timestamp, self.camera.timestamp)
-			#old = self.camera.frame.timestamp
-			#if new != old:
-			#	self.camera.annotate_text = str(self.camera.frame.timestamp)
-			#new = old
+			# Condition for when the trigger is triggered
 			if not pt.is_alive():
+				# Save the frame number
 				if self.trigger.value == 1:
 					self.trigtime.append(self.camera.timestamp)
-								
+				
+				# Quit the recording		
 				elif self.trigger.value == 2:
 					pt.terminate()
 					break
 				
+				# Restart the trigger process
 				pt.terminate()
 				self.trigger.value = 0
 				pt = Process(target = self.paraTrigger)
 				pt.start()
 			
+			# Determine whether the current frame was recorded when the trigger occured
 			if len(self.trigtime) > 0:
 				if self.camera.frame.timestamp > self.trigtime[0]:
 					output.frameout.append(self.camera.frame.index)
 					self.trigtime.pop(0)
 		
+		# Close the recording
 		self.camera.stop_recording()
-		#finish = time.time()
 		self.fnames = output.fnames
-		#print('Captured %d frames at %.2ffps' % (output.frame_num, output.frame_num / (finish - start)))
-		
-		##for frm in self.camera.capture_continuous("../../Images/Test{timestamp}.jpg", format='jpeg', use_video_port=True):
-		#for frm in self.camera.capture_continuous(stream, format='jpeg', use_video_port=True):
-			##if self.frames >= 10:
-				##break
-			
-			#print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
-			#self.camera.annotate_text = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-			
-			#stream.truncate()
-			#stream.seek(0)
-			
-			#if not pt.is_alive():
-				#if self.trigger.value == 1:
-					#self.fcaptures.append(self.frames)
-								
-				#elif self.trigger.value == 2:
-					#pt.terminate()
-					#break
-				
-				#pt.terminate()
-				#self.trigger.value = 0
-				#pt = Process(target = self.paraTrigger)
-				#pt.start()
-			
-			##if self.frames in self.fcaptures or (self.frames-1) in self.fcaptures or (self.frames-2) in self.fcaptures or (self.frames-3) in self.fcaptures or (self.frames-4) in self.fcaptures:
-			#if (self.frames) in self.fcaptures:
-				##a = time.time()
-				#print("Captured")
-				
-				#fname = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
-				#self.fnames.append(fname)
-				#self.ind += 1
-				#img = Image.open(stream)
-				#img.save(fname)
-				#img.close()
-				##print(time.time()-a)
-				
-				#stream.seek(0)
-				#stream.truncate()
-			
-			#self.frames += 1
-			
-			
-			#if self.trigflag == 1:
-				#self.trigcount += 1
-			
-			#if self.trigcount >= 4:
-				## Capture image
-				#if self.trigger.value == 1:
-					#print("Captured")
-					#fname = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
-					#self.fnames.append(fname)
-					#self.ind += 1
-					#img = Image.open(stream)
-					#img.save(fname)
-					#img.close()
-				
-				## Quit trigger mode
-				#elif self.trigger.value == 2:
-					#pt.terminate()
-					#self.trigger.value = 0
-					#break
-				
-				#pt.terminate()
-				#self.trigger.value = 0
-				#pt = Process(target = self.paraTrigger)
-				#pt.start()
-				#self.trigflag = 0
-				#self.trigcount = 0
-			
-			#if not pt.is_alive():
-				#self.trigflag = 1
-			
-			#print(self.frames)
-			#self.frames += 1
 		
 	
 	def captureTriggerV2(self):
@@ -500,22 +299,21 @@ class cameraModuleServer:
 		However, the time taken to encode and store the image is ~500 ms. 
 		'''
 		
+		# Initialise to store image info
 		self.fnames = []
 		self.ind = 0
-		#stream = io.BytesIO()
 		
+		# Warm-up the camera
 		self.camera.start_preview()
 		time.sleep(2)
 		
+		# Start the trigger process
 		self.trigger.value = 0
 		pt = Process(target = self.paraTrigger)
 		pt.start()
 
 		while True:
-			
-			#stream.truncate()
-			#stream.seek(0)
-			
+			# Condition for when the trigger is triggered
 			if not pt.is_alive():
 				if self.trigger.value == 1:
 					# Capture an image and store in file <fname>
@@ -526,16 +324,19 @@ class cameraModuleServer:
 					self.camera.capture(fname,'jpeg')
 					self.end = time.time()
 					print("Captured in: " + str(self.end-self.start) + "seconds")
-								
+				
+				# Quit the loop
 				elif self.trigger.value == 2:
 					pt.terminate()
 					break
 				
+				# Restart the trigger process
 				pt.terminate()
 				self.trigger.value = 0
 				pt = Process(target = self.paraTrigger)
 				pt.start()
 		
+		# Close the camera preview
 		self.camera.stop_preview()
 		
 	
@@ -761,7 +562,6 @@ class cameraModuleServer:
 		'''
 		
 		self.hostSock.close()
-		#self.server_socket.close()
 		self.network = 0
 		
 	
