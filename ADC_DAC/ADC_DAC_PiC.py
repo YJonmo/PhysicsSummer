@@ -62,8 +62,14 @@ class DetectPi:
 		elif "DAC1" in Port:
 			channel = 2
 		
+		if Volt > 3.3:
+			print("Voltage exceeds maximum limit. Reducing to 3.3 V.")
+			maxVolt = 3.3
+		else:
+			maxVolt = Volt
+		
 		# Set DAC output voltage <Volt> on channel <channel>
-		self.adclib.set_dac_voltage(ctypes.c_double(Volt), ctypes.c_int(channel))
+		self.adclib.set_dac_voltage(ctypes.c_double(maxVolt), ctypes.c_int(channel))
 		
 		return
 		
@@ -86,6 +92,7 @@ class DetectPi:
 		
 		# Read voltage from channel <channel> in single ended mode
 		voltRead = self.adclib.read_adc_voltage(ctypes.c_int(channel), ctypes.c_int(0))
+		print(voltRead)
 		
 		return np.float(voltRead), time.time()
 		
