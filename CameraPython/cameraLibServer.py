@@ -46,7 +46,8 @@ IMAGE_TYPES = ['jpeg', 'jpg', 'png', 'gif', 'bmp']
 
 
 class SplitFrames(object):
-	def __init__(self):
+	def __init__(self, camera):
+		self.camera = camera
 		self.frame_num = 0
 		self.output = None
 		self.frameout = []
@@ -60,6 +61,7 @@ class SplitFrames(object):
 				self.output.close()
 			
 			if self.frame_num in self.frameout:
+				print("Saving: " + str(self.frame_num))
 				fname = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
 				self.fnames.append(fname)
 				self.output = io.open(fname, 'wb')
@@ -79,6 +81,7 @@ class cameraModuleServer:
 		self.camera = PiCamera()
 		PiCamera.CAPTURE_TIMEOUT = 600
 		self.camera.clock_mode = "raw"
+		#self.camera.annotate_frame_num = True
 
 		# Initialise network variable
 		self.network = 0
@@ -362,7 +365,7 @@ class cameraModuleServer:
 		time.sleep(2)
 		
 		#stream = io.BytesIO()
-		output = SplitFrames()
+		output = SplitFrames(self.camera)
 		
 		self.fnames = []
 		self.fcaptures = []
@@ -370,10 +373,14 @@ class cameraModuleServer:
 		self.frames = 0
 		self.trigflag = 0
 		self.trigcount = 0
+		self.trigtime = []
 		
 		self.trigger.value = 0
 		pt = Process(target = self.paraTrigger)
 		pt.start()
+		
+		old = 0
+		new = 0
 		
 		#camera.annotate_background = PiCamera.color.Color('black')
 		#self.camera.annotate_text = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -381,10 +388,15 @@ class cameraModuleServer:
 		start = time.time()
 		self.camera.start_recording(output, format='mjpeg')
 		while True:
-			print(self.camera.frame.timestamp, self.camera.timestamp)
+			#print(self.camera.frame.timestamp, self.camera.timestamp)
+			print(self.camera.frame.index, self.camera.frame.timestamp, self.camera.timestamp)
+			#old = self.camera.frame.timestamp
+			#if new != old:
+			#	self.camera.annotate_text = str(self.camera.frame.timestamp)
+			#new = old
 			if not pt.is_alive():
 				if self.trigger.value == 1:
-					output.frameout.append(output.frame_num)
+					self.trigtime.append(self.camera.timestamp)
 								
 				elif self.trigger.value == 2:
 					pt.terminate()
@@ -394,6 +406,11 @@ class cameraModuleServer:
 				self.trigger.value = 0
 				pt = Process(target = self.paraTrigger)
 				pt.start()
+			
+			if len(self.trigtime) > 0:
+				if self.camera.frame.timestamp > self.trigtime[0]:
+					output.frameout.append(output.frame_num)
+					self.trigtime.pop(0)
 		
 		self.camera.stop_recording()
 		finish = time.time()
