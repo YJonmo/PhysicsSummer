@@ -95,6 +95,8 @@ double read_adc_voltage(int channel, int mode) {
 	 Returns voltage between 0 and 3.3V
 	 */
 	int rawval = read_adc_raw(channel, mode);
+	//printf("RawVolt: %d\r\n",rawval);
+	//printf("ConvVolt: %.2f\r\n",((adcrefvoltage / (double)4096) * (double) rawval));
 	return ((adcrefvoltage / (double)4096) * (double) rawval);
 }
 
@@ -201,6 +203,7 @@ void set_dac_voltage(double voltage, int channel) {
 	}
 	if ((voltage >= 0.0) && (voltage < dacvoltage)) {
 		uint16_t rawval = ((voltage / 2.048) * 4096) / dacgain;
+		//printf("RawVolt: %.2f", rawval);
 		set_dac_raw(rawval, channel);
 	} else {
 		return;
@@ -224,3 +227,13 @@ void set_dac_gain(int gain) {
 	}
 
 }
+
+void c_sleep(long nanoseconds) {
+	/*
+	 * Very accurate sleep function
+	 */
+	 
+	nanosleep((const struct timespec[]){{0, nanoseconds}}, NULL);
+}
+
+

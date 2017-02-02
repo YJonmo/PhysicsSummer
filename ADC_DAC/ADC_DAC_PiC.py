@@ -21,16 +21,22 @@ class DetectPi:
 		factor may also be set to 2, which gives an output range of 0 to 3.3 V.
 		'''
 		
-		# Import the adc_dac C library
-		self.adclib = ctypes.CDLL('/home/pi/Documents/PhysicsSummer/ADC_DAC/libABE_ADCDACPi.so')
+		self.Error = 0
 		
-		# Initialise ADC and DAC SPI
-		self.adclib.open_adc()
-		self.adclib.open_dac()
-		
-		# Set reference voltage to 3.3 V and DAC gain to 2
-		self.adclib.set_adc_refvoltage(ctypes.c_double(3.3))
-		self.adclib.set_dac_gain(ctypes.c_int(2))
+		try:
+			# Import the adc_dac C library
+			self.adclib = ctypes.CDLL('/home/pi/Documents/PhysicsSummer/ADC_DAC/libABE_ADCDACPi.so')
+			
+			# Initialise ADC and DAC SPI
+			self.adclib.open_adc()
+			self.adclib.open_dac()
+			
+			# Set reference voltage to 3.3 V and DAC gain to 2
+			self.adclib.set_adc_refvoltage(ctypes.c_double(3.3))
+			self.adclib.set_dac_gain(ctypes.c_int(2))
+		except:
+			self.Error = 1
+			raise Exception("Initialisation failed")
 		
 		return
 		
@@ -48,23 +54,26 @@ class DetectPi:
 		'''
 		Write values to a DAC pin. Values may be written to either channel 1 
 		or channel 2. The maximum voltage is specified by the gain factor.
-		Note: Setting a voltage of 5 V will return an error for exceeding 
-		the maximum voltage.
+		Note: Setting a voltage greater than 3.3 V will result in an output 
+		voltage of 3.3 V.
 		'''
 		
 		# Ensure port is of type list
-		if type(Port) == str:
+		if type(Port) == str or type(Port) == int:
 			Port = [Port]
 		
 		# Convert DAQT7 DAC ports to DAC Pi channels
-		if "DAC0" in Port:
+		if "DAC0" in Port or p == 1:
 			channel = 1
-		elif "DAC1" in Port:
+		elif "DAC1" in Port or p == 2:
 			channel = 2
+		else:
+			self.Error = 1
+			raise Exception("Port must be a string ('DAC0' or 'DAC1'), or an int (1 or 2)")
 		
-		if Volt > 3.3:
+		if Volt > 3.299:
 			print("Voltage exceeds maximum limit. Reducing to 3.3 V.")
-			maxVolt = 3.3
+			maxVolt = 3.299
 		else:
 			maxVolt = Volt
 		
@@ -81,18 +90,22 @@ class DetectPi:
 		'''
 		
 		# Ensure port is of type list
-		if type(Port) == str:
+		if type(Port) == str or type(Port) == int:
 			Port = [Port]
 		
 		# Convert DAQT7 AIN ports to ADC Pi channels
-		if "AIN0" in Port:
+		if "AIN0" in Port or 1 in Port:
 			channel = 1
-		elif "AIN1" in Port:
+		elif "AIN1" in Port or 2 in Port:
 			channel = 2
+		else:
+			self.Error = 1
+			raise Exception("Port must be a string ('AIN0' or 'AIN1'), or an int (1 or 2)")
 		
 		# Read voltage from channel <channel> in single ended mode
+		self.adclib.read_adc_voltage.restype = ctypes.c_double
 		voltRead = self.adclib.read_adc_voltage(ctypes.c_int(channel), ctypes.c_int(0))
-		print(voltRead)
+		#print(voltRead)
 		
 		return np.float(voltRead), time.time()
 		
@@ -103,51 +116,69 @@ class DetectPi:
 		'''
 		
 		# Ensure port is of type list
-		if type(Port) == str:
+		if type(Port) == str or type(Port) == int:
 			Port = [Port]
 		
 		# Convert DAQ ports to ADC channels
 		channel = []
 		for p in Port:
-			if p == "AIN0":
+			if p == "AIN0" or p == 1:
 				channel.append(1)
-			elif p == "AIN1":
+			elif p == "AIN1" or p == 2:
 				channel.append(2)
 			else:
-				channel.append(1)
+				self.Error = 1
+				raise Exception("Port must be a string ('AIN0' or 'AIN1'), or an int (1 or 2)")
 		
 		# Initialise array and time values
-		Read = [0]
+		Read = [[], 1, 2]
 		StartingMoment = 0
 		FinishingMoment = 0
 		scansPerRead = int(scansPerRead)
 		
-		# Determine timing characteristics
-		duration = scansPerRead/float(scanRate)
-		dt = 1/float(scanRate)
-		
 		# Allow for alternation between multiple ports
 		portIndex = 0
+		totIndex = 0
 		portLength = len(channel)
+		totScans = scansPerRead*portLength
+		
+		# Determine timing characteristics
+		duration = scansPerRead/float(scanRate)
+		dt = 1/float(scanRate*portLength)
 		
 		# Loop for the duration
 		StartingMoment = time.time()
-		while (time.time()-StartingMoment) < duration:
+		lastReadTime = time.clock()
+		print(scanRate, scansPerRead, dt)
+		#while (time.time()-StartingMoment) < duration:
+		while totIndex < totScans:
 			# Read the ADC value and append to an array
+			self.adclib.read_adc_voltage.restype = ctypes.c_double
 			voltRead = self.adclib.read_adc_voltage(ctypes.c_int(channel[portIndex]), ctypes.c_int(0))
-			Read.append(voltRead)
+			Read[0].append(voltRead)
 			portIndex = (portIndex + 1) % portLength
+			totIndex += 1
+			#lastReadTime = time.clock()
+			
+			#while (time.clock() - lastReadTime) < dt:
+				#continue
 			
 			# Wait for the program to run at the correct frequency
-			#lastReadTime = readTime
-			#readTime = time.time()
-			#if readTime - lastReadTime < dt:
+			readTime = time.time()
+			if readTime - lastReadTime < dt:
+				secs = long((dt - time.time() + lastReadTime) * 1e9)
+				lastReadTime = readTime
+				#print(secs)
+				self.adclib.c_sleep(ctypes.c_long(secs))
 				#time.sleep(dt - readTime + lastReadTime)
+			else:
+				lastReadTime = readTime
+			
 			
 		# Calculate and print elapsed time
 		FinishingMoment = time.time()
 		print ('Elapsed time %f seconds' % (FinishingMoment - StartingMoment))
-		print(np.mean(Read))
+		#print(np.mean(Read))
 		
 		return Read, StartingMoment, FinishingMoment
 		
