@@ -34,6 +34,8 @@ class DetectPi:
 			# Set reference voltage to 3.3 V and DAC gain to 2
 			self.adclib.set_adc_refvoltage(ctypes.c_double(3.3))
 			self.adclib.set_dac_gain(ctypes.c_int(2))
+			
+			print("ADC_DAC_Pi is ready\n")
 		except:
 			self.Error = 1
 			raise Exception("Initialisation failed")
@@ -63,9 +65,9 @@ class DetectPi:
 			Port = [Port]
 		
 		# Convert DAQT7 DAC ports to DAC Pi channels
-		if "DAC0" in Port or p == 1:
+		if "DAC0" in Port or 1 in Port:
 			channel = 1
-		elif "DAC1" in Port or p == 2:
+		elif "DAC1" in Port or 2 in Port:
 			channel = 2
 		else:
 			self.Error = 1
@@ -121,9 +123,9 @@ class DetectPi:
 		# Convert DAQ ports to ADC channels
 		channel = []
 		for p in Port:
-			if p == "AIN0" or p == 1:
+			if p == "AIN0" or 1 in Port:
 				channel.append(1)
-			elif p == "AIN1" or p == 2:
+			elif p == "AIN1" or 2 in Port:
 				channel.append(2)
 			else:
 				self.Error = 1
