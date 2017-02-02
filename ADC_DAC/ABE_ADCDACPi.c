@@ -95,7 +95,7 @@ double read_adc_voltage(int channel, int mode) {
 	 Returns voltage between 0 and 3.3V
 	 */
 	int rawval = read_adc_raw(channel, mode);
-	return ((adcrefvoltage / 4096) * (double) rawval);
+	return ((adcrefvoltage / (double)4096) * (double) rawval);
 }
 
 int read_adc_raw(int channel, int mode) {
