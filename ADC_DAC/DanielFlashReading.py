@@ -161,7 +161,7 @@ if __name__ == "__main__":
         if (DAQ1.Error == 0):
             DAQ_Is_Read.value = 0
             StreamPort = ['AIN0', 'AIN1']          
-            DAQ_SamplingRate = 5000                     # this sampling rate in HZ is for when the internal buffer of DAQ is used
+            DAQ_SamplingRate = 10000                     # this sampling rate in HZ is for when the internal buffer of DAQ is used
                                                          # check this link to see what sampling rates are appropriate:
                                                          # https://labjack.com/support/datasheets/t7/appendix-a-1 
             # Round to nearest hundered in order to avoid error when averaging         

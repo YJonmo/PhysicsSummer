@@ -105,7 +105,6 @@ class DetectPi:
 		# Read voltage from channel <channel> in single ended mode
 		self.adclib.read_adc_voltage.restype = ctypes.c_double
 		voltRead = self.adclib.read_adc_voltage(ctypes.c_int(channel), ctypes.c_int(0))
-		#print(voltRead)
 		
 		return np.float(voltRead), time.time()
 		
@@ -149,8 +148,7 @@ class DetectPi:
 		# Loop for the duration
 		StartingMoment = time.time()
 		lastReadTime = time.clock()
-		print(scanRate, scansPerRead, dt)
-		#while (time.time()-StartingMoment) < duration:
+		offerr = 15e-6
 		while totIndex < totScans:
 			# Read the ADC value and append to an array
 			self.adclib.read_adc_voltage.restype = ctypes.c_double
@@ -166,11 +164,10 @@ class DetectPi:
 			# Wait for the program to run at the correct frequency
 			readTime = time.time()
 			if readTime - lastReadTime < dt:
-				secs = long((dt - time.time() + lastReadTime) * 1e9)
+				secs = long((dt - time.time() + lastReadTime - offerr) * 1e9)
 				lastReadTime = readTime
-				#print(secs)
+				startt = time.time()
 				self.adclib.c_sleep(ctypes.c_long(secs))
-				#time.sleep(dt - readTime + lastReadTime)
 			else:
 				lastReadTime = readTime
 			
@@ -178,7 +175,6 @@ class DetectPi:
 		# Calculate and print elapsed time
 		FinishingMoment = time.time()
 		print ('Elapsed time %f seconds' % (FinishingMoment - StartingMoment))
-		#print(np.mean(Read))
 		
 		return Read, StartingMoment, FinishingMoment
 		
