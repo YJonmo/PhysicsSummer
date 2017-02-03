@@ -99,7 +99,6 @@ class DetectDAQT7:
             names = ["AIN_ALL_NEGATIVE_CH", "AIN_ALL_RANGE", "AIN_ALL_RESOLUTION_INDEX"]
             aValues = [199, 10, 1]
             self.Handle.eWriteNames(self.Handle.handle, numFrames, names, aValues)
-            self.Handle.writeLibraryConfigS("LJM_STREAM_RECEIVE_TIMEOUT_MS",5000)
             return
         except Exception, e:
             print (e.message)
@@ -181,6 +180,7 @@ class DetectDAQT7:
             print("\nStream started with a scan rate of %0.0f Hz." % scanRate)
             StartingMoment = time.time()
             Read = self.Handle.eStreamRead(self.Handle.handle)
+            print(Read)
             FinishingMoment = time.time()
             self.Handle.eStreamStop(self.Handle.handle)
             #FinishingMoment = time.time()

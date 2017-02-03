@@ -295,6 +295,7 @@ class cameraModuleServer:
 		# Close the recording
 		self.camera.stop_recording()
 		self.camera.stop_preview()
+		print(output.fnames)
 		self.fnames = output.fnames
 		
 	
@@ -453,7 +454,7 @@ class cameraModuleServer:
 			p2 = Process(target = self.stopProcess)
 
 			# Send framerate to client
-			self.send_msg(sock, fr)
+			self.send_msg(self.hostSock, fr)
 
 			# Stream camera with raspivid and pipe to gstreamer to stream over network
 			cmdstream1 = ['raspivid', '-n', '-t', '0', '-w', wt, '-h', ht, '-fps', fr, '-o', '-']
@@ -938,9 +939,24 @@ class cameraModuleServer:
 		
 		# Capture with trigger
 		elif command == "T":
+			#if self.network == 1:
+				#mode = self.recv_msg(self.hostSock)
+			#else:
+				#while True:
+					#mode = str(raw_input("Enter mode (1 or 2): "))
+					#if mode == "1" or mode == "2":
+						#break
+					#else:
+						#print("Incorrect mode")
+			#print("Mode: " + mode)
+			#if mode == "1":
+				#self.captureTriggerV1()
+			#else:
+				#self.captureTriggerV2()
 			self.captureTriggerV2()
 			if self.network == 1:
 				for name in self.fnames:
+					print("Sending")
 					self.sendFile(name, "Trigger")
 				self.send_msg(self.hostSock, "Q")
 			
