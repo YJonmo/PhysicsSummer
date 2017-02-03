@@ -158,10 +158,6 @@ class DetectPi:
 			Read[0].append(voltRead)
 			portIndex = (portIndex + 1) % portLength
 			totIndex += 1
-			#lastReadTime = time.clock()
-			
-			#while (time.clock() - lastReadTime) < dt:
-				#continue
 			
 			# Wait for the program to run at the correct frequency
 			readTime = time.time()

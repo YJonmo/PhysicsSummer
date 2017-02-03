@@ -63,7 +63,7 @@ class SplitFrames(object):
 			
 			# Offset the frame number to account for image delay in video mode.
 			if (self.frame_num - IMAGE_OFFSET) in self.frameout:
-				print("Saving: " + str(self.frame_num))
+				#print("Saving: " + str(self.frame_num))
 				fname = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
 				self.fnames.append(fname)
 				self.output = io.open(fname, 'wb')
@@ -226,7 +226,7 @@ class cameraModuleServer:
 		self.camera.stop_preview()
 		
 	
-	def paraTrigger(self):
+	def paraTrigger(self, fn):
 		'''
 		Trigger function executed in parallel to capture function.
 		'''
@@ -234,6 +234,7 @@ class cameraModuleServer:
 		if self.network == 1:
 			trig = self.recv_msg(self.hostSock)
 		else:
+			sys.stdin = os.fdopen(fn)
 			trig = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
 
 		if trig == "T":
@@ -260,7 +261,8 @@ class cameraModuleServer:
 		
 		# Start the trigger process
 		self.trigger.value = 0
-		pt = Process(target = self.paraTrigger)
+		fn = sys.stdin.fileno()
+		pt = Process(target = self.paraTrigger, args=(fn,))
 		pt.start()
 		
 		# Start recording
@@ -281,7 +283,7 @@ class cameraModuleServer:
 				# Restart the trigger process
 				pt.terminate()
 				self.trigger.value = 0
-				pt = Process(target = self.paraTrigger)
+				pt = Process(target = self.paraTrigger, args=(fn,))
 				pt.start()
 			
 			# Determine whether the current frame was recorded when the trigger occured
@@ -292,6 +294,7 @@ class cameraModuleServer:
 		
 		# Close the recording
 		self.camera.stop_recording()
+		self.camera.stop_preview()
 		self.fnames = output.fnames
 		
 	
@@ -311,7 +314,8 @@ class cameraModuleServer:
 		
 		# Start the trigger process
 		self.trigger.value = 0
-		pt = Process(target = self.paraTrigger)
+		fn = sys.stdin.fileno()
+		pt = Process(target = self.paraTrigger, args=(fn,))
 		pt.start()
 
 		while True:
@@ -325,7 +329,7 @@ class cameraModuleServer:
 					self.start = time.time()
 					self.camera.capture(fname,'jpeg')
 					self.end = time.time()
-					print("Captured in: " + str(self.end-self.start) + "seconds")
+					print("Captured in: " + str(self.end-self.start) + " seconds")
 				
 				# Quit the loop
 				elif self.trigger.value == 2:
@@ -335,7 +339,7 @@ class cameraModuleServer:
 				# Restart the trigger process
 				pt.terminate()
 				self.trigger.value = 0
-				pt = Process(target = self.paraTrigger)
+				pt = Process(target = self.paraTrigger, args=(fn,))
 				pt.start()
 		
 		# Close the camera preview
@@ -424,33 +428,33 @@ class cameraModuleServer:
 				self.initNetwork()
 		
 		
-	def networkSubtract(self, sock, duration):
+	def networkSubtract(self, duration):
 		'''
 		Stream a video through the network, and allow image subtraction with openCV on the client computer.
 		'''
 		
+		# Save camera properties
+		fr = str(self.camera.framerate)
+		wt = str(self.camera.resolution[0])
+		ht = str(self.camera.resolution[1])
+		brightness = self.camera.brightness
+		contrast = self.camera.contrast
+		gain = self.camera.iso
+		sharpness = self.camera.sharpness
+		saturation = self.camera.saturation
+		xt = self.camera.exposure_speed
+		
+		# Close the camera to enable raspivid command (easier to pipe with)
+		self.camera.close()
+			
 		if self.network == 1:
 			# Set up camera wait processes
 			p1 = Process(target = self.delayProcess, args=(duration,))
 			p2 = Process(target = self.stopProcess)
 
 			# Send framerate to client
-			self.send_msg(sock, str(self.camera.framerate))
+			self.send_msg(sock, fr)
 
-			# Save camera properties
-			fr = str(self.camera.framerate)
-			wt = str(self.camera.resolution[0])
-			ht = str(self.camera.resolution[1])
-			brightness = self.camera.brightness
-			contrast = self.camera.contrast
-			gain = self.camera.iso
-			sharpness = self.camera.sharpness
-			saturation = self.camera.saturation
-			xt = self.camera.exposure_speed
-			
-			# Close the camera to enable raspivid command (easier to pipe with)
-			self.camera.close()
-			
 			# Stream camera with raspivid and pipe to gstreamer to stream over network
 			cmdstream1 = ['raspivid', '-n', '-t', '0', '-w', wt, '-h', ht, '-fps', fr, '-o', '-']
 			cmdstream2 = ['gst-launch-1.0', '-v', 'fdsrc', '!', 'h264parse', '!', 'rtph264pay', 'config-interval=1', 'pt=96', '!', 'gdppay', '!', 'tcpserversink', 'host=192.168.1.1', 'port=5000']
@@ -468,18 +472,28 @@ class cameraModuleServer:
 			# Terminate the raspivid and gstreamer commands
 			pcmd1.terminate()
 			pcmd2.terminate()
+		
+		else:
+			try:
+				cmdstream = ['./BackGroundSubb_Video_RPI', '-vid', '0']
+				pcmd = subprocess.Popen(cmdstream)
+				time.sleep(duration)
+			except KeyboardInterrupt:
+				pass
 			
-			# Re-open the camera and return to saved parameters
-			self.camera = PiCamera()
-			self.setResolution(int(wt), int(ht))
-			self.setFrameRate(int(fr))
-			self.setBrightness(brightness)
-			self.setContrast(contrast)
-			self.setGain(gain)
-			self.setSharpness(sharpness)
-			self.setSaturation(saturation)
-			self.setExposureTime(xt)
+			pcmd.terminate()
 			
+		# Re-open the camera and return to saved parameters
+		time.sleep(1)
+		self.camera = PiCamera()
+		self.setResolution(int(wt), int(ht))
+		self.setFrameRate(int(fr))
+		self.setBrightness(brightness)
+		self.setContrast(contrast)
+		self.setGain(gain)
+		self.setSharpness(sharpness)
+		self.setSaturation(saturation)
+		self.setExposureTime(xt)
 		
 	
 	def send_msg(self, sock, msg):
@@ -894,12 +908,9 @@ class cameraModuleServer:
 		
 		# Network subtract stream
 		elif command == "O":
-			if self.network == 1:
-				duration = float(self.inputParameter("Duration"))
-				self.confirmCompletion("Duration set")
-				self.networkSubtract(self.hostSock, duration)
-			else:
-				print("Not connected to network")
+			duration = float(self.inputParameter("Duration"))
+			self.confirmCompletion("Duration set")
+			self.networkSubtract(duration)
 		
 		# Get camera settings
 		elif command == "P":
@@ -927,7 +938,7 @@ class cameraModuleServer:
 		
 		# Capture with trigger
 		elif command == "T":
-			self.captureTriggerV1()
+			self.captureTriggerV2()
 			if self.network == 1:
 				for name in self.fnames:
 					self.sendFile(name, "Trigger")
