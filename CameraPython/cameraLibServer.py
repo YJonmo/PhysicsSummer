@@ -100,7 +100,6 @@ class cameraModuleServer:
 		# Initialise trigger
 		self.trigger = Value('i', 0)
 		
-		
 	
 	def setResolution(self, width, height):
 		'''

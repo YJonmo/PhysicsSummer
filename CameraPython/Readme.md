@@ -20,6 +20,80 @@ This folder contains Python code to control the Raspberry Pi camera module.
 
 - launcher.sh: A bash script which allows the python camera module server to be launched on the Raspberry Pi at boot.
 
+## Instructions - Running from remote computer
+
+The CameraPython code can be run from a remote computer by connecting to the PiNet Wi-Fi network.
+Once connected, open a terminal and enter the following commands:
+
+	ssh pi@192.168.1.1
+	cd Documents/PhysicsSummer/CameraPython
+	python cameraServerTest.py
+	
+If prompted for a password, enter "PiPhysics".
+If the python script is successfully runnning on the Raspberry Pi, open a new terminal, navigate to the git repository directory, and enter the following commands:
+
+	cd CameraPython
+	python cameraClientTest.py
+
+If successful, a list of commands should appear.
+The commands are:
+
+	B: Set brightness
+	C: Set contrast
+	F: Set framerate
+	G: Set gain
+	H: Help
+	I: Capture an image
+	N: Stream to network
+	O: Stream with image subtraction
+	P: Get camera settings
+	Q: Quit program
+	R: Set resolution
+	S: Set sharpness
+	T: Capture with trigger
+	U: Set saturation
+	V: Capture a video
+	X: Set exposure time
+
+A prompt will appear to input a command.
+Each command is a single letter and not case sensitive.
+Input the command and press enter.
+
+The I command takes a single image from the camera.
+This command prompts for a filename to store the image in.
+The filename must end in one of the following: ".jpg", ".jpeg", ".png", ".gif", ".bmp".
+The default image filename is a timestamp, and used if no filename is entered into the prompt.
+The image is downloaded from the Raspberry Pi to the remote computer, and stored in a folder named "Images".
+The images folder must exist in the same directory that the git repository is contained in.
+
+The T command is a trigger mode for taking images with small latency.
+
+The V command takes a video from the camera.
+The program will ask for the duration of the video in seconds.
+If no duration is entered, then the video will record indefinitely, until "Ctrl+C" is pressed in the terminal.
+A filename will then be prompted.
+A filename containing a timestamp is used if no filename is entered.
+After the recording is completed, the video is downloaded to the remote computer, and stored in a folder named "Videos".
+The videos folder must exist in the same directory that the git repository is contained in.
+
+The N command streams a camera recording from the Raspberry Pi to the remote computer in real-time.
+The program will ask for the duration of the video in seconds.
+If no duration is entered, then the video will record indefinitely, until "Ctrl+C" is pressed in the terminal.
+VLC will open and display the video stream.
+
+The O command streams a camera recording from the Raspberry Pi to the remote computer in real-time, and performs image subtraction on the stream using OpenCV.
+The program will ask for the duration of the video in seconds.
+If no duration is entered, then the video will record indefinitely, until "Ctrl+C" is pressed in the terminal.
+A window displaying the camera video will open, as well as another window displaying the image subtracted video.
+
+The B, C, F, G, R, S, U, and X commands are setter functions.
+For each command, the default, minimum, and maximum values are displayed for the corresponding property.
+The default value is equal to the current value of the property.
+If no value is entered, then the property is set to the default value.
+Note that increasing the exposure time may lower the framerate, that increaing the framerate may lower the exposure time.
+
+## Instructions - running from Raspberry Pi
+
 ## Raspberry Pi Installation
 
 The code requires the MP4Box package to place the raw video in a container, in order to playback at the correct framerate. This can be installed by:
