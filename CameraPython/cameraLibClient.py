@@ -104,6 +104,7 @@ class cameraModuleClient:
 			# Receive a stream from gstreamer, and pipe into the openCV executable.
 			gstcmd = "tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, framerate=" + frate + "/1 ! avdec_h264 ! videoconvert ! appsink"
 			subline = ['./BackGroundSubb_Video', '-vid', gstcmd]
+			time.sleep(0.1)
 			player = subprocess.Popen(subline)
 			
 			# Wait for executable to exit
@@ -356,9 +357,11 @@ class cameraModuleClient:
 		elif typ == "Trigger":
 			while True:
 				fnm = self.recv_msg(self.client_socket)
+				print(fnm)
 				if fnm == "Q":
 					break
 				else:
+					time.sleep(0.1)
 					os.system("nc 192.168.1.1 60000 > " + fnm)
 		elif typ == "Video":
 			os.system("nc 192.168.1.1 60000 > ../../Videos/" + fname)
