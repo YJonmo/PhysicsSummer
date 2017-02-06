@@ -12,6 +12,19 @@ This folder contains modifications to the DanielFlashReading code.
 
 - ThorlabsPM100_Objective.py: Power meter library.
 
+## Instructions
+
+Open a terminal and type the following commands:
+
+	cd Documents/Damon/PhysicsSummer/Temp
+	python DanielFlashReading.py
+	
+If the PhysicsSummer folder does not exist, download the folder by running the command:
+
+	git clone https://github.com/dhutley/PhysicsSummer
+	cd PhysicsSummer/Temp
+	python DanielFlashReading.py
+
 ## Modifications
 
 - Calculations are added to convert the analogue thermocouple input into temperature. This calculation is based on the opamp gain.
