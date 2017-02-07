@@ -67,6 +67,16 @@ The image is downloaded from the Raspberry Pi to the remote computer, and stored
 The images folder must exist in the same directory that the git repository is contained in.
 
 The T command is a trigger mode for taking images with small latency.
+There are two trigger modes.
+Mode 1 uses the video port.
+This mode allows images to be taken in rapid succession.
+However, it is possible that the image is taken before the trigger occurs.
+This can be fixed by increasing the IMAGE_OFFSET parameter in the cameraLibServer.py code.
+Additionally, the resolution cannot exceed 1920x1080 in this mode.
+Mode 2 uses the image port.
+This mode results in more consistent and higher quality images.
+However, ~500 ms is required after the capture to process and store the image.
+Additional images cannot be taken in this period of time.
 
 The V command takes a video from the camera.
 The program will ask for the duration of the video in seconds.
@@ -93,6 +103,20 @@ If no value is entered, then the property is set to the default value.
 Note that increasing the exposure time may lower the framerate, that increaing the framerate may lower the exposure time.
 
 ## Instructions - running from Raspberry Pi
+
+The CameraPython code can be run directly from the Raspberry Pi.
+On the Raspberry Pi, open a terminal, and run the command:
+
+	cd Documents/PhysicsSummer/CameraPython
+	python picamCommand.py
+
+The code runs the same way as on a remote computer, but with a few differences:
+
+- Images and Videos are stored on the Raspberry Pi as opposed to a remote computer
+
+- The N command (network streaming) does not work
+
+- The O command (image subtraction) runs on the Raspberry Pi as opposed to streaming on a remote computer. It runs a lot slower on the Raspberry Pi.
 
 ## Raspberry Pi Installation
 
