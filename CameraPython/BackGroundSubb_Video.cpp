@@ -69,6 +69,8 @@ int main(int argc, char* argv[])
 void processVideo(char* videoFilename) {
     //create the capture object
     VideoCapture capture(videoFilename);
+    
+    int whitePixels;
 
     if(!capture.isOpened()){
         //error in opening the video input
@@ -86,6 +88,12 @@ void processVideo(char* videoFilename) {
         }
         //update the background model
         pMOG2->apply(frame, fgMaskMOG2);
+        
+        // Count the number of white pixels
+        whitePixels = countNonZero(fgMaskMOG2);
+        cout << "White Pixels: ";
+        cout << whitePixels << endl;
+        
         //get the frame number and write it on the current frame
         stringstream ss;
         rectangle(frame, cv::Point(10, 2), cv::Point(100,20),
