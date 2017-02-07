@@ -446,7 +446,7 @@ class cameraModuleServer:
 		'''
 		
 		# Save camera properties
-		fr = str(self.camera.framerate)
+		'''fr = str(self.camera.framerate)
 		wt = str(self.camera.resolution[0])
 		ht = str(self.camera.resolution[1])
 		brightness = self.camera.brightness
@@ -454,10 +454,14 @@ class cameraModuleServer:
 		gain = self.camera.iso
 		sharpness = self.camera.sharpness
 		saturation = self.camera.saturation
-		xt = self.camera.exposure_speed
+		xt = self.camera.exposure_speed'''
 		
 		# Close the camera to enable raspivid command (easier to pipe with)
-		self.camera.close()
+		#self.camera.close()
+		
+		# Warm the camera up
+		self.camera.start_preview()
+		time.sleep(2)
 			
 		if self.network == 1:
 			# Set up camera wait processes
@@ -465,13 +469,18 @@ class cameraModuleServer:
 			p2 = Process(target = self.stopProcess)
 
 			# Send framerate to client
-			self.send_msg(self.hostSock, fr)
+			#self.send_msg(self.hostSock, fr)
+			self.send_msg(self.hostSock, str(self.camera.framerate))
 
 			# Stream camera with raspivid and pipe to gstreamer to stream over network
-			cmdstream1 = ['raspivid', '-n', '-t', '0', '-w', wt, '-h', ht, '-fps', fr, '-o', '-']
-			cmdstream2 = ['gst-launch-1.0', '-v', 'fdsrc', '!', 'h264parse', '!', 'rtph264pay', 'config-interval=1', 'pt=96', '!', 'gdppay', '!', 'tcpserversink', 'host=192.168.1.1', 'port=5000']
-			pcmd1 = subprocess.Popen(cmdstream1, stdout=subprocess.PIPE)
-			pcmd2 = subprocess.Popen(cmdstream2, stdin=pcmd1.stdout)
+			#cmdstream1 = ['raspivid', '-n', '-t', '0', '-w', wt, '-h', ht, '-fps', fr, '-o', '-']
+			#cmdstream2 = ['gst-launch-1.0', '-v', 'fdsrc', '!', 'h264parse', '!', 'rtph264pay', 'config-interval=1', 'pt=96', '!', 'gdppay', '!', 'tcpserversink', 'host=192.168.1.1', 'port=5000']
+			#pcmd1 = subprocess.Popen(cmdstream1, stdout=subprocess.PIPE)
+			#pcmd2 = subprocess.Popen(cmdstream2, stdin=pcmd1.stdout)
+			
+			cmdstr = ['gst-launch-1.0', '-v', 'fdsrc', '!', 'h264parse', '!', 'rtph264pay', 'config-interval=1', 'pt=96', '!', 'gdppay', '!', 'tcpserversink', 'host=192.168.1.1', 'port=5000']
+			pcm = subprocess.Popen(cmdstr, stdin=subprocess.PIPE)
+			self.camera.start_recording(pcm.stdin, format='h264')
 			
 			# Multiprocessing to determine when to stop recording
 			p1.start()
@@ -481,9 +490,13 @@ class cameraModuleServer:
 			p1.terminate()
 			p2.terminate()
 			
+			self.camera.stop_recording()
+			self.camera.stop_preview()
+			
 			# Terminate the raspivid and gstreamer commands
-			pcmd1.terminate()
-			pcmd2.terminate()
+			#pcmd1.terminate()
+			#pcmd2.terminate()
+			pcm.terminate()
 		
 		else:
 			try:
@@ -496,7 +509,7 @@ class cameraModuleServer:
 			pcmd.terminate()
 			
 		# Re-open the camera and return to saved parameters
-		time.sleep(1)
+		'''time.sleep(1)
 		self.camera = PiCamera()
 		self.setResolution(int(wt), int(ht))
 		self.setFrameRate(int(fr))
@@ -505,7 +518,7 @@ class cameraModuleServer:
 		self.setGain(gain)
 		self.setSharpness(sharpness)
 		self.setSaturation(saturation)
-		self.setExposureTime(xt)
+		self.setExposureTime(xt)'''
 		
 	
 	def send_msg(self, sock, msg):

@@ -9,6 +9,14 @@
 //C++
 #include <iostream>
 #include <sstream>
+#include <iomanip>
+#include <string>
+#include <chrono>
+#include <ctime>
+
+#define THRESHOLD 5.0
+#define INIT_DISCARD 100
+
 using namespace cv;
 using namespace std;
 // Global variables
@@ -71,6 +79,15 @@ void processVideo(char* videoFilename) {
     VideoCapture capture(videoFilename);
     
     int whitePixels;
+    int totalPixels;
+    double pixPercent;
+    int savedFrames = 0;
+    int totalFrames = 0;
+    string fname;
+    chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
+    chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
+    time_t now;
+    tm *ltm;
 
     if(!capture.isOpened()){
         //error in opening the video input
@@ -91,8 +108,33 @@ void processVideo(char* videoFilename) {
         
         // Count the number of white pixels
         whitePixels = countNonZero(fgMaskMOG2);
-        cout << "White Pixels: ";
-        cout << whitePixels << endl;
+        totalPixels = fgMaskMOG2.total();
+        pixPercent = ((float)whitePixels / (float)totalPixels) * 100;
+        
+        /*cout << "White Pixels: ";
+        cout << whitePixels;
+        cout << ", Total Pixels: ";
+        cout << totalPixels;*/
+        cout << "Percentage: ";
+        cout << fixed << setprecision(1) << pixPercent;
+        cout << " %, Save: ";
+        
+        if (pixPercent > THRESHOLD && totalFrames >= INIT_DISCARD) {
+			cout << "Y, Total: ";
+			fname = "../../Images/Im";
+			now = time(0);
+			ltm = localtime(&now);
+			fname += to_string(1900+ltm->tm_year) + "-" + to_string(1+ltm->tm_mon) + "-" + to_string(ltm->tm_mday);
+			fname += "T" + to_string(ltm->tm_hour) + "-" + to_string(ltm->tm_min) + "-" + to_string(ltm->tm_sec);
+			fname += "N" + to_string(savedFrames) + ".jpg";
+			imwrite(fname, frame);
+			savedFrames++;
+		}
+		else {
+			cout << "N, Total: ";
+		}
+		
+		cout << savedFrames;
         
         //get the frame number and write it on the current frame
         stringstream ss;
@@ -105,6 +147,15 @@ void processVideo(char* videoFilename) {
         //show the current frame and the fg masks
         imshow("Frame", frame);
         imshow("FG Mask MOG 2", fgMaskMOG2);
+        
+        totalFrames++;
+        
+        t2 = t1;
+        t1 = chrono::high_resolution_clock::now();
+        chrono::duration<double> time_span = chrono::duration_cast<chrono::duration<double>>(t1-t2);
+        cout << " Time: ";
+        cout << fixed << setprecision(6) << time_span.count() << endl;
+        
         //get the input from the keyboard
         keyboard = waitKey( 10 );
     }
