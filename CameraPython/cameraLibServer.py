@@ -62,12 +62,15 @@ class SplitFrames(object):
 				self.output.close()
 			
 			# Offset the frame number to account for image delay in video mode.
-			if (self.frame_num - IMAGE_OFFSET) in self.frameout:
+			#if (self.frame_num - IMAGE_OFFSET) in self.frameout:
+			if any(i <= (self.frame_num - IMAGE_OFFSET) for i in self.frameout):
 				#print("Saving: " + str(self.frame_num))
 				fname = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
 				self.fnames.append(fname)
 				self.output = io.open(fname, 'wb')
 				self.output.write(buf)
+				print("Captured")
+				self.frameout.pop(0)
 		
 		self.frame_num += 1
 
@@ -246,10 +249,10 @@ class cameraModuleServer:
 		'''
 		Fast capture of a series of images given a trigger. Uses video mode instead of still mode.
 		'''
-		
+
 		# Camera setup
 		self.camera.start_preview()
-		time.sleep(2)
+		time.sleep(1)
 		
 		# Initialise the custom output
 		output = SplitFrames(self.camera)
@@ -257,6 +260,11 @@ class cameraModuleServer:
 		# Initialise arrays to store frame info
 		self.fnames = []
 		self.trigtime = []
+		self.imno = 0
+		endflag = 0
+		
+		# Start recording
+		self.camera.start_recording(output, format='mjpeg')
 		
 		# Start the trigger process
 		self.trigger.value = 0
@@ -264,21 +272,25 @@ class cameraModuleServer:
 		pt = Process(target = self.paraTrigger, args=(fn,))
 		pt.start()
 		
-		# Start recording
-		self.camera.start_recording(output, format='mjpeg')
-		
 		while True:
+			# End condition
+			if endflag == 1 and self.imno == len(output.fnames):
+				pt.terminate()
+				break
+			
 			# Condition for when the trigger is triggered
 			if not pt.is_alive():
 				# Save the frame number
 				if self.trigger.value == 1:
 					self.trigtime.append(self.camera.timestamp)
+					self.imno += 1
 				
 				# Quit the recording		
 				elif self.trigger.value == 2:
-					pt.terminate()
-					break
-				
+					endflag = 1
+					#pt.terminate()
+					#break
+
 				# Restart the trigger process
 				pt.terminate()
 				self.trigger.value = 0
@@ -294,7 +306,7 @@ class cameraModuleServer:
 		# Close the recording
 		self.camera.stop_recording()
 		self.camera.stop_preview()
-		print(output.fnames)
+		
 		self.fnames = output.fnames
 		
 	
@@ -938,21 +950,21 @@ class cameraModuleServer:
 		
 		# Capture with trigger
 		elif command == "T":
-			#if self.network == 1:
-				#mode = self.recv_msg(self.hostSock)
-			#else:
-				#while True:
-					#mode = str(raw_input("Enter mode (1 or 2): "))
-					#if mode == "1" or mode == "2":
-						#break
-					#else:
-						#print("Incorrect mode")
-			#print("Mode: " + mode)
-			#if mode == "1":
-				#self.captureTriggerV1()
-			#else:
-				#self.captureTriggerV2()
-			self.captureTriggerV2()
+			if self.network == 1:
+				mode = self.recv_msg(self.hostSock)
+			else:
+				while True:
+					mode = str(raw_input("Enter mode (1 or 2): "))
+					if mode == "1" or mode == "2":
+						break
+					else:
+						print("Incorrect mode")
+			print("Mode: " + mode)
+			if mode == "1":
+				self.captureTriggerV1()
+			else:
+				self.captureTriggerV2()
+			#self.captureTriggerV2()
 			if self.network == 1:
 				for name in self.fnames:
 					print("Sending")

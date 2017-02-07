@@ -357,7 +357,7 @@ class cameraModuleClient:
 		elif typ == "Trigger":
 			while True:
 				fnm = self.recv_msg(self.client_socket)
-				print(fnm)
+				print("Receiving...")
 				if fnm == "Q":
 					break
 				else:
@@ -460,17 +460,17 @@ class cameraModuleClient:
 		
 		# Capture with trigger
 		elif command == "T":
-			#print(CYAN + "Note: Option 1 uses the video port, which means there is a latency of 0-300 ms," + CLEAR)
-			#print(CYAN + "      but allows images to be taken in rapid succession." + CLEAR)
-			#print(CYAN + "      Option 2 uses the still port, which has a latency of 10-30 ms," + CLEAR)
-			#print(CYAN + "      but requires ~500 ms after capture to process and store the image." + CLEAR)
-			#while True:
-				#mode = str(raw_input("Enter mode (1 or 2): "))
-				#if mode == "1" or mode == "2":
-					#break
-				#else:
-					#print("Incorrect mode")
-			#self.send_msg(self.client_socket, mode)
+			print(CYAN + "Note: Option 1 uses the video port, which means there is a latency of 0-300 ms," + CLEAR)
+			print(CYAN + "      but allows images to be taken in rapid succession." + CLEAR)
+			print(CYAN + "      Option 2 uses the still port, which has a latency of 10-30 ms," + CLEAR)
+			print(CYAN + "      but requires ~500 ms after capture to process and store the image." + CLEAR)
+			while True:
+				mode = str(raw_input("Enter mode (1 or 2): "))
+				if mode == "1" or mode == "2":
+					break
+				else:
+					print("Incorrect mode")
+			self.send_msg(self.client_socket, mode)
 			self.sendTrigger()
 			self.receiveFile("", "Trigger")
 			
