@@ -224,7 +224,7 @@ class cameraModuleServer:
 		time.sleep(2)
 		
 		# Capture the image
-		self.camera.capture(floc,'jpeg')
+		self.camera.capture(floc)
 		self.camera.stop_preview()
 		
 	

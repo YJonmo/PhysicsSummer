@@ -353,6 +353,7 @@ class cameraModuleClient:
 		
 		# Must have Netcat installed on the command-line
 		if typ == "Image":
+			time.sleep(0.1)
 			os.system("nc 192.168.1.1 60000 > ../../Images/" + fname)
 		elif typ == "Trigger":
 			while True:
@@ -364,6 +365,7 @@ class cameraModuleClient:
 					time.sleep(0.1)
 					os.system("nc 192.168.1.1 60000 > " + fnm)
 		elif typ == "Video":
+			time.sleep(0.1)
 			os.system("nc 192.168.1.1 60000 > ../../Videos/" + fname)
 		
 		print(GREEN + "Downloaded file" + CLEAR)
