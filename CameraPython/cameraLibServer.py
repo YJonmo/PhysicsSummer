@@ -458,10 +458,6 @@ class cameraModuleServer:
 		
 		# Close the camera to enable raspivid command (easier to pipe with)
 		#self.camera.close()
-		
-		# Warm the camera up
-		self.camera.start_preview()
-		time.sleep(2)
 			
 		if self.network == 1:
 			# Set up camera wait processes
@@ -491,7 +487,6 @@ class cameraModuleServer:
 			p2.terminate()
 			
 			self.camera.stop_recording()
-			self.camera.stop_preview()
 			
 			# Terminate the raspivid and gstreamer commands
 			#pcmd1.terminate()
@@ -500,13 +495,35 @@ class cameraModuleServer:
 		
 		else:
 			try:
-				cmdstream = ['./BackGroundSubb_Video_RPI', '-vid', '0']
-				pcmd = subprocess.Popen(cmdstream)
+				cmdstr = ['gst-launch-1.0', '-v', 'fdsrc', '!', 'h264parse', '!', 'rtph264pay', 'config-interval=1', 'pt=96', '!', 'gdppay', '!', 'tcpserversink', 'host=192.168.1.1', 'port=5000']
+				pcm = subprocess.Popen(cmdstr, stdin=subprocess.PIPE)
+				self.camera.start_recording(pcm.stdin, format='h264')
+				
+				frate = str(self.camera.framerate)
+				gstcmd = "tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, framerate=" + frate + "/1 ! avdec_h264 ! videoconvert ! appsink"
+				subline = ['./BackGroundSubb_Video_RPI', '-vid', gstcmd]
+				time.sleep(0.1)
+				player = subprocess.Popen(subline)
+				
 				time.sleep(duration)
+				
+				self.camera.stop_recording()
+				pcm.terminate()
+				player.terminate()
+				
 			except KeyboardInterrupt:
-				pass
+				self.camera.stop_recording()
+				pcm.terminate()
+				player.terminate()
 			
-			pcmd.terminate()
+			#try:
+				#cmdstream = ['./BackGroundSubb_Video_RPI', '-vid', '/dev/video0']
+				#pcmd = subprocess.Popen(cmdstream)
+				#time.sleep(duration)
+			#except KeyboardInterrupt:
+				#pass
+			
+			#pcmd.terminate()
 			
 		# Re-open the camera and return to saved parameters
 		'''time.sleep(1)

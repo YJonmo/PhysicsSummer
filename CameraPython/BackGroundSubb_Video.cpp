@@ -126,7 +126,7 @@ void processVideo(char* videoFilename) {
 			ltm = localtime(&now);
 			fname += to_string(1900+ltm->tm_year) + "-" + to_string(1+ltm->tm_mon) + "-" + to_string(ltm->tm_mday);
 			fname += "T" + to_string(ltm->tm_hour) + "-" + to_string(ltm->tm_min) + "-" + to_string(ltm->tm_sec);
-			fname += "N" + to_string(savedFrames) + ".jpg";
+			fname += "N" + to_string(savedFrames) + ".png";
 			imwrite(fname, frame);
 			savedFrames++;
 		}
