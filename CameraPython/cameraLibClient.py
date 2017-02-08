@@ -228,7 +228,6 @@ class cameraModuleClient:
 		# Receive confirmation message from the Pi.
 		confirm = self.recv_msg(self.client_socket)
 		if confirm == None:
-			#print("Command failed")
 			raise Exception("Command Failed (May need to lower resolution or framerate)")
 		else:
 			print(GREEN + confirm + CLEAR)
@@ -273,12 +272,10 @@ class cameraModuleClient:
 		
 		# Send parameter value to Pi
 		self.send_msg(self.client_socket, value)
-		#print(time.time()-1484705222)
 		
 		# Receive start confirmation message from the Pi.
 		confirm = self.recv_msg(self.client_socket)
 		if confirm == None:
-			#print("Command failed")
 			raise Exception("Command Failed (May need to lower resolution or framerate)")
 		else:
 			print(YELLOW + confirm + CLEAR)
@@ -292,7 +289,6 @@ class cameraModuleClient:
 			confirm = self.recv_msg(self.client_socket)
 		
 		if confirm == None:
-			#print("Command failed")
 			raise Exception("Command Failed (May need to lower resolution or framerate)")
 		else:
 			print(GREEN + confirm + CLEAR)

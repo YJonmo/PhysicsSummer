@@ -62,9 +62,7 @@ class SplitFrames(object):
 				self.output.close()
 			
 			# Offset the frame number to account for image delay in video mode.
-			#if (self.frame_num - IMAGE_OFFSET) in self.frameout:
 			if any(i <= (self.frame_num - IMAGE_OFFSET) for i in self.frameout):
-				#print("Saving: " + str(self.frame_num))
 				fname = "../../Images/Image" + datetime.datetime.now().isoformat() + ".jpg"
 				self.fnames.append(fname)
 				self.output = io.open(fname, 'wb')
@@ -86,7 +84,6 @@ class cameraModuleServer:
 		self.camera = PiCamera()
 		PiCamera.CAPTURE_TIMEOUT = 600
 		self.camera.clock_mode = "raw"
-		#self.camera.annotate_frame_num = True
 
 		# Initialise network variable
 		self.network = 0
@@ -288,8 +285,6 @@ class cameraModuleServer:
 				# Quit the recording		
 				elif self.trigger.value == 2:
 					endflag = 1
-					#pt.terminate()
-					#break
 
 				# Restart the trigger process
 				pt.terminate()
@@ -444,20 +439,6 @@ class cameraModuleServer:
 		'''
 		Stream a video through the network, and allow image subtraction with openCV on the client computer.
 		'''
-		
-		# Save camera properties
-		'''fr = str(self.camera.framerate)
-		wt = str(self.camera.resolution[0])
-		ht = str(self.camera.resolution[1])
-		brightness = self.camera.brightness
-		contrast = self.camera.contrast
-		gain = self.camera.iso
-		sharpness = self.camera.sharpness
-		saturation = self.camera.saturation
-		xt = self.camera.exposure_speed'''
-		
-		# Close the camera to enable raspivid command (easier to pipe with)
-		#self.camera.close()
 			
 		if self.network == 1:
 			# Set up camera wait processes
@@ -465,15 +446,9 @@ class cameraModuleServer:
 			p2 = Process(target = self.stopProcess)
 
 			# Send framerate to client
-			#self.send_msg(self.hostSock, fr)
 			self.send_msg(self.hostSock, str(self.camera.framerate))
 
-			# Stream camera with raspivid and pipe to gstreamer to stream over network
-			#cmdstream1 = ['raspivid', '-n', '-t', '0', '-w', wt, '-h', ht, '-fps', fr, '-o', '-']
-			#cmdstream2 = ['gst-launch-1.0', '-v', 'fdsrc', '!', 'h264parse', '!', 'rtph264pay', 'config-interval=1', 'pt=96', '!', 'gdppay', '!', 'tcpserversink', 'host=192.168.1.1', 'port=5000']
-			#pcmd1 = subprocess.Popen(cmdstream1, stdout=subprocess.PIPE)
-			#pcmd2 = subprocess.Popen(cmdstream2, stdin=pcmd1.stdout)
-			
+			# Stream from picamera and pipe into gstreamer to stream over network
 			cmdstr = ['gst-launch-1.0', '-v', 'fdsrc', '!', 'h264parse', '!', 'rtph264pay', 'config-interval=1', 'pt=96', '!', 'gdppay', '!', 'tcpserversink', 'host=192.168.1.1', 'port=5000']
 			pcm = subprocess.Popen(cmdstr, stdin=subprocess.PIPE)
 			self.camera.start_recording(pcm.stdin, format='h264')
@@ -486,56 +461,39 @@ class cameraModuleServer:
 			p1.terminate()
 			p2.terminate()
 			
+			# Stop recording
 			self.camera.stop_recording()
 			
-			# Terminate the raspivid and gstreamer commands
-			#pcmd1.terminate()
-			#pcmd2.terminate()
+			# Terminate the streamer command
 			pcm.terminate()
 		
 		else:
 			try:
+				# Stream from picamera and pipe into gstreamer to stream into opencv
 				cmdstr = ['gst-launch-1.0', '-v', 'fdsrc', '!', 'h264parse', '!', 'rtph264pay', 'config-interval=1', 'pt=96', '!', 'gdppay', '!', 'tcpserversink', 'host=192.168.1.1', 'port=5000']
 				pcm = subprocess.Popen(cmdstr, stdin=subprocess.PIPE)
 				self.camera.start_recording(pcm.stdin, format='h264')
 				
+				# Start the opencv executable
 				frate = str(self.camera.framerate)
 				gstcmd = "tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, framerate=" + frate + "/1 ! avdec_h264 ! videoconvert ! appsink"
 				subline = ['./BackGroundSubb_Video_RPI', '-vid', gstcmd]
 				time.sleep(0.1)
 				player = subprocess.Popen(subline)
 				
+				# Wait for specified duration
 				time.sleep(duration)
 				
+				# Stop recording and close resources
 				self.camera.stop_recording()
 				pcm.terminate()
 				player.terminate()
 				
 			except KeyboardInterrupt:
+				# Stop recording and close resources if Ctrl+C is pressed
 				self.camera.stop_recording()
 				pcm.terminate()
 				player.terminate()
-			
-			#try:
-				#cmdstream = ['./BackGroundSubb_Video_RPI', '-vid', '/dev/video0']
-				#pcmd = subprocess.Popen(cmdstream)
-				#time.sleep(duration)
-			#except KeyboardInterrupt:
-				#pass
-			
-			#pcmd.terminate()
-			
-		# Re-open the camera and return to saved parameters
-		'''time.sleep(1)
-		self.camera = PiCamera()
-		self.setResolution(int(wt), int(ht))
-		self.setFrameRate(int(fr))
-		self.setBrightness(brightness)
-		self.setContrast(contrast)
-		self.setGain(gain)
-		self.setSharpness(sharpness)
-		self.setSaturation(saturation)
-		self.setExposureTime(xt)'''
 		
 	
 	def send_msg(self, sock, msg):
@@ -994,7 +952,6 @@ class cameraModuleServer:
 				self.captureTriggerV1()
 			else:
 				self.captureTriggerV2()
-			#self.captureTriggerV2()
 			if self.network == 1:
 				for name in self.fnames:
 					print("Sending")
