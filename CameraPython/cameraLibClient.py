@@ -15,7 +15,7 @@ import os
 import sys
 import tempfile
 from Tkinter import Tk, Text, BOTH, W, N, E, S
-from ttk import Frame, Button, Style, Label
+from ttk import Frame, Button, Style, Label, Entry
 
 
 IMAGE_TYPES = ['jpeg', 'jpg', 'png', 'gif', 'bmp']
@@ -54,6 +54,10 @@ class cameraGUI(Frame):
 		self.camera = camera
 		self.buttonWidth = 20
 		self.initUI()
+		
+		self.commValue = 0
+		self.fnameValue = 0
+		self.durValue = 0
 	
 	def initUI(self):
 		self.parent.title("Raspberry Pi Camera")
@@ -61,103 +65,245 @@ class cameraGUI(Frame):
 		#self.style.configure("TButton", padding=(0,5,0,5), font='serif 10')
 		self.style.theme_use("clam")
 		
+		pcolumn = 0
+		ctcolumn = 1
+		ccolumn = 2
+		bcolumn = 0
+		mintcolumn = 3
+		mincolumn = 4
+		maxtcolumn = 5
+		maxcolumn = 6
+		stcolumn = 7
+		txtcolumn = 8
+		
 		#frame = Frame(self, relief=RAISED, borderwidth=1)
 		#frame.pack(fill=BOTH, expand=1)
 		
 		self.pack(fill=BOTH, expand=1)
 		
 		#self.columnconfigure(1, weight=1)
-		self.columnconfigure(2, weight=1)
+		#self.columnconfigure(2, weight=1)
 		self.columnconfigure(0, pad=7)
-		self.columnconfigure(1, pad=7)
-		self.rowconfigure(14, weight=1)
+		#self.columnconfigure(1, pad=7)
+		#self.rowconfigure(14, weight=1)
 		#self.rowconfigure(5, pad=7)
 		
-		lbl = Label(self, text="")
-		lbl.grid(sticky=W, row=0, column=1, pady=4, padx=5)
+		lbl = Label(self, text="Commands")
+		lbl.grid(sticky=W, row=0, column=0, pady=4, padx=5)
 		
-		#area = Text(self)
-		#area.grid(row=2, column=1, columnspan=2, rowspan=15, padx=5, sticky=E+W+S+N)
+		area = Text(self, width=66)
+		area.grid(row=4, column=1, columnspan=4, rowspan=15, padx=5, sticky=E+W+S+N)
 		
 		imageButton = Button(self, text="Take Image", command= lambda: self.dispChange("I"), width=self.buttonWidth)
-		imageButton.grid(row=1, column=0, pady=4)
+		imageButton.grid(row=1, column=bcolumn, pady=4)
 		
-		videoButton = Button(self, text="Take Video", command= lambda: self.camera.sendCommand("V"), width=self.buttonWidth)
-		videoButton.grid(row=2, column=0, pady=4)
+		videoButton = Button(self, text="Take Video", command= lambda: self.dispChange("V"), width=self.buttonWidth)
+		videoButton.grid(row=2, column=bcolumn, pady=4)
 		
-		networkButton = Button(self, text="Stream to VLC", command= lambda: self.camera.sendCommand("N"), width=self.buttonWidth)
-		networkButton.grid(row=3, column=0, pady=4)
+		networkButton = Button(self, text="Stream to VLC", command= lambda: self.dispChange("N"), width=self.buttonWidth)
+		networkButton.grid(row=3, column=bcolumn, pady=4)
 		
-		isButton = Button(self, text="Image Subtraction", command= lambda: self.camera.sendCommand("O"), width=self.buttonWidth)
-		isButton.grid(row=4, column=0, pady=4)
+		isButton = Button(self, text="Image Subtraction", command= lambda: self.dispChange("O"), width=self.buttonWidth)
+		isButton.grid(row=4, column=bcolumn, pady=4)
 		
-		resButton = Button(self, text="Set Resolution", command= lambda: self.camera.sendCommand("R"), width=self.buttonWidth)
-		resButton.grid(row=5, column=0, pady=4)
+		resButton = Button(self, text="Set Resolution", command= lambda: self.dispChange("R"), width=self.buttonWidth)
+		resButton.grid(row=5, column=bcolumn, pady=4)
 		
-		frButton = Button(self, text="Set Framerate", command= lambda: self.camera.sendCommand("F"), width=self.buttonWidth)
-		frButton.grid(row=6, column=0, pady=4)
+		frButton = Button(self, text="Set Framerate", command= lambda: self.dispChange("F"), width=self.buttonWidth)
+		frButton.grid(row=6, column=bcolumn, pady=4)
 		
-		xtButton = Button(self, text="Set Exposure Time", command= lambda: self.camera.sendCommand("X"), width=self.buttonWidth)
-		xtButton.grid(row=7, column=0, pady=4)
+		xtButton = Button(self, text="Set Exposure Time", command= lambda: self.dispChange("X"), width=self.buttonWidth)
+		xtButton.grid(row=7, column=bcolumn, pady=4)
 		
-		brButton = Button(self, text="Set Brightness", command= lambda: self.camera.sendCommand("B"), width=self.buttonWidth)
-		brButton.grid(row=8, column=0, pady=4)
+		brButton = Button(self, text="Set Brightness", command= lambda: self.dispChange("B"), width=self.buttonWidth)
+		brButton.grid(row=8, column=bcolumn, pady=4)
 		
-		coButton = Button(self, text="Set Contrast", command= lambda: self.camera.sendCommand("C"), width=self.buttonWidth)
-		coButton.grid(row=9, column=0, pady=4)
+		coButton = Button(self, text="Set Contrast", command= lambda: self.dispChange("C"), width=self.buttonWidth)
+		coButton.grid(row=9, column=bcolumn, pady=4)
 		
-		gnButton = Button(self, text="Set Gain", command= lambda: self.camera.sendCommand("G"), width=self.buttonWidth)
-		gnButton.grid(row=10, column=0, pady=4)
+		gnButton = Button(self, text="Set Gain", command= lambda: self.dispChange("G"), width=self.buttonWidth)
+		gnButton.grid(row=10, column=bcolumn, pady=4)
 		
-		stButton = Button(self, text="Set Saturation", command= lambda: self.camera.sendCommand("U"), width=self.buttonWidth)
-		stButton.grid(row=11, column=0, pady=4)
+		stButton = Button(self, text="Set Saturation", command= lambda: self.dispChange("U"), width=self.buttonWidth)
+		stButton.grid(row=11, column=bcolumn, pady=4)
 		
-		shButton = Button(self, text="Set Sharpness", command= lambda: self.camera.sendCommand("S"), width=self.buttonWidth)
-		shButton.grid(row=12, column=0, pady=4)
+		shButton = Button(self, text="Set Sharpness", command= lambda: self.dispChange("S"), width=self.buttonWidth)
+		shButton.grid(row=12, column=bcolumn, pady=4)
 		
 		quitButton = Button(self, text="Quit", command= lambda: self.camera.quitGUI(self), width=self.buttonWidth)
-		quitButton.grid(row=13, column=0, pady=4)
+		quitButton.grid(row=13, column=bcolumn, pady=4)
 		
-		self.camera.sendCommand("A")
-		stats = self.camera.receiveAll()
-		print(stats)
+		self.modelb = Label(self, text="Mode: Waiting")
+		self.modelb.grid(sticky=W, row=1, column=1, columnspan=2, pady=4, padx=5)
 		
-		reswlbl = Label(self, text="Width: ")
-		reswlbl.grid(sticky=W, row=4, column=1, pady=4, padx=5)
+		self.statlb = Label(self, text="Status: Connected to Raspberry Pi")
+		self.statlb.grid(sticky=W, row=1, column=2, columnspan=2, pady=4, padx=5)
 		
-		reshlbl = Label(self, text="Height: ")
-		reshlbl.grid(sticky=W, row=5, column=1, pady=4, padx=5)
+		self.but = Button(self)
+		self.but2 = Button(self)
+		self.lbl = Label(self)
+		self.lbl2 = Label(self)
+		self.txt = Entry(self)
+		self.txt2 = Entry(self)
 		
-		frlbl = Label(self, text="Framerate: ")
-		frlbl.grid(sticky=W, row=6, column=1, pady=4, padx=5)
+		#self.camera.sendCommand("A")
+		#stats = self.camera.receiveAll()
 		
-		xtlbl = Label(self, text="Exposure Time: ")
-		xtlbl.grid(sticky=W, row=7, column=1, pady=4, padx=5)
+		#reswlbl = Label(self, text="Width: ")
+		#reswlbl.grid(sticky=W, row=4, column=pcolumn, pady=4, padx=5)
 		
-		brlbl = Label(self, text="Brightness: ")
-		brlbl.grid(sticky=W, row=8, column=1, pady=4, padx=5)
+		#reshlbl = Label(self, text="Height: ")
+		#reshlbl.grid(sticky=W, row=5, column=pcolumn, pady=4, padx=5)
 		
-		colbl = Label(self, text="Contrast: ")
-		colbl.grid(sticky=W, row=9, column=1, pady=4, padx=5)
+		#frlbl = Label(self, text="Framerate: ")
+		#frlbl.grid(sticky=W, row=6, column=pcolumn, pady=4, padx=5)
 		
-		gnlbl = Label(self, text="Gain: ")
-		gnlbl.grid(sticky=W, row=10, column=1, pady=4, padx=5)
+		#xtlbl = Label(self, text="Exposure Time: ")
+		#xtlbl.grid(sticky=W, row=7, column=pcolumn, pady=4, padx=5)
 		
-		stlbl = Label(self, text="Saturation: ")
-		stlbl.grid(sticky=W, row=11, column=1, pady=4, padx=5)
+		#brlbl = Label(self, text="Brightness: ")
+		#brlbl.grid(sticky=W, row=8, column=pcolumn, pady=4, padx=5)
 		
-		stlbl = Label(self, text="Sharpness: ")
-		stlbl.grid(sticky=W, row=12, column=1, pady=4, padx=5)
+		#colbl = Label(self, text="Contrast: ")
+		#colbl.grid(sticky=W, row=9, column=pcolumn, pady=4, padx=5)
+		
+		#gnlbl = Label(self, text="Gain: ")
+		#gnlbl.grid(sticky=W, row=10, column=pcolumn, pady=4, padx=5)
+		
+		#stlbl = Label(self, text="Saturation: ")
+		#stlbl.grid(sticky=W, row=11, column=pcolumn, pady=4, padx=5)
+		
+		#stlbl = Label(self, text="Sharpness: ")
+		#stlbl.grid(sticky=W, row=12, column=pcolumn, pady=4, padx=5)
+		
+		#for i in range(27):
+			#if i % 3 == 0:
+				#currlab = Label(self, text="Current: ")
+				#currlab.grid(sticky=W, row=(4+i/3), column=ctcolumn, pady=4, padx=5)
+				
+				#proplab = Label(self, text=str(stats[i]))
+				#proplab.grid(sticky=W, row=(4+i/3), column=ccolumn, pady=4, padx=5)
+			
+			#if i % 3 == 1:
+				#minlab = Label(self, text="Minimum: ")
+				#minlab.grid(sticky=W, row=(4+i/3), column=mintcolumn, pady=4, padx=5)
+				
+				#minplab = Label(self, text=str(stats[i]))
+				#minplab.grid(sticky=W, row=(4+i/3), column=mincolumn, pady=4, padx=5)
+			
+			#if i % 3 == 2:
+				#maxlab = Label(self, text="Maximum: ")
+				#maxlab.grid(sticky=W, row=(4+i/3), column=maxtcolumn, pady=4, padx=5)
+				
+				#maxplab = Label(self, text=str(stats[i]))
+				#maxplab.grid(sticky=W, row=(4+i/3), column=maxcolumn, pady=4, padx=5)
+		
+		#for i in range(9):
+			#setlab = Label(self, text="Set: ")
+			#setlab.grid(sticky=W, row=(4+i), column=stcolumn, pady=4, padx=5)
+			
+			#txtlab = Text(self, height=1, width=10)
+			#txtlab.grid(sticky=W, row=(4+i), column=txtcolumn, pady=4, padx=5)
 	
 	
 	def dispChange(self, useCmd):
-		lbl = Label(self, text="Enter filename:", width=20)
-		lbl.grid(sticky=W, row=1, column=1, pady=4, padx=5)
+		self.but.grid_forget()
+		self.but2.grid_forget()
+		self.lbl.grid_forget()
+		self.lbl2.grid_forget()
+		self.txt.grid_forget()
+		self.txt2.grid_forget()
 		
-		area = Text(self, height=1)
-		area.grid(row=1, column=2, padx=5, sticky=W)
+		if useCmd == "I":
+			self.modelb.config(text="Mode: Image")
+			
+			self.but = Button(self, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
+			self.but.grid(sticky=W, row=2, column=3, pady=4, padx=5)
+			
+			self.lbl = Label(self, text="Enter Filename: ")
+			self.lbl.grid(sticky=W, row=2, column=1, pady=4, padx=5)
+			
+			self.txt = Entry(self)
+			self.txt.grid(sticky=W, row=2, column=2, pady=4, padx=5)
+			
+		elif useCmd == "V":
+			self.modelb.config(text="Mode: Video")
+			
+			self.lbl = Label(self, text="Enter Filename: ")
+			self.lbl.grid(sticky=W, row=2, column=1, pady=4, padx=5)
+			
+			self.txt = Entry(self)
+			self.txt.grid(sticky=W, row=2, column=2, pady=4, padx=5)
+			
+			self.lbl2 = Label(self, text="Enter Duration: ")
+			self.lbl2.grid(sticky=W, row=3, column=1, pady=4, padx=5)
+			
+			self.txt2 = Entry(self)
+			self.txt2.grid(sticky=W, row=3, column=2, pady=4, padx=5)
+			
+			self.but = Button(self, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth/2)
+			self.but.grid(sticky=W, row=3, column=3, pady=4, padx=5)
+			
+			self.but2 = Button(self, text="Stop", command=self.streamStop, width=self.buttonWidth/2)
+			self.but2.grid(sticky=W, row=3, column=4, pady=4, padx=5)
+			
+		elif useCmd == "N":
+			self.modelb.config(text="Mode: Stream")
+			
+			self.lbl2 = Label(self, text="Enter Duration: ")
+			self.lbl2.grid(sticky=W, row=2, column=1, pady=4, padx=5)
+			
+			self.txt2 = Entry(self)
+			self.txt2.grid(sticky=W, row=2, column=2, pady=4, padx=5)
+			
+			self.but = Button(self, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth/2)
+			self.but.grid(sticky=W, row=2, column=3, pady=4, padx=5)
+			
+			self.but2 = Button(self, text="Stop", command=self.streamStop, width=self.buttonWidth/2)
+			self.but2.grid(sticky=W, row=2, column=4, pady=4, padx=5)
+			
+		elif useCmd == "O":
+			self.modelb.config(text="Mode: Subtract")
+			
+			self.lbl2 = Label(self, text="Enter Duration: ")
+			self.lbl2.grid(sticky=W, row=2, column=1, pady=4, padx=5)
+			
+			self.txt2 = Entry(self)
+			self.txt2.grid(sticky=W, row=2, column=2, pady=4, padx=5)
+			
+			self.but = Button(self, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth/2)
+			self.but.grid(sticky=W, row=2, column=3, pady=4, padx=5)
+			
+			self.but2 = Button(self, text="Stop", command=self.streamStop, width=self.buttonWidth/2)
+			self.but2.grid(sticky=W, row=2, column=4, pady=4, padx=5)
+			
+		elif useCmd == "R":
+			self.modelb.config(text="Mode: Resolution")
 		
+			self.lbl2 = Label(self, text="Enter Width: ")
+			self.lbl2.grid(sticky=W, row=2, column=1, pady=4, padx=5)
+			
+			self.txt2 = Entry(self)
+			self.txt2.grid(sticky=W, row=2, column=2, pady=4, padx=5)
+			
+			self.lbl = Label(self, text="Enter Height: ")
+			self.lbl.grid(sticky=W, row=3, column=1, pady=4, padx=5)
+			
+			self.txt = Entry(self)
+			self.txt.grid(sticky=W, row=3, column=2, pady=4, padx=5)
+			
+			self.but = Button(self, text="Set", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
+			self.but.grid(sticky=W, row=3, column=3, pady=4, padx=5)
+	
+	def retStr(self, useCmd):
+		self.fnameValue = self.txt.get()
+		self.durValue = self.txt2.get()
+
 		self.camera.sendCommand(useCmd)
+	
+	
+	def streamStop(self):
+		raise KeyboardInterrupt
 
 
 class cameraModuleClient:
@@ -308,6 +454,7 @@ class cameraModuleClient:
 		
 		return result
 	
+	
 	def processIntParameter(self, parameter):
 		'''
 		Wait for parameter from the terminal, and then send integer to the Pi.
@@ -325,7 +472,10 @@ class cameraModuleClient:
 		
 		# Input parameter value from terminal
 		while True:
-			value = str(raw_input(parameter + " (Default: " + str(default) + ", Min: " + str(minimum) + ", Max: " + str(maximum) + "): "))
+			if self.useGUI == 1:
+				value = self.app.durValue
+			else:
+				value = str(raw_input(parameter + " (Default: " + str(default) + ", Min: " + str(minimum) + ", Max: " + str(maximum) + "): "))
 			
 			# Set default value if there is no input
 			if value == "":
@@ -367,10 +517,13 @@ class cameraModuleClient:
 		
 		# Receive default, min, max parameters from Pi
 		default = self.recv_msg(self.client_socket)
-		
+
 		# Input parameter value from terminal
 		while True:
-			value = str(raw_input(parameter + " (Default: " + str(default) + "): "))
+			if self.useGUI == 1:
+				value = self.app.fnameValue
+			else:
+				value = str(raw_input(parameter + " (Default: " + str(default) + "): "))
 			
 			# Set default value if there is no input
 			if value == "":
@@ -403,7 +556,11 @@ class cameraModuleClient:
 		if confirm == None:
 			raise Exception("Command Failed (May need to lower resolution or framerate)")
 		else:
-			print(YELLOW + confirm + CLEAR)
+			if self.useGUI == 1:
+				self.app.statlb.config(text="Status: " + confirm)
+				Tk.update(self.root)
+			else:
+				print(YELLOW + confirm + CLEAR)
 			
 		try:
 			# Receive finish confirmation message from the Pi.
@@ -416,8 +573,11 @@ class cameraModuleClient:
 		if confirm == None:
 			raise Exception("Command Failed (May need to lower resolution or framerate)")
 		else:
-			print(GREEN + confirm + CLEAR)
-		
+			if self.useGUI == 1:
+				self.app.statlb.config(text="Status: " + confirm)
+				Tk.update(self.root)
+			else:
+				print(GREEN + confirm + CLEAR)
 		
 		return value
 		
@@ -474,8 +634,12 @@ class cameraModuleClient:
 		Receive an image or video from the Pi.
 		'''
 		
-		print(YELLOW + "Downloading file..." + CLEAR)
-		
+		if self.useGUI == 1:
+			self.app.statlb.config(text="Status: Downloading file...")
+			Tk.update(self.root)
+		else:
+			print(YELLOW + "Downloading file..." + CLEAR)
+				
 		# Must have Netcat installed on the command-line
 		if typ == "Image":
 			time.sleep(0.1)
@@ -493,7 +657,11 @@ class cameraModuleClient:
 			time.sleep(0.1)
 			os.system("nc 192.168.1.1 60000 > ../../Videos/" + fname)
 		
-		print(GREEN + "Downloaded file" + CLEAR)
+		if self.useGUI == 1:
+			self.app.statlb.config(text="Status: Downloaded file")
+			Tk.update(self.root)
+		else:
+			print(GREEN + "Downloaded file" + CLEAR)
 		
 	
 	def sendTrigger(self):
@@ -582,6 +750,8 @@ class cameraModuleClient:
 		# Change resolution
 		elif command == "R":
 			self.processIntParameter("Width")
+			if self.useGUI == 1:
+				self.app.durValue = self.app.fnameValue
 			self.processIntParameter("Height")
 				
 		# Set sharpness
@@ -626,11 +796,11 @@ class cameraModuleClient:
 	
 	def runGUI(self):
 		self.useGUI = 1
-		root = Tk()
-		root.geometry("640x480+300+300")
+		self.root = Tk()
+		self.root.geometry("640x480+300+300")
 		#root.attributes('-zoomed', True)
-		app = cameraGUI(root, self)
-		root.mainloop()
+		self.app = cameraGUI(self.root, self)
+		self.root.mainloop()
 	
 	
 	def quitGUI(self, app):
