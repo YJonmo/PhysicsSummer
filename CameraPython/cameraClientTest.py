@@ -18,7 +18,7 @@ try:
 
 	# Continuously ask for commands to send to the Raspberry Pi from the terminal.
 	while True:
-		command = camCommand.sendCommand()
+		command = camCommand.sendCommand(0)
 		
 		# Exit program if quit command called
 		if command == "Q":

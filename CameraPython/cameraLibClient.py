@@ -14,6 +14,8 @@ import struct
 import os
 import sys
 import tempfile
+from Tkinter import Tk, Text, BOTH, W, N, E, S
+from ttk import Frame, Button, Style, Label
 
 
 IMAGE_TYPES = ['jpeg', 'jpg', 'png', 'gif', 'bmp']
@@ -44,6 +46,120 @@ else:
 	CLEAR = "\033[0m"
 
 
+class cameraGUI(Frame):
+	
+	def __init__(self, parent, camera):
+		Frame.__init__(self, parent)
+		self.parent = parent
+		self.camera = camera
+		self.buttonWidth = 20
+		self.initUI()
+	
+	def initUI(self):
+		self.parent.title("Raspberry Pi Camera")
+		self.style = Style()
+		#self.style.configure("TButton", padding=(0,5,0,5), font='serif 10')
+		self.style.theme_use("clam")
+		
+		#frame = Frame(self, relief=RAISED, borderwidth=1)
+		#frame.pack(fill=BOTH, expand=1)
+		
+		self.pack(fill=BOTH, expand=1)
+		
+		#self.columnconfigure(1, weight=1)
+		self.columnconfigure(2, weight=1)
+		self.columnconfigure(0, pad=7)
+		self.columnconfigure(1, pad=7)
+		self.rowconfigure(14, weight=1)
+		#self.rowconfigure(5, pad=7)
+		
+		lbl = Label(self, text="")
+		lbl.grid(sticky=W, row=0, column=1, pady=4, padx=5)
+		
+		#area = Text(self)
+		#area.grid(row=2, column=1, columnspan=2, rowspan=15, padx=5, sticky=E+W+S+N)
+		
+		imageButton = Button(self, text="Take Image", command= lambda: self.dispChange("I"), width=self.buttonWidth)
+		imageButton.grid(row=1, column=0, pady=4)
+		
+		videoButton = Button(self, text="Take Video", command= lambda: self.camera.sendCommand("V"), width=self.buttonWidth)
+		videoButton.grid(row=2, column=0, pady=4)
+		
+		networkButton = Button(self, text="Stream to VLC", command= lambda: self.camera.sendCommand("N"), width=self.buttonWidth)
+		networkButton.grid(row=3, column=0, pady=4)
+		
+		isButton = Button(self, text="Image Subtraction", command= lambda: self.camera.sendCommand("O"), width=self.buttonWidth)
+		isButton.grid(row=4, column=0, pady=4)
+		
+		resButton = Button(self, text="Set Resolution", command= lambda: self.camera.sendCommand("R"), width=self.buttonWidth)
+		resButton.grid(row=5, column=0, pady=4)
+		
+		frButton = Button(self, text="Set Framerate", command= lambda: self.camera.sendCommand("F"), width=self.buttonWidth)
+		frButton.grid(row=6, column=0, pady=4)
+		
+		xtButton = Button(self, text="Set Exposure Time", command= lambda: self.camera.sendCommand("X"), width=self.buttonWidth)
+		xtButton.grid(row=7, column=0, pady=4)
+		
+		brButton = Button(self, text="Set Brightness", command= lambda: self.camera.sendCommand("B"), width=self.buttonWidth)
+		brButton.grid(row=8, column=0, pady=4)
+		
+		coButton = Button(self, text="Set Contrast", command= lambda: self.camera.sendCommand("C"), width=self.buttonWidth)
+		coButton.grid(row=9, column=0, pady=4)
+		
+		gnButton = Button(self, text="Set Gain", command= lambda: self.camera.sendCommand("G"), width=self.buttonWidth)
+		gnButton.grid(row=10, column=0, pady=4)
+		
+		stButton = Button(self, text="Set Saturation", command= lambda: self.camera.sendCommand("U"), width=self.buttonWidth)
+		stButton.grid(row=11, column=0, pady=4)
+		
+		shButton = Button(self, text="Set Sharpness", command= lambda: self.camera.sendCommand("S"), width=self.buttonWidth)
+		shButton.grid(row=12, column=0, pady=4)
+		
+		quitButton = Button(self, text="Quit", command= lambda: self.camera.quitGUI(self), width=self.buttonWidth)
+		quitButton.grid(row=13, column=0, pady=4)
+		
+		self.camera.sendCommand("A")
+		stats = self.camera.receiveAll()
+		print(stats)
+		
+		reswlbl = Label(self, text="Width: ")
+		reswlbl.grid(sticky=W, row=4, column=1, pady=4, padx=5)
+		
+		reshlbl = Label(self, text="Height: ")
+		reshlbl.grid(sticky=W, row=5, column=1, pady=4, padx=5)
+		
+		frlbl = Label(self, text="Framerate: ")
+		frlbl.grid(sticky=W, row=6, column=1, pady=4, padx=5)
+		
+		xtlbl = Label(self, text="Exposure Time: ")
+		xtlbl.grid(sticky=W, row=7, column=1, pady=4, padx=5)
+		
+		brlbl = Label(self, text="Brightness: ")
+		brlbl.grid(sticky=W, row=8, column=1, pady=4, padx=5)
+		
+		colbl = Label(self, text="Contrast: ")
+		colbl.grid(sticky=W, row=9, column=1, pady=4, padx=5)
+		
+		gnlbl = Label(self, text="Gain: ")
+		gnlbl.grid(sticky=W, row=10, column=1, pady=4, padx=5)
+		
+		stlbl = Label(self, text="Saturation: ")
+		stlbl.grid(sticky=W, row=11, column=1, pady=4, padx=5)
+		
+		stlbl = Label(self, text="Sharpness: ")
+		stlbl.grid(sticky=W, row=12, column=1, pady=4, padx=5)
+	
+	
+	def dispChange(self, useCmd):
+		lbl = Label(self, text="Enter filename:", width=20)
+		lbl.grid(sticky=W, row=1, column=1, pady=4, padx=5)
+		
+		area = Text(self, height=1)
+		area.grid(row=1, column=2, padx=5, sticky=W)
+		
+		self.camera.sendCommand(useCmd)
+
+
 class cameraModuleClient:
 	
 	def __init__(self):
@@ -56,6 +172,7 @@ class cameraModuleClient:
 		print(YELLOW + "Waiting for connection..." + CLEAR)
 		self.client_socket.connect(('192.168.1.1', 8000))
 		print(GREEN + "Connection accepted" + CLEAR)
+		self.useGUI = 0
 		
 	
 	def networkStreamServer(self, duration):
@@ -182,6 +299,14 @@ class cameraModuleClient:
 		print("    V: Capture a video")
 		print("    X: Set exposure time\n")
 		
+		
+	def receiveAll(self):
+		result = []
+		
+		for i in range(27):
+			result.append(self.recv_msg(self.client_socket))
+		
+		return result
 	
 	def processIntParameter(self, parameter):
 		'''
@@ -313,6 +438,9 @@ class cameraModuleClient:
 		saturation = self.recv_msg(self.client_socket)
 		xt = self.recv_msg(self.client_socket)
 		
+		if self.useGUI == 1:
+			return resolution,framerate,brightness,contrast,sharpness,saturation,xt
+		
 		# Convert gain fractions into decimal
 		if "/" in again:
 			anum, aden = again.split('/')
@@ -327,17 +455,18 @@ class cameraModuleClient:
 		sharpness = str((int(sharpness)+100)/2)
 		saturation = str((int(saturation)+100)/2)
 		
-		# Print the received properties
-		print("\nProperties: ")
-		print("    Resolution: " + resolution)
-		print("    Framerate: " + framerate + " fps")
-		print("    Brightness: " + brightness + " %")
-		print("    Contrast: " + contrast + " %")
-		print("    Analog gain: " + str(float(again)) + " dB")
-		print("    Digital gain: " + str(float(dgain)) + " dB")
-		print("    Sharpness: " + sharpness + " %")
-		print("    Saturation: " + saturation + " %")
-		print("    Exposure time: " + xt + " microseconds\n")
+		if self.useGUI == 0:
+			# Print the received properties
+			print("\nProperties: ")
+			print("    Resolution: " + resolution)
+			print("    Framerate: " + framerate + " fps")
+			print("    Brightness: " + brightness + " %")
+			print("    Contrast: " + contrast + " %")
+			print("    Analog gain: " + str(float(again)) + " dB")
+			print("    Digital gain: " + str(float(dgain)) + " dB")
+			print("    Sharpness: " + sharpness + " %")
+			print("    Saturation: " + saturation + " %")
+			print("    Exposure time: " + xt + " microseconds\n")
 		
 	
 	def receiveFile(self, fname, typ):
@@ -383,7 +512,7 @@ class cameraModuleClient:
 				break
 		
 	
-	def sendCommand(self):
+	def sendCommand(self, useCmd):
 		'''
 		Send a command via terminal to the Raspberry Pi.
 		'''
@@ -391,14 +520,17 @@ class cameraModuleClient:
 		# List of commands
 		opt = ["B","C","F","G","H","I","N","O","P","Q","R","S","T","U","V","X"]
 		
-		# Input command from terminal
-		command = 0
-		while command not in opt:
-			command = str(raw_input("Input camera command: ")).upper()
-			if command not in opt:
-				print(RED + "Invalid command" + CLEAR)
-			else:
-				print(GREEN + "Command sent: " + command + CLEAR)
+		if self.useGUI == 1:
+			command = useCmd
+		else:
+			# Input command from terminal
+			command = 0
+			while command not in opt:
+				command = str(raw_input("Input camera command: ")).upper()
+				if command not in opt:
+					print(RED + "Invalid command" + CLEAR)
+				else:
+					print(GREEN + "Command sent: " + command + CLEAR)
 		
 		# Send command
 		self.send_msg(self.client_socket, command)
@@ -490,7 +622,21 @@ class cameraModuleClient:
 			self.processIntParameter("Exposure time (microseconds)")
 		
 		return command
-		
+	
+	
+	def runGUI(self):
+		self.useGUI = 1
+		root = Tk()
+		root.geometry("640x480+300+300")
+		#root.attributes('-zoomed', True)
+		app = cameraGUI(root, self)
+		root.mainloop()
+	
+	
+	def quitGUI(self, app):
+		app.quit()
+		self.sendCommand("Q")
+	
 	
 	def closeServer(self):
 		'''

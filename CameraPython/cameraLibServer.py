@@ -605,6 +605,45 @@ class cameraModuleServer:
 		print("	X: Set exposure time\n")
 		
 	
+	def sendAll(self):
+		
+		self.send_msg(self.hostSock, str(self.camera.resolution[0]))
+		self.send_msg(self.hostSock, str(WIDTH_MIN))
+		self.send_msg(self.hostSock, str(WIDTH_MAX))
+		
+		self.send_msg(self.hostSock, str(self.camera.resolution[1]))
+		self.send_msg(self.hostSock, str(HEIGHT_MIN))
+		self.send_msg(self.hostSock, str(HEIGHT_MAX))
+		
+		self.send_msg(self.hostSock, str(self.camera.framerate))
+		self.send_msg(self.hostSock, str(FRAMERATE_MIN))
+		self.send_msg(self.hostSock, str(FRAMERATE_MAX))
+		
+		self.send_msg(self.hostSock, str(self.camera.shutter_speed))
+		self.send_msg(self.hostSock, str(EXPOSURE_MIN))
+		self.send_msg(self.hostSock, str(EXPOSURE_MAX))
+		
+		self.send_msg(self.hostSock, str(self.camera.brightness))
+		self.send_msg(self.hostSock, str(BRIGHTNESS_MIN))
+		self.send_msg(self.hostSock, str(BRIGHTNESS_MAX))
+		
+		self.send_msg(self.hostSock, str(self.camera.contrast))
+		self.send_msg(self.hostSock, str(CONTRAST_MIN))
+		self.send_msg(self.hostSock, str(CONTRAST_MAX))
+		
+		self.send_msg(self.hostSock, str(self.camera.iso))
+		self.send_msg(self.hostSock, str(GAIN_MIN))
+		self.send_msg(self.hostSock, str(GAIN_MAX))
+		
+		self.send_msg(self.hostSock, str(self.camera.saturation))
+		self.send_msg(self.hostSock, str(SATURATION_MIN))
+		self.send_msg(self.hostSock, str(SATURATION_MAX))
+		
+		self.send_msg(self.hostSock, str(self.camera.sharpness))
+		self.send_msg(self.hostSock, str(SHARPNESS_MIN))
+		self.send_msg(self.hostSock, str(SHARPNESS_MAX))
+	
+	
 	def inputParameter(self, parameter):
 		'''
 		Wait for a parameter from either the network or the Pi terminal.
@@ -859,8 +898,11 @@ class cameraModuleServer:
 		Raspberry Pi terminal.
 		'''
 		
+		if command == "A":
+			self.sendAll()
+		
 		# Set brightness
-		if command == "B":
+		elif command == "B":
 			brightness = int(float(self.inputParameter("Brightness")))
 			self.setBrightness(brightness)
 			self.confirmCompletion("Brightness changed")
