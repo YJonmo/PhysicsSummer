@@ -14,6 +14,7 @@ import struct
 import os
 import sys
 import tempfile
+from multiprocessing import Process, Value
 from Tkinter import Tk, Text, BOTH, W, N, E, S, RAISED, Frame, LEFT, TOP, BOTTOM
 from ttk import Button, Style, Label, Entry
 
@@ -132,7 +133,7 @@ class cameraGUI(Frame):
 		coButton = Button(self.frame, text="Set Contrast", command= lambda: self.dispChange("C"), width=self.buttonWidth)
 		coButton.grid(row=9, column=bcolumn, pady=4)
 		
-		gnButton = Button(self.frame, text="Set Gain", command= lambda: self.dispChange("G"), width=self.buttonWidth)
+		gnButton = Button(self.frame, text="Set ISO", command= lambda: self.dispChange("G"), width=self.buttonWidth)
 		gnButton.grid(row=10, column=bcolumn, pady=4)
 		
 		stButton = Button(self.frame, text="Set Saturation", command= lambda: self.dispChange("U"), width=self.buttonWidth)
@@ -147,7 +148,7 @@ class cameraGUI(Frame):
 		ctrlbl = Label(self.frame2, text="Control")
 		ctrlbl.grid(sticky=W, row=0, column=0, columnspan=2, pady=(5,10), padx=5)
 		
-		self.modelb = Label(self.frame2, text="Mode: Waiting")
+		self.modelb = Label(self.frame2, text="Mode: Waiting    ")
 		self.modelb.grid(sticky=W, row=1, column=0, columnspan=2, pady=(4,10), padx=5)
 		
 		self.statlb = Label(self.frame2, text="Status: Connected to Raspberry Pi")
@@ -186,10 +187,10 @@ class cameraGUI(Frame):
 		reshlbl = Label(self.frame3, text="Height: ")
 		reshlbl.grid(sticky=W, row=6, column=pcolumn, pady=10, padx=5)
 		
-		frlbl = Label(self.frame3, text="Framerate: ")
+		frlbl = Label(self.frame3, text="Framerate (fps): ")
 		frlbl.grid(sticky=W, row=7, column=pcolumn, pady=10, padx=5)
 		
-		xtlbl = Label(self.frame3, text="Exposure Time: ")
+		xtlbl = Label(self.frame3, text=u'Exposure Time (\u03bcs): ')
 		xtlbl.grid(sticky=W, row=8, column=pcolumn, pady=10, padx=5)
 		
 		brlbl = Label(self.frame3, text="Brightness: ")
@@ -198,7 +199,7 @@ class cameraGUI(Frame):
 		colbl = Label(self.frame3, text="Contrast: ")
 		colbl.grid(sticky=W, row=10, column=pcolumn, pady=10, padx=5)
 		
-		gnlbl = Label(self.frame3, text="Gain: ")
+		gnlbl = Label(self.frame3, text="ISO: ")
 		gnlbl.grid(sticky=W, row=11, column=pcolumn, pady=10, padx=5)
 		
 		stlbl = Label(self.frame3, text="Saturation: ")
@@ -210,27 +211,28 @@ class cameraGUI(Frame):
 		self.proplab = []
 		self.minplab = []
 		self.maxplab = []
+		propwidth = 6
 		
 		for i in range(27):
 			if i % 3 == 0:
-				currlab = Label(self.frame3, text="Curr:")
-				currlab.grid(sticky=W, row=(5+i/3), column=ctcolumn, pady=4, padx=5)
+				currlab = Label(self.frame3, text="Curr:", width=propwidth)
+				currlab.grid(sticky=W, row=(5+i/3), column=ctcolumn, pady=4, padx=2)
 				
-				self.proplab.append(Label(self.frame3, text=str(stats[i])))
+				self.proplab.append(Label(self.frame3, text=str(stats[i]), width=propwidth))
 				self.proplab[i/3].grid(sticky=W, row=(5+i/3), column=ccolumn, pady=4, padx=5)
 			
 			if i % 3 == 1:
-				minlab = Label(self.frame3, text="Min:")
-				minlab.grid(sticky=W, row=(5+i/3), column=mintcolumn, pady=4, padx=5)
+				minlab = Label(self.frame3, text="Min:", width=propwidth)
+				minlab.grid(sticky=W, row=(5+i/3), column=mintcolumn, pady=4, padx=2)
 				
-				self.minplab.append(Label(self.frame3, text=str(stats[i])))
+				self.minplab.append(Label(self.frame3, text=str(stats[i]), width=propwidth))
 				self.minplab[i/3].grid(sticky=W, row=(5+i/3), column=mincolumn, pady=4, padx=5)
 			
 			if i % 3 == 2:
-				maxlab = Label(self.frame3, text="Max:")
-				maxlab.grid(sticky=W, row=(5+i/3), column=maxtcolumn, pady=4, padx=5)
+				maxlab = Label(self.frame3, text="Max:", width=propwidth)
+				maxlab.grid(sticky=W, row=(5+i/3), column=maxtcolumn, pady=4, padx=2)
 				
-				self.maxplab.append(Label(self.frame3, text=str(stats[i])))
+				self.maxplab.append(Label(self.frame3, text=str(stats[i]), width=propwidth))
 				self.maxplab[i/3].grid(sticky=W, row=(5+i/3), column=maxcolumn, pady=4, padx=5)
 		
 		#self.camera.sendCommand("A")
@@ -340,25 +342,28 @@ class cameraGUI(Frame):
 				#currlab = Label(self, text="Curr:")
 				#currlab.grid(sticky=W, row=(5+i/3), column=ctcolumn, pady=4, padx=5)
 				
-				self.proplab[i/3].destroy()
-				self.proplab[i/3] = Label(self.frame3, text=str(stats[i]))
-				self.proplab[i/3].grid(sticky=W, row=(5+i/3), column=ccolumn, pady=4, padx=5)
+				self.proplab[i/3].config(text=str(stats[i]))
+				#self.proplab[i/3].destroy()
+				#self.proplab[i/3] = Label(self.frame3, text=str(stats[i]))
+				#self.proplab[i/3].grid(sticky=W, row=(5+i/3), column=ccolumn, pady=4, padx=5)
 			
 			if i % 3 == 1:
 				#minlab = Label(self, text="Min:")
 				#minlab.grid(sticky=W, row=(5+i/3), column=mintcolumn, pady=4, padx=5)
 				
-				self.minplab[i/3].destroy()
-				self.minplab[i/3] = Label(self.frame3, text=str(stats[i]))
-				self.minplab[i/3].grid(sticky=W, row=(5+i/3), column=mincolumn, pady=4, padx=5)
+				self.minplab[i/3].config(text=str(stats[i]))
+				#self.minplab[i/3].destroy()
+				#self.minplab[i/3] = Label(self.frame3, text=str(stats[i]))
+				#self.minplab[i/3].grid(sticky=W, row=(5+i/3), column=mincolumn, pady=4, padx=5)
 			
 			if i % 3 == 2:
 				#maxlab = Label(self, text="Max:")
 				#maxlab.grid(sticky=W, row=(5+i/3), column=maxtcolumn, pady=4, padx=5)
 				
-				self.maxplab[i/3].destroy()
-				self.maxplab[i/3] = Label(self.frame3, text=str(stats[i]))
-				self.maxplab[i/3].grid(sticky=W, row=(5+i/3), column=maxcolumn, pady=4, padx=5)
+				self.maxplab[i/3].config(text=str(stats[i]))
+				#self.maxplab[i/3].destroy()
+				#self.maxplab[i/3] = Label(self.frame3, text=str(stats[i]))
+				#self.maxplab[i/3].grid(sticky=W, row=(5+i/3), column=maxcolumn, pady=4, padx=5)
 	
 	
 	def dispChange(self, useCmd):
@@ -402,7 +407,7 @@ class cameraGUI(Frame):
 			self.but = Button(self.frame2, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth/2)
 			self.but.grid(sticky=W, row=3, column=5, pady=0, padx=2.5)
 			
-			self.but2 = Button(self.frame2, text="Stop", command=self.streamStop, width=self.buttonWidth/2)
+			self.but2 = Button(self.frame2, text="Stop", command= lambda: self.streamStop(useCmd), width=self.buttonWidth/2)
 			self.but2.grid(sticky=W, row=3, column=6, pady=0, padx=2.5)
 			
 		elif useCmd == "N":
@@ -417,7 +422,7 @@ class cameraGUI(Frame):
 			self.but = Button(self.frame2, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth/2)
 			self.but.grid(sticky=W, row=2, column=5, pady=4, padx=2.5)
 			
-			self.but2 = Button(self.frame2, text="Stop", command=self.streamStop, width=self.buttonWidth/2)
+			self.but2 = Button(self.frame2, text="Stop", command= lambda: self.streamStop(useCmd), width=self.buttonWidth/2)
 			self.but2.grid(sticky=W, row=2, column=6, pady=4, padx=2.5)
 			
 			self.lbl = Label(self.frame2, text=" ")
@@ -435,7 +440,7 @@ class cameraGUI(Frame):
 			self.but = Button(self.frame2, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth/2)
 			self.but.grid(sticky=W, row=2, column=5, pady=4, padx=2.5)
 			
-			self.but2 = Button(self.frame2, text="Stop", command=self.streamStop, width=self.buttonWidth/2)
+			self.but2 = Button(self.frame2, text="Stop", command= lambda: self.streamStop(useCmd), width=self.buttonWidth/2)
 			self.but2.grid(sticky=W, row=2, column=6, pady=4, padx=2.5)
 			
 			self.lbl = Label(self.frame2, text=" ")
@@ -462,7 +467,7 @@ class cameraGUI(Frame):
 		elif useCmd == "F":
 			self.modelb.config(text="Mode: Framerate  ")
 		
-			self.lbl2 = Label(self.frame2, text="Enter Rate:      ")
+			self.lbl2 = Label(self.frame2, text="Enter Rate (fps):")
 			self.lbl2.grid(sticky=W, row=2, column=1, pady=10, padx=5)
 			
 			self.txt2 = Entry(self.frame2)
@@ -477,7 +482,7 @@ class cameraGUI(Frame):
 		elif useCmd == "X":
 			self.modelb.config(text="Mode: Exposure   ")
 		
-			self.lbl2 = Label(self.frame2, text="Enter Time:      ")
+			self.lbl2 = Label(self.frame2, text=u'Enter Time (\u03bcs):')
 			self.lbl2.grid(sticky=W, row=2, column=1, pady=10, padx=5)
 			
 			self.txt2 = Entry(self.frame2)
@@ -571,8 +576,20 @@ class cameraGUI(Frame):
 		self.camera.sendCommand(useCmd)
 	
 	
-	def streamStop(self):
-		raise KeyboardInterrupt
+	def streamStop(self, useCmd):
+		self.camera.procStop.value = 1
+		time.sleep(1)
+		
+		if useCmd == "N":
+			# Free connection resources
+			print(GREEN + "Network stream closed" + CLEAR)
+			self.camera.client_socket.close()
+			self.camera.client_socket = socket.socket()
+			self.camera.client_socket.connect(('192.168.1.1', 8000))
+		elif useCmd == "V":
+			self.statlb.config(text="Status: " + self.camera.confStop)
+			Tk.update(self.camera.root)
+			self.camera.receiveFile(self.camera.fileStop, "Video")
 
 
 class cameraModuleClient:
@@ -587,7 +604,14 @@ class cameraModuleClient:
 		print(YELLOW + "Waiting for connection..." + CLEAR)
 		self.client_socket.connect(('192.168.1.1', 8000))
 		print(GREEN + "Connection accepted" + CLEAR)
+		
+		# GUI settings
 		self.useGUI = 0
+		self.procStop = Value('i', 0)
+		self.durStop = 0
+		self.fileStop = ""
+		self.confStop = ""
+		self.msgSent = 0
 		
 	
 	def networkStreamServer(self, duration):
@@ -597,10 +621,11 @@ class cameraModuleClient:
 		
 		# Determine the framerate of the stream
 		frate = self.recv_msg(self.client_socket)
+		self.msgSent = 0
 		
 		# Make a file-like object for the connection
 		connection = self.client_socket.makefile('rb')
-		
+
 		try:
 			# Start stream to VLC
 			cmdline = ['vlc', '--demux', 'h264', '--h264-fps', frate, '-']
@@ -611,17 +636,22 @@ class cameraModuleClient:
 				if not data:
 					break
 				player.stdin.write(data)
+				if self.useGUI == 1 and self.procStop.value == 1:
+					raise KeyboardInterrupt
 		except KeyboardInterrupt:
 			self.send_msg(self.client_socket, "Stop")
+			self.msgSent = 1
 			time.sleep(1)
 		
-		# Free connection resources
-		print(GREEN + "Network stream closed" + CLEAR)
 		connection.close()
-		self.client_socket.close()
 		player.terminate()
-		self.client_socket = socket.socket()
-		self.client_socket.connect(('192.168.1.1', 8000))
+		
+		if not self.useGUI == 1:
+			# Free connection resources
+			print(GREEN + "Network stream closed" + CLEAR)
+			self.client_socket.close()
+			self.client_socket = socket.socket()
+			self.client_socket.connect(('192.168.1.1', 8000))
 		
 	
 	def networkStreamSubtract(self, duration):
@@ -639,13 +669,22 @@ class cameraModuleClient:
 			time.sleep(0.1)
 			player = subprocess.Popen(subline)
 			
-			# Wait for executable to exit
-			player.wait()
+			if self.useGUI == 1:
+				while not player.poll() == 1:
+					if self.procStop.value == 1:
+						raise KeyboardInterrupt	
+			else:
+				# Wait for executable to exit
+				player.wait()
 			
-			# Free resources
+				# Free resources
+				print(GREEN + "Network stream closed" + CLEAR)
+				player.terminate()
+		
+		except KeyboardInterrupt:
 			print(GREEN + "Network stream closed" + CLEAR)
 			player.terminate()
-		except:
+			
 			self.send_msg(self.client_socket, "Stop")
 			time.sleep(1)
 		
@@ -787,6 +826,9 @@ class cameraModuleClient:
 					else:
 						print(RED + "Not a number" + CLEAR)
 		
+		if self.useGUI == 1 and parameter == "Duration (seconds)":
+			self.durStop = value
+		
 		# Send parameter value to Pi
 		self.send_msg(self.client_socket, value)
 		
@@ -841,7 +883,11 @@ class cameraModuleClient:
 				if ftype in IMAGE_TYPES:
 					break
 				else:
-					print(RED + "Image filename must have one of these extensions: " + str(IMAGE_TYPES) + CLEAR)
+					if self.useGUI == 1:
+						value += ".jpg"
+						break
+					else:
+						print(RED + "Image filename must have one of these extensions: " + str(IMAGE_TYPES) + CLEAR)
 			else:
 				# All video extensions supported, so no need to check
 				break
@@ -878,6 +924,72 @@ class cameraModuleClient:
 				print(GREEN + confirm + CLEAR)
 		
 		return value
+	
+	
+	def filenameGUI(self, parameter):
+		
+		# Receive default, min, max parameters from Pi
+		default = self.recv_msg(self.client_socket)
+
+		# Input parameter value from terminal
+		while True:
+			if self.useGUI == 1:
+				value = self.app.fnameValue
+			else:
+				value = str(raw_input(parameter + " (Default: " + str(default) + "): "))
+			
+			# Set default value if there is no input
+			if value == "":
+				value = str(default)
+				break
+			elif parameter == "Image filename":
+				# Check image filename is of correct filetype
+				fpart = value.split('.',1)
+				
+				# Check file has an extension
+				if len(fpart) > 1:
+					ftype = fpart[-1]
+				else:
+					ftype = ""
+				
+				# Continue only if file extension is correct
+				if ftype in IMAGE_TYPES:
+					break
+				else:
+					if self.useGUI == 1:
+						value += ".jpg"
+						break
+					else:
+						print(RED + "Image filename must have one of these extensions: " + str(IMAGE_TYPES) + CLEAR)
+			else:
+				# All video extensions supported, so no need to check
+				break
+		
+		# Send parameter value to Pi
+		self.send_msg(self.client_socket, value)
+		
+		# Receive start confirmation message from the Pi.
+		confirm = self.recv_msg(self.client_socket)
+		if confirm == None:
+			raise Exception("Command Failed (May need to lower resolution or framerate)")
+		else:
+			if self.useGUI == 1:
+				self.app.statlb.config(text="Status: " + confirm)
+				Tk.update(self.root)
+			else:
+				print(YELLOW + confirm + CLEAR)
+		
+		return value
+		
+	
+	def videoGUI(self):
+		
+		while True:
+			if self.procStop.value == 1:
+				break
+		# Send message to stop recording if Ctrl+C is pressed
+		self.send_msg(self.client_socket, "Stop")
+		self.confStop = self.recv_msg(self.client_socket)
 		
 	
 	def printStats(self):
@@ -1033,13 +1145,23 @@ class cameraModuleClient:
 		elif command == "N":
 			print(CYAN + "Note: Press Ctrl+C to exit recording" + CLEAR)
 			duration = self.processIntParameter("Duration (seconds)")
-			self.networkStreamServer(duration)
+			if self.useGUI == 1:
+				self.procStop.value = 0
+				prc = Process(target = self.networkStreamServer, args=(duration,))
+				prc.start()
+			else:
+				self.networkStreamServer(duration)
 
 		# Network subtract stream
 		elif command == "O":
 			print(CYAN + "Note: Press Ctrl+C to exit recording" + CLEAR)
 			duration = self.processIntParameter("Duration (seconds)")
-			self.networkStreamSubtract(duration)
+			if self.useGUI == 1:
+				self.procStop.value = 0
+				prc = Process(target = self.networkStreamSubtract, args=(duration,))
+				prc.start()
+			else:
+				self.networkStreamSubtract(duration)
 		
 		# Print camera settings
 		elif command == "P":
@@ -1080,16 +1202,22 @@ class cameraModuleClient:
 		elif command == "V":
 			print(CYAN + "Note: Press Ctrl+C to exit recording" + CLEAR)
 			self.processIntParameter("Duration (seconds)")
-			filename = self.processStrParameter("Video filename")
-			self.printStats()
-			self.receiveFile(filename, "Video")
+			if self.useGUI == 1:
+				self.fileStop = self.filenameGUI("Video filename")
+				self.procStop.value = 0
+				prc = Process(target = self.videoGUI)
+				prc.start()
+			else:
+				filename = self.processStrParameter("Video filename")
+				self.printStats()
+				self.receiveFile(filename, "Video")
 		
 		# Change exposure time
 		elif command == "X":
 			print(CYAN + "Note: Exposure time of 0 automatically sets the exposure time" + CLEAR)
 			self.processIntParameter("Exposure time (microseconds)")
-	
-		if self.useGUI == 1 and not command == "A":
+
+		if self.useGUI == 1 and not command == "A" and not command == "N" and not command == "O" and not command == "V":
 			self.app.dispProps()
 		
 		return command
@@ -1098,7 +1226,7 @@ class cameraModuleClient:
 	def runGUI(self):
 		self.useGUI = 1
 		self.root = Tk()
-		self.root.geometry("640x480+300+300")
+		self.root.geometry("640x480+150+150")
 		#root.attributes('-zoomed', True)
 		self.app = cameraGUI(self.root, self)
 		self.root.mainloop()
