@@ -14,8 +14,8 @@ import struct
 import os
 import sys
 import tempfile
-from Tkinter import Tk, Text, BOTH, W, N, E, S
-from ttk import Frame, Button, Style, Label, Entry
+from Tkinter import Tk, Text, BOTH, W, N, E, S, RAISED, Frame, LEFT, TOP, BOTTOM
+from ttk import Button, Style, Label, Entry
 
 
 IMAGE_TYPES = ['jpeg', 'jpg', 'png', 'gif', 'bmp']
@@ -54,11 +54,12 @@ class cameraGUI(Frame):
 		self.camera = camera
 		self.buttonWidth = 20
 		self.initUI()
-		self.dispProps()
+		#self.dispProps()
 		
 		self.commValue = 0
 		self.fnameValue = 0
 		self.durValue = 0
+		self.error = 0
 	
 	def initUI(self):
 		self.parent.title("Raspberry Pi Camera")
@@ -77,75 +78,160 @@ class cameraGUI(Frame):
 		stcolumn = 7
 		txtcolumn = 8
 		
-		#frame = Frame(self, relief=RAISED, borderwidth=1)
+		self.frame = Frame(self, relief=RAISED, borderwidth=1, width=100, height=480)
+		self.frame.pack(side=LEFT, expand=0, fill=BOTH)
+		
+		self.frame2 = Frame(self, relief=RAISED, borderwidth=1, width=540, height=120)
+		self.frame2.pack(side=TOP, expand=0, fill=BOTH)
+		
+		self.frame3 = Frame(self, relief=RAISED, borderwidth=1, width=540, height=360)
+		self.frame3.pack(side=TOP, expand=0, fill=BOTH)
+		
+		#frame.grid(row=0, column = 0, rowspan=15, columnspan=1)
 		#frame.pack(fill=BOTH, expand=1)
 		
 		self.pack(fill=BOTH, expand=1)
 		
 		#self.columnconfigure(1, weight=1)
 		#self.columnconfigure(2, weight=1)
-		self.columnconfigure(0, pad=7)
+		#self.columnconfigure(0, pad=7)
 		#self.columnconfigure(1, pad=7)
 		#self.rowconfigure(14, weight=1)
 		#self.rowconfigure(5, pad=7)
 		
-		lbl = Label(self, text="Commands")
-		lbl.grid(sticky=W, row=0, column=0, pady=4, padx=5)
+		lbl = Label(self.frame, text="Commands")
+		lbl.grid(row=0, column=0, pady=4, padx=5)
 		
 		#area = Text(self, width=66)
 		#area.grid(row=4, column=1, columnspan=4, rowspan=15, padx=5, sticky=E+W+S+N)
 		
-		imageButton = Button(self, text="Take Image", command= lambda: self.dispChange("I"), width=self.buttonWidth)
+		imageButton = Button(self.frame, text="Take Image", command= lambda: self.dispChange("I"), width=self.buttonWidth)
 		imageButton.grid(row=1, column=bcolumn, pady=4)
 		
-		videoButton = Button(self, text="Take Video", command= lambda: self.dispChange("V"), width=self.buttonWidth)
+		videoButton = Button(self.frame, text="Take Video", command= lambda: self.dispChange("V"), width=self.buttonWidth)
 		videoButton.grid(row=2, column=bcolumn, pady=4)
 		
-		networkButton = Button(self, text="Stream to VLC", command= lambda: self.dispChange("N"), width=self.buttonWidth)
+		networkButton = Button(self.frame, text="Stream to VLC", command= lambda: self.dispChange("N"), width=self.buttonWidth)
 		networkButton.grid(row=3, column=bcolumn, pady=4)
 		
-		isButton = Button(self, text="Image Subtraction", command= lambda: self.dispChange("O"), width=self.buttonWidth)
+		isButton = Button(self.frame, text="Image Subtraction", command= lambda: self.dispChange("O"), width=self.buttonWidth)
 		isButton.grid(row=4, column=bcolumn, pady=4)
 		
-		resButton = Button(self, text="Set Resolution", command= lambda: self.dispChange("R"), width=self.buttonWidth)
+		resButton = Button(self.frame, text="Set Resolution", command= lambda: self.dispChange("R"), width=self.buttonWidth)
 		resButton.grid(row=5, column=bcolumn, pady=4)
 		
-		frButton = Button(self, text="Set Framerate", command= lambda: self.dispChange("F"), width=self.buttonWidth)
+		frButton = Button(self.frame, text="Set Framerate", command= lambda: self.dispChange("F"), width=self.buttonWidth)
 		frButton.grid(row=6, column=bcolumn, pady=4)
 		
-		xtButton = Button(self, text="Set Exposure Time", command= lambda: self.dispChange("X"), width=self.buttonWidth)
+		xtButton = Button(self.frame, text="Set Exposure Time", command= lambda: self.dispChange("X"), width=self.buttonWidth)
 		xtButton.grid(row=7, column=bcolumn, pady=4)
 		
-		brButton = Button(self, text="Set Brightness", command= lambda: self.dispChange("B"), width=self.buttonWidth)
+		brButton = Button(self.frame, text="Set Brightness", command= lambda: self.dispChange("B"), width=self.buttonWidth)
 		brButton.grid(row=8, column=bcolumn, pady=4)
 		
-		coButton = Button(self, text="Set Contrast", command= lambda: self.dispChange("C"), width=self.buttonWidth)
+		coButton = Button(self.frame, text="Set Contrast", command= lambda: self.dispChange("C"), width=self.buttonWidth)
 		coButton.grid(row=9, column=bcolumn, pady=4)
 		
-		gnButton = Button(self, text="Set Gain", command= lambda: self.dispChange("G"), width=self.buttonWidth)
+		gnButton = Button(self.frame, text="Set Gain", command= lambda: self.dispChange("G"), width=self.buttonWidth)
 		gnButton.grid(row=10, column=bcolumn, pady=4)
 		
-		stButton = Button(self, text="Set Saturation", command= lambda: self.dispChange("U"), width=self.buttonWidth)
+		stButton = Button(self.frame, text="Set Saturation", command= lambda: self.dispChange("U"), width=self.buttonWidth)
 		stButton.grid(row=11, column=bcolumn, pady=4)
 		
-		shButton = Button(self, text="Set Sharpness", command= lambda: self.dispChange("S"), width=self.buttonWidth)
+		shButton = Button(self.frame, text="Set Sharpness", command= lambda: self.dispChange("S"), width=self.buttonWidth)
 		shButton.grid(row=12, column=bcolumn, pady=4)
 		
-		quitButton = Button(self, text="Quit", command= lambda: self.camera.quitGUI(self), width=self.buttonWidth)
+		quitButton = Button(self.frame, text="Quit", command= lambda: self.camera.quitGUI(self), width=self.buttonWidth)
 		quitButton.grid(row=13, column=bcolumn, pady=4)
 		
-		self.modelb = Label(self, text="Mode: Waiting")
-		self.modelb.grid(sticky=W, row=1, column=1, columnspan=2, pady=4, padx=5)
+		ctrlbl = Label(self.frame2, text="Control")
+		ctrlbl.grid(sticky=W, row=0, column=0, columnspan=2, pady=(5,10), padx=5)
 		
-		self.statlb = Label(self, text="Status: Connected to Raspberry Pi")
-		self.statlb.grid(sticky=W, row=1, column=2, columnspan=7, pady=4, padx=5)
+		self.modelb = Label(self.frame2, text="Mode: Waiting")
+		self.modelb.grid(sticky=W, row=1, column=0, columnspan=2, pady=(4,10), padx=5)
 		
-		self.but = Button(self)
-		self.but2 = Button(self)
-		self.lbl = Label(self)
-		self.lbl2 = Label(self)
-		self.txt = Entry(self)
-		self.txt2 = Entry(self)
+		self.statlb = Label(self.frame2, text="Status: Connected to Raspberry Pi")
+		self.statlb.grid(sticky=W, row=1, column=2, columnspan=7, pady=(4,10), padx=5)
+		
+		self.but = Button(self.frame2)
+		self.but2 = Button(self.frame2)
+		#self.lbl = Label(self.frame2)
+		#self.lbl2 = Label(self.frame2)
+		self.txt = Entry(self.frame2)
+		self.txt2 = Entry(self.frame2)
+		
+		self.lbl = Label(self.frame2, text=" ")
+		self.lbl.grid(sticky=W, row=2, column=1, pady=10, padx=5)
+		
+		self.lbl2 = Label(self.frame2, text=" ")
+		self.lbl2.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
+		
+		pcolumn = 1
+		ctcolumn = 2
+		ccolumn = 3
+		mintcolumn = 4
+		mincolumn = 5
+		maxtcolumn = 6
+		maxcolumn = 7
+		
+		self.camera.sendCommand("A")
+		stats = self.camera.receiveAll()
+		
+		titlbl = Label(self.frame3, text="Properties")
+		titlbl.grid(sticky=W, row=4, column=pcolumn, pady=(8,10), padx=5)
+		
+		reswlbl = Label(self.frame3, text="Width: ")
+		reswlbl.grid(sticky=W, row=5, column=pcolumn, pady=10, padx=5)
+		
+		reshlbl = Label(self.frame3, text="Height: ")
+		reshlbl.grid(sticky=W, row=6, column=pcolumn, pady=10, padx=5)
+		
+		frlbl = Label(self.frame3, text="Framerate: ")
+		frlbl.grid(sticky=W, row=7, column=pcolumn, pady=10, padx=5)
+		
+		xtlbl = Label(self.frame3, text="Exposure Time: ")
+		xtlbl.grid(sticky=W, row=8, column=pcolumn, pady=10, padx=5)
+		
+		brlbl = Label(self.frame3, text="Brightness: ")
+		brlbl.grid(sticky=W, row=9, column=pcolumn, pady=10, padx=5)
+		
+		colbl = Label(self.frame3, text="Contrast: ")
+		colbl.grid(sticky=W, row=10, column=pcolumn, pady=10, padx=5)
+		
+		gnlbl = Label(self.frame3, text="Gain: ")
+		gnlbl.grid(sticky=W, row=11, column=pcolumn, pady=10, padx=5)
+		
+		stlbl = Label(self.frame3, text="Saturation: ")
+		stlbl.grid(sticky=W, row=12, column=pcolumn, pady=10, padx=5)
+		
+		stlbl = Label(self.frame3, text="Sharpness: ")
+		stlbl.grid(sticky=W, row=13, column=pcolumn, pady=10, padx=5)
+		
+		self.proplab = []
+		self.minplab = []
+		self.maxplab = []
+		
+		for i in range(27):
+			if i % 3 == 0:
+				currlab = Label(self.frame3, text="Curr:")
+				currlab.grid(sticky=W, row=(5+i/3), column=ctcolumn, pady=4, padx=5)
+				
+				self.proplab.append(Label(self.frame3, text=str(stats[i])))
+				self.proplab[i/3].grid(sticky=W, row=(5+i/3), column=ccolumn, pady=4, padx=5)
+			
+			if i % 3 == 1:
+				minlab = Label(self.frame3, text="Min:")
+				minlab.grid(sticky=W, row=(5+i/3), column=mintcolumn, pady=4, padx=5)
+				
+				self.minplab.append(Label(self.frame3, text=str(stats[i])))
+				self.minplab[i/3].grid(sticky=W, row=(5+i/3), column=mincolumn, pady=4, padx=5)
+			
+			if i % 3 == 2:
+				maxlab = Label(self.frame3, text="Max:")
+				maxlab.grid(sticky=W, row=(5+i/3), column=maxtcolumn, pady=4, padx=5)
+				
+				self.maxplab.append(Label(self.frame3, text=str(stats[i])))
+				self.maxplab[i/3].grid(sticky=W, row=(5+i/3), column=maxcolumn, pady=4, padx=5)
 		
 		#self.camera.sendCommand("A")
 		#stats = self.camera.receiveAll()
@@ -219,54 +305,60 @@ class cameraGUI(Frame):
 		self.camera.sendCommand("A")
 		stats = self.camera.receiveAll()
 		
-		reswlbl = Label(self, text="Width: ")
-		reswlbl.grid(sticky=W, row=4, column=pcolumn, pady=4, padx=5)
+		#titlb = Label(self, text="Properties")
+		#titlb.grid(sticky=W, row=4, column=pcolumn, pady=4, padx=5)
 		
-		reshlbl = Label(self, text="Height: ")
-		reshlbl.grid(sticky=W, row=5, column=pcolumn, pady=4, padx=5)
+		#reswlbl = Label(self, text="Width: ")
+		#reswlbl.grid(sticky=W, row=5, column=pcolumn, pady=4, padx=5)
 		
-		frlbl = Label(self, text="Framerate: ")
-		frlbl.grid(sticky=W, row=6, column=pcolumn, pady=4, padx=5)
+		#reshlbl = Label(self, text="Height: ")
+		#reshlbl.grid(sticky=W, row=6, column=pcolumn, pady=4, padx=5)
 		
-		xtlbl = Label(self, text="Exposure Time: ")
-		xtlbl.grid(sticky=W, row=7, column=pcolumn, pady=4, padx=5)
+		#frlbl = Label(self, text="Framerate: ")
+		#frlbl.grid(sticky=W, row=7, column=pcolumn, pady=4, padx=5)
 		
-		brlbl = Label(self, text="Brightness: ")
-		brlbl.grid(sticky=W, row=8, column=pcolumn, pady=4, padx=5)
+		#xtlbl = Label(self, text="Exposure Time: ")
+		#xtlbl.grid(sticky=W, row=8, column=pcolumn, pady=4, padx=5)
 		
-		colbl = Label(self, text="Contrast: ")
-		colbl.grid(sticky=W, row=9, column=pcolumn, pady=4, padx=5)
+		#brlbl = Label(self, text="Brightness: ")
+		#brlbl.grid(sticky=W, row=9, column=pcolumn, pady=4, padx=5)
 		
-		gnlbl = Label(self, text="Gain: ")
-		gnlbl.grid(sticky=W, row=10, column=pcolumn, pady=4, padx=5)
+		#colbl = Label(self, text="Contrast: ")
+		#colbl.grid(sticky=W, row=10, column=pcolumn, pady=4, padx=5)
 		
-		stlbl = Label(self, text="Saturation: ")
-		stlbl.grid(sticky=W, row=11, column=pcolumn, pady=4, padx=5)
+		#gnlbl = Label(self, text="Gain: ")
+		#gnlbl.grid(sticky=W, row=11, column=pcolumn, pady=4, padx=5)
 		
-		stlbl = Label(self, text="Sharpness: ")
-		stlbl.grid(sticky=W, row=12, column=pcolumn, pady=4, padx=5)
+		#stlbl = Label(self, text="Saturation: ")
+		#stlbl.grid(sticky=W, row=12, column=pcolumn, pady=4, padx=5)
+		
+		#stlbl = Label(self, text="Sharpness: ")
+		#stlbl.grid(sticky=W, row=13, column=pcolumn, pady=4, padx=5)
 		
 		for i in range(27):
 			if i % 3 == 0:
-				currlab = Label(self, text="Curr:")
-				currlab.grid(sticky=W, row=(4+i/3), column=ctcolumn, pady=4, padx=5)
+				#currlab = Label(self, text="Curr:")
+				#currlab.grid(sticky=W, row=(5+i/3), column=ctcolumn, pady=4, padx=5)
 				
-				proplab = Label(self, text=str(stats[i]))
-				proplab.grid(sticky=W, row=(4+i/3), column=ccolumn, pady=4, padx=5)
+				self.proplab[i/3].destroy()
+				self.proplab[i/3] = Label(self.frame3, text=str(stats[i]))
+				self.proplab[i/3].grid(sticky=W, row=(5+i/3), column=ccolumn, pady=4, padx=5)
 			
 			if i % 3 == 1:
-				minlab = Label(self, text="Min:")
-				minlab.grid(sticky=W, row=(4+i/3), column=mintcolumn, pady=4, padx=5)
+				#minlab = Label(self, text="Min:")
+				#minlab.grid(sticky=W, row=(5+i/3), column=mintcolumn, pady=4, padx=5)
 				
-				minplab = Label(self, text=str(stats[i]))
-				minplab.grid(sticky=W, row=(4+i/3), column=mincolumn, pady=4, padx=5)
+				self.minplab[i/3].destroy()
+				self.minplab[i/3] = Label(self.frame3, text=str(stats[i]))
+				self.minplab[i/3].grid(sticky=W, row=(5+i/3), column=mincolumn, pady=4, padx=5)
 			
 			if i % 3 == 2:
-				maxlab = Label(self, text="Max:")
-				maxlab.grid(sticky=W, row=(4+i/3), column=maxtcolumn, pady=4, padx=5)
+				#maxlab = Label(self, text="Max:")
+				#maxlab.grid(sticky=W, row=(5+i/3), column=maxtcolumn, pady=4, padx=5)
 				
-				maxplab = Label(self, text=str(stats[i]))
-				maxplab.grid(sticky=W, row=(4+i/3), column=maxcolumn, pady=4, padx=5)
+				self.maxplab[i/3].destroy()
+				self.maxplab[i/3] = Label(self.frame3, text=str(stats[i]))
+				self.maxplab[i/3].grid(sticky=W, row=(5+i/3), column=maxcolumn, pady=4, padx=5)
 	
 	
 	def dispChange(self, useCmd):
@@ -280,167 +372,197 @@ class cameraGUI(Frame):
 		if useCmd == "I":
 			self.modelb.config(text="Mode: Image      ")
 			
-			self.but = Button(self, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
-			self.but.grid(sticky=W, row=2, column=3, pady=4, padx=5)
+			self.but = Button(self.frame2, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
+			self.but.grid(sticky=W, row=2, column=5, pady=4, padx=5, columnspan=3)
 			
-			self.lbl = Label(self, text="Enter Filename:  ")
-			self.lbl.grid(sticky=W, row=2, column=1, pady=4, padx=5)
+			self.lbl = Label(self.frame2, text="Enter Filename:  ")
+			self.lbl.grid(sticky=W, row=2, column=1, pady=10, padx=5)
 			
-			self.txt = Entry(self)
+			self.txt = Entry(self.frame2)
 			self.txt.grid(sticky=W, row=2, column=2, pady=4, padx=5, columnspan=3)
+			
+			self.lbl2 = Label(self.frame2, text=" ")
+			self.lbl2.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 			
 		elif useCmd == "V":
 			self.modelb.config(text="Mode: Video      ")
 			
-			self.lbl = Label(self, text="Enter Filename:  ")
-			self.lbl.grid(sticky=W, row=2, column=1, pady=4, padx=5)
+			self.lbl = Label(self.frame2, text="Enter Filename:  ")
+			self.lbl.grid(sticky=W, row=2, column=1, pady=10, padx=5)
 			
-			self.txt = Entry(self)
+			self.txt = Entry(self.frame2)
 			self.txt.grid(sticky=W, row=2, column=2, pady=4, padx=5, columnspan=3)
 			
-			self.lbl2 = Label(self, text="Enter Duration:  ")
-			self.lbl2.grid(sticky=W, row=3, column=1, pady=4, padx=5)
+			self.lbl2 = Label(self.frame2, text="Enter Duration:  ")
+			self.lbl2.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 			
-			self.txt2 = Entry(self)
+			self.txt2 = Entry(self.frame2)
 			self.txt2.grid(sticky=W, row=3, column=2, pady=4, padx=5, columnspan=3)
 			
-			self.but = Button(self, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth/2)
-			self.but.grid(sticky=W, row=3, column=3, pady=4, padx=2.5)
+			self.but = Button(self.frame2, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth/2)
+			self.but.grid(sticky=W, row=3, column=5, pady=0, padx=2.5)
 			
-			self.but2 = Button(self, text="Stop", command=self.streamStop, width=self.buttonWidth/2)
-			self.but2.grid(sticky=W, row=3, column=4, pady=4, padx=2.5)
+			self.but2 = Button(self.frame2, text="Stop", command=self.streamStop, width=self.buttonWidth/2)
+			self.but2.grid(sticky=W, row=3, column=6, pady=0, padx=2.5)
 			
 		elif useCmd == "N":
 			self.modelb.config(text="Mode: Stream     ")
 			
-			self.lbl2 = Label(self, text="Enter Duration:  ")
-			self.lbl2.grid(sticky=W, row=2, column=1, pady=4, padx=5)
+			self.lbl2 = Label(self.frame2, text="Enter Duration:  ")
+			self.lbl2.grid(sticky=W, row=2, column=1, pady=10, padx=5)
 			
-			self.txt2 = Entry(self)
+			self.txt2 = Entry(self.frame2)
 			self.txt2.grid(sticky=W, row=2, column=2, pady=4, padx=5, columnspan=3)
 			
-			self.but = Button(self, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth/2)
-			self.but.grid(sticky=W, row=2, column=3, pady=4, padx=2.5)
+			self.but = Button(self.frame2, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth/2)
+			self.but.grid(sticky=W, row=2, column=5, pady=4, padx=2.5)
 			
-			self.but2 = Button(self, text="Stop", command=self.streamStop, width=self.buttonWidth/2)
-			self.but2.grid(sticky=W, row=2, column=4, pady=4, padx=2.5)
+			self.but2 = Button(self.frame2, text="Stop", command=self.streamStop, width=self.buttonWidth/2)
+			self.but2.grid(sticky=W, row=2, column=6, pady=4, padx=2.5)
+			
+			self.lbl = Label(self.frame2, text=" ")
+			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 			
 		elif useCmd == "O":
 			self.modelb.config(text="Mode: Subtract   ")
 			
-			self.lbl2 = Label(self, text="Enter Duration:  ")
-			self.lbl2.grid(sticky=W, row=2, column=1, pady=4, padx=5)
+			self.lbl2 = Label(self.frame2, text="Enter Duration:  ")
+			self.lbl2.grid(sticky=W, row=2, column=1, pady=10, padx=5)
 			
-			self.txt2 = Entry(self)
+			self.txt2 = Entry(self.frame2)
 			self.txt2.grid(sticky=W, row=2, column=2, pady=4, padx=5, columnspan=3)
 			
-			self.but = Button(self, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth/2)
-			self.but.grid(sticky=W, row=2, column=3, pady=4, padx=2.5)
+			self.but = Button(self.frame2, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth/2)
+			self.but.grid(sticky=W, row=2, column=5, pady=4, padx=2.5)
 			
-			self.but2 = Button(self, text="Stop", command=self.streamStop, width=self.buttonWidth/2)
-			self.but2.grid(sticky=W, row=2, column=4, pady=4, padx=2.5)
+			self.but2 = Button(self.frame2, text="Stop", command=self.streamStop, width=self.buttonWidth/2)
+			self.but2.grid(sticky=W, row=2, column=6, pady=4, padx=2.5)
+			
+			self.lbl = Label(self.frame2, text=" ")
+			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 			
 		elif useCmd == "R":
 			self.modelb.config(text="Mode: Resolution ")
 		
-			self.lbl2 = Label(self, text="Enter Width:     ")
-			self.lbl2.grid(sticky=W, row=2, column=1, pady=4, padx=5)
+			self.lbl2 = Label(self.frame2, text="Enter Width:     ")
+			self.lbl2.grid(sticky=W, row=2, column=1, pady=10, padx=5)
 			
-			self.txt2 = Entry(self)
+			self.txt2 = Entry(self.frame2)
 			self.txt2.grid(sticky=W, row=2, column=2, pady=4, padx=5, columnspan=3)
 			
-			self.lbl = Label(self, text="Enter Height:    ")
-			self.lbl.grid(sticky=W, row=3, column=1, pady=4, padx=5)
+			self.lbl = Label(self.frame2, text="Enter Height:    ")
+			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 			
-			self.txt = Entry(self)
+			self.txt = Entry(self.frame2)
 			self.txt.grid(sticky=W, row=3, column=2, pady=4, padx=5, columnspan=3)
 			
-			self.but = Button(self, text="Set", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
-			self.but.grid(sticky=W, row=3, column=5, pady=4, padx=5)
+			self.but = Button(self.frame2, text="Set", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
+			self.but.grid(sticky=W, row=3, column=5, pady=0, padx=5, columnspan=3)
 		
 		elif useCmd == "F":
 			self.modelb.config(text="Mode: Framerate  ")
 		
-			self.lbl2 = Label(self, text="Enter Rate:      ")
-			self.lbl2.grid(sticky=W, row=2, column=1, pady=4, padx=5)
+			self.lbl2 = Label(self.frame2, text="Enter Rate:      ")
+			self.lbl2.grid(sticky=W, row=2, column=1, pady=10, padx=5)
 			
-			self.txt2 = Entry(self)
+			self.txt2 = Entry(self.frame2)
 			self.txt2.grid(sticky=W, row=2, column=2, pady=4, padx=5, columnspan=3)
 			
-			self.but = Button(self, text="Set", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
-			self.but.grid(sticky=W, row=2, column=3, pady=4, padx=5)
+			self.but = Button(self.frame2, text="Set", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
+			self.but.grid(sticky=W, row=2, column=5, pady=4, padx=5, columnspan=3)
+			
+			self.lbl = Label(self.frame2, text=" ")
+			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 		
 		elif useCmd == "X":
 			self.modelb.config(text="Mode: Exposure   ")
 		
-			self.lbl2 = Label(self, text="Enter Time:      ")
-			self.lbl2.grid(sticky=W, row=2, column=1, pady=4, padx=5)
+			self.lbl2 = Label(self.frame2, text="Enter Time:      ")
+			self.lbl2.grid(sticky=W, row=2, column=1, pady=10, padx=5)
 			
-			self.txt2 = Entry(self)
+			self.txt2 = Entry(self.frame2)
 			self.txt2.grid(sticky=W, row=2, column=2, pady=4, padx=5, columnspan=3)
 			
-			self.but = Button(self, text="Set", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
-			self.but.grid(sticky=W, row=2, column=3, pady=4, padx=5)
+			self.but = Button(self.frame2, text="Set", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
+			self.but.grid(sticky=W, row=2, column=5, pady=4, padx=5, columnspan=3)
+			
+			self.lbl = Label(self.frame2, text=" ")
+			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 		
 		elif useCmd == "B":
 			self.modelb.config(text="Mode: Brightness ")
 		
-			self.lbl2 = Label(self, text="Enter Brightness:")
-			self.lbl2.grid(sticky=W, row=2, column=1, pady=4, padx=5)
+			self.lbl2 = Label(self.frame2, text="Enter Brightness:")
+			self.lbl2.grid(sticky=W, row=2, column=1, pady=10, padx=5)
 			
-			self.txt2 = Entry(self)
+			self.txt2 = Entry(self.frame2)
 			self.txt2.grid(sticky=W, row=2, column=2, pady=4, padx=5, columnspan=3)
 			
-			self.but = Button(self, text="Set", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
-			self.but.grid(sticky=W, row=2, column=3, pady=4, padx=5)
+			self.but = Button(self.frame2, text="Set", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
+			self.but.grid(sticky=W, row=2, column=5, pady=4, padx=5, columnspan=3)
+			
+			self.lbl = Label(self.frame2, text=" ")
+			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 		
 		elif useCmd == "C":
 			self.modelb.config(text="Mode: Contrast   ")
 		
-			self.lbl2 = Label(self, text="Enter Contrast:  ")
-			self.lbl2.grid(sticky=W, row=2, column=1, pady=4, padx=5)
+			self.lbl2 = Label(self.frame2, text="Enter Contrast:  ")
+			self.lbl2.grid(sticky=W, row=2, column=1, pady=10, padx=5)
 			
-			self.txt2 = Entry(self)
+			self.txt2 = Entry(self.frame2)
 			self.txt2.grid(sticky=W, row=2, column=2, pady=4, padx=5, columnspan=3)
 			
-			self.but = Button(self, text="Set", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
-			self.but.grid(sticky=W, row=2, column=3, pady=4, padx=5)
+			self.but = Button(self.frame2, text="Set", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
+			self.but.grid(sticky=W, row=2, column=5, pady=4, padx=5, columnspan=3)
+			
+			self.lbl = Label(self.frame2, text=" ")
+			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 			
 		elif useCmd == "G":
 			self.modelb.config(text="Mode: Gain       ")
 		
-			self.lbl2 = Label(self, text="Enter Gain:      ")
-			self.lbl2.grid(sticky=W, row=2, column=1, pady=4, padx=5)
+			self.lbl2 = Label(self.frame2, text="Enter Gain:      ")
+			self.lbl2.grid(sticky=W, row=2, column=1, pady=10, padx=5)
 			
-			self.txt2 = Entry(self)
+			self.txt2 = Entry(self.frame2)
 			self.txt2.grid(sticky=W, row=2, column=2, pady=4, padx=5, columnspan=3)
 			
-			self.but = Button(self, text="Set", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
-			self.but.grid(sticky=W, row=2, column=3, pady=4, padx=5)
+			self.but = Button(self.frame2, text="Set", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
+			self.but.grid(sticky=W, row=2, column=5, pady=4, padx=5, columnspan=3)
+			
+			self.lbl = Label(self.frame2, text=" ")
+			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 			
 		elif useCmd == "U":
 			self.modelb.config(text="Mode: Saturation ")
 		
-			self.lbl2 = Label(self, text="Enter Saturation:")
-			self.lbl2.grid(sticky=W, row=2, column=1, pady=4, padx=5)
+			self.lbl2 = Label(self.frame2, text="Enter Saturation:")
+			self.lbl2.grid(sticky=W, row=2, column=1, pady=10, padx=5)
 			
-			self.txt2 = Entry(self)
+			self.txt2 = Entry(self.frame2)
 			self.txt2.grid(sticky=W, row=2, column=2, pady=4, padx=5, columnspan=3)
 			
-			self.but = Button(self, text="Set", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
-			self.but.grid(sticky=W, row=2, column=3, pady=4, padx=5)
+			self.but = Button(self.frame2, text="Set", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
+			self.but.grid(sticky=W, row=2, column=5, pady=4, padx=5, columnspan=3)
+			
+			self.lbl = Label(self.frame2, text=" ")
+			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 			
 		elif useCmd == "S":
 			self.modelb.config(text="Mode: Sharpness  ")
 		
-			self.lbl2 = Label(self, text="Enter Sharpness: ")
-			self.lbl2.grid(sticky=W, row=2, column=1, pady=4, padx=5)
+			self.lbl2 = Label(self.frame2, text="Enter Sharpness: ")
+			self.lbl2.grid(sticky=W, row=2, column=1, pady=10, padx=5)
 			
-			self.txt2 = Entry(self)
+			self.txt2 = Entry(self.frame2)
 			self.txt2.grid(sticky=W, row=2, column=2, pady=4, padx=5, columnspan=3)
 			
-			self.but = Button(self, text="Set", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
-			self.but.grid(sticky=W, row=2, column=3, pady=4, padx=5)
+			self.but = Button(self.frame2, text="Set", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
+			self.but.grid(sticky=W, row=2, column=5, pady=4, padx=5, columnspan=3)
+			
+			self.lbl = Label(self.frame2, text=" ")
+			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 	
 	def retStr(self, useCmd):
 		self.fnameValue = self.txt.get()
@@ -632,9 +754,23 @@ class cameraModuleClient:
 				try:
 					# Condition for exceeding min/max bounds
 					if float(value) < float(minimum):
-						print(RED + "Value is less than minimum" + CLEAR)
+						if self.useGUI == 1:
+							self.app.statlb.config(text="Status: Value is less than minimum")
+							Tk.update(self.root)
+							value = default
+							self.app.error = 1
+							break
+						else:
+							print(RED + "Value is less than minimum" + CLEAR)
 					elif float(value) > float(maximum):
-						print(RED + "Value is greater than maximum" + CLEAR)
+						if self.useGUI == 1:
+							self.app.statlb.config(text="Status: Value is greater than maximum")
+							Tk.update(self.root)
+							value = default
+							self.app.error = 1
+							break
+						else:
+							print(RED + "Value is greater than maximum" + CLEAR)
 					elif value == "inf":
 						value = str(sys.maxint)
 						break
@@ -642,7 +778,14 @@ class cameraModuleClient:
 						break
 				except ValueError:
 					# Condition for parameter inputs that are not integers
-					print(RED + "Not a number" + CLEAR)
+					if self.useGUI == 1:
+						self.app.statlb.config(text="Status: Not a number")
+						Tk.update(self.root)
+						value = default
+						self.app.error = 1
+						break
+					else:
+						print(RED + "Not a number" + CLEAR)
 		
 		# Send parameter value to Pi
 		self.send_msg(self.client_socket, value)
@@ -652,11 +795,13 @@ class cameraModuleClient:
 		if confirm == None:
 			raise Exception("Command Failed (May need to lower resolution or framerate)")
 		else:
-			if self.useGUI == 1:
+			if self.useGUI == 1 and self.app.error == 0:
 				if "Resolution" in confirm:
 					confirm = "Resolution changed"
 				self.app.statlb.config(text="Status: " + confirm)
 				Tk.update(self.root)
+			elif self.useGUI == 1 and self.app.error == 1:
+				self.app.error = 0
 			else:
 				print(GREEN + confirm + CLEAR)
 			
@@ -943,6 +1088,9 @@ class cameraModuleClient:
 		elif command == "X":
 			print(CYAN + "Note: Exposure time of 0 automatically sets the exposure time" + CLEAR)
 			self.processIntParameter("Exposure time (microseconds)")
+	
+		if self.useGUI == 1 and not command == "A":
+			self.app.dispProps()
 		
 		return command
 	

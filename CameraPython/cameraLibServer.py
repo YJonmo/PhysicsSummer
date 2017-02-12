@@ -134,7 +134,7 @@ class cameraModuleServer:
 		
 		if speed > maxSpeed:
 			# Change the framerate to allow the set exposure time
-			self.camera.framerate = 1000000/float(speed)
+			self.camera.framerate = int(1000000/float(speed))
 		
 		# Change the shutter speed of the camera (in microseconds)
 		self.camera.shutter_speed = speed
