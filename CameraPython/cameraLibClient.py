@@ -289,7 +289,7 @@ class cameraGUI(Frame):
 			self.but = Button(self.frame2, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth/2)
 			self.but.grid(sticky=W, row=3, column=5, pady=0, padx=2.5)
 			
-			self.but2 = Button(self.frame2, text="Stop", command= lambda: self.streamStop(useCmd), width=self.buttonWidth/2)
+			self.but2 = Button(self.frame2, text="Stop", state=DISABLED, command= lambda: self.streamStop(useCmd), width=self.buttonWidth/2)
 			self.but2.grid(sticky=W, row=3, column=6, pady=0, padx=2.5)
 			
 		elif useCmd == "N":
@@ -304,7 +304,7 @@ class cameraGUI(Frame):
 			self.but = Button(self.frame2, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth/2)
 			self.but.grid(sticky=W, row=2, column=5, pady=4, padx=2.5)
 			
-			self.but2 = Button(self.frame2, text="Stop", command= lambda: self.streamStop(useCmd), width=self.buttonWidth/2)
+			self.but2 = Button(self.frame2, text="Stop", state=DISABLED, command= lambda: self.streamStop(useCmd), width=self.buttonWidth/2)
 			self.but2.grid(sticky=W, row=2, column=6, pady=4, padx=2.5)
 			
 			self.lbl = Label(self.frame2, text=" ")
@@ -322,7 +322,7 @@ class cameraGUI(Frame):
 			self.but = Button(self.frame2, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth/2)
 			self.but.grid(sticky=W, row=2, column=5, pady=4, padx=2.5)
 			
-			self.but2 = Button(self.frame2, text="Stop", command= lambda: self.streamStop(useCmd), width=self.buttonWidth/2)
+			self.but2 = Button(self.frame2, text="Stop", state=DISABLED, command= lambda: self.streamStop(useCmd), width=self.buttonWidth/2)
 			self.but2.grid(sticky=W, row=2, column=6, pady=4, padx=2.5)
 			
 			self.lbl = Label(self.frame2, text=" ")
@@ -477,6 +477,8 @@ class cameraGUI(Frame):
 			self.stButton.config(state=DISABLED)
 			self.shButton.config(state=DISABLED)
 			self.quitButton.config(state=DISABLED)
+			self.but.config(state=DISABLED)
+			self.but2.config(state=NORMAL)
 	
 	
 	def streamStop(self, useCmd):
@@ -501,6 +503,8 @@ class cameraGUI(Frame):
 		self.stButton.config(state=NORMAL)
 		self.shButton.config(state=NORMAL)
 		self.quitButton.config(state=NORMAL)
+		self.but.config(state=NORMAL)
+		self.but2.config(state=DISABLED)
 		
 		if useCmd == "N":
 			# Free connection resources
