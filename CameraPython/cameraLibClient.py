@@ -50,35 +50,40 @@ else:
 class cameraGUI(Frame):
 	
 	def __init__(self, parent, camera):
+		# Initialise the GUI to control the Raspberry Pi camera
 		Frame.__init__(self, parent)
 		self.parent = parent
 		self.camera = camera
 		self.buttonWidth = 20
 		self.initUI()
-		#self.dispProps()
 		
-		self.commValue = 0
+		# Initialise global values to store Entry text.
 		self.fnameValue = 0
 		self.durValue = 0
 		self.error = 0
 	
 	def initUI(self):
+		'''
+		Completely setup and display the camera GUI. This is run once at 
+		initialisation of the camera GUI module.
+		'''
+		
+		# Initialise the UI
 		self.parent.title("Raspberry Pi Camera")
 		self.style = Style()
-		#self.style.configure("TButton", padding=(0,5,0,5), font='serif 10')
 		self.style.theme_use("clam")
 		
-		pcolumn = 0
-		ctcolumn = 1
-		ccolumn = 2
+		# Determine column values
+		pcolumn = 1
+		ctcolumn = 2
+		ccolumn = 3
 		bcolumn = 0
-		mintcolumn = 3
-		mincolumn = 4
-		maxtcolumn = 5
-		maxcolumn = 6
-		stcolumn = 7
-		txtcolumn = 8
+		mintcolumn = 4
+		mincolumn = 5
+		maxtcolumn = 6
+		maxcolumn = 7
 		
+		# Split the GUI into 3 sections
 		self.frame = Frame(self, relief=RAISED, borderwidth=1, width=100, height=480)
 		self.frame.pack(side=LEFT, expand=0, fill=BOTH)
 		
@@ -88,23 +93,11 @@ class cameraGUI(Frame):
 		self.frame3 = Frame(self, relief=RAISED, borderwidth=1, width=540, height=360)
 		self.frame3.pack(side=TOP, expand=0, fill=BOTH)
 		
-		#frame.grid(row=0, column = 0, rowspan=15, columnspan=1)
-		#frame.pack(fill=BOTH, expand=1)
-		
 		self.pack(fill=BOTH, expand=1)
 		
-		#self.columnconfigure(1, weight=1)
-		#self.columnconfigure(2, weight=1)
-		#self.columnconfigure(0, pad=7)
-		#self.columnconfigure(1, pad=7)
-		#self.rowconfigure(14, weight=1)
-		#self.rowconfigure(5, pad=7)
-		
+		# Set the buttons corresponding to camera commands
 		lbl = Label(self.frame, text="Commands")
 		lbl.grid(row=0, column=0, pady=4, padx=5)
-		
-		#area = Text(self, width=66)
-		#area.grid(row=4, column=1, columnspan=4, rowspan=15, padx=5, sticky=E+W+S+N)
 		
 		imageButton = Button(self.frame, text="Take Image", command= lambda: self.dispChange("I"), width=self.buttonWidth)
 		imageButton.grid(row=1, column=bcolumn, pady=4)
@@ -145,6 +138,7 @@ class cameraGUI(Frame):
 		quitButton = Button(self.frame, text="Quit", command= lambda: self.camera.quitGUI(self), width=self.buttonWidth)
 		quitButton.grid(row=13, column=bcolumn, pady=4)
 		
+		# Set the section to control a mode
 		ctrlbl = Label(self.frame2, text="Control")
 		ctrlbl.grid(sticky=W, row=0, column=0, columnspan=2, pady=(5,10), padx=5)
 		
@@ -156,8 +150,6 @@ class cameraGUI(Frame):
 		
 		self.but = Button(self.frame2)
 		self.but2 = Button(self.frame2)
-		#self.lbl = Label(self.frame2)
-		#self.lbl2 = Label(self.frame2)
 		self.txt = Entry(self.frame2)
 		self.txt2 = Entry(self.frame2)
 		
@@ -167,17 +159,11 @@ class cameraGUI(Frame):
 		self.lbl2 = Label(self.frame2, text=" ")
 		self.lbl2.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 		
-		pcolumn = 1
-		ctcolumn = 2
-		ccolumn = 3
-		mintcolumn = 4
-		mincolumn = 5
-		maxtcolumn = 6
-		maxcolumn = 7
-		
+		# Receive the camera properties from the Raspberry Pi
 		self.camera.sendCommand("A")
 		stats = self.camera.receiveAll()
 		
+		# Set the section containing the current camera properties
 		titlbl = Label(self.frame3, text="Properties")
 		titlbl.grid(sticky=W, row=4, column=pcolumn, pady=(8,10), padx=5)
 		
@@ -213,6 +199,7 @@ class cameraGUI(Frame):
 		self.maxplab = []
 		propwidth = 6
 		
+		# Set the actual camera properties
 		for i in range(27):
 			if i % 3 == 0:
 				currlab = Label(self.frame3, text="Curr:", width=propwidth)
@@ -235,138 +222,33 @@ class cameraGUI(Frame):
 				self.maxplab.append(Label(self.frame3, text=str(stats[i]), width=propwidth))
 				self.maxplab[i/3].grid(sticky=W, row=(5+i/3), column=maxcolumn, pady=4, padx=5)
 		
-		#self.camera.sendCommand("A")
-		#stats = self.camera.receiveAll()
-		
-		#reswlbl = Label(self, text="Width: ")
-		#reswlbl.grid(sticky=W, row=4, column=pcolumn, pady=4, padx=5)
-		
-		#reshlbl = Label(self, text="Height: ")
-		#reshlbl.grid(sticky=W, row=5, column=pcolumn, pady=4, padx=5)
-		
-		#frlbl = Label(self, text="Framerate: ")
-		#frlbl.grid(sticky=W, row=6, column=pcolumn, pady=4, padx=5)
-		
-		#xtlbl = Label(self, text="Exposure Time: ")
-		#xtlbl.grid(sticky=W, row=7, column=pcolumn, pady=4, padx=5)
-		
-		#brlbl = Label(self, text="Brightness: ")
-		#brlbl.grid(sticky=W, row=8, column=pcolumn, pady=4, padx=5)
-		
-		#colbl = Label(self, text="Contrast: ")
-		#colbl.grid(sticky=W, row=9, column=pcolumn, pady=4, padx=5)
-		
-		#gnlbl = Label(self, text="Gain: ")
-		#gnlbl.grid(sticky=W, row=10, column=pcolumn, pady=4, padx=5)
-		
-		#stlbl = Label(self, text="Saturation: ")
-		#stlbl.grid(sticky=W, row=11, column=pcolumn, pady=4, padx=5)
-		
-		#stlbl = Label(self, text="Sharpness: ")
-		#stlbl.grid(sticky=W, row=12, column=pcolumn, pady=4, padx=5)
-		
-		#for i in range(27):
-			#if i % 3 == 0:
-				#currlab = Label(self, text="Current: ")
-				#currlab.grid(sticky=W, row=(4+i/3), column=ctcolumn, pady=4, padx=5)
-				
-				#proplab = Label(self, text=str(stats[i]))
-				#proplab.grid(sticky=W, row=(4+i/3), column=ccolumn, pady=4, padx=5)
-			
-			#if i % 3 == 1:
-				#minlab = Label(self, text="Minimum: ")
-				#minlab.grid(sticky=W, row=(4+i/3), column=mintcolumn, pady=4, padx=5)
-				
-				#minplab = Label(self, text=str(stats[i]))
-				#minplab.grid(sticky=W, row=(4+i/3), column=mincolumn, pady=4, padx=5)
-			
-			#if i % 3 == 2:
-				#maxlab = Label(self, text="Maximum: ")
-				#maxlab.grid(sticky=W, row=(4+i/3), column=maxtcolumn, pady=4, padx=5)
-				
-				#maxplab = Label(self, text=str(stats[i]))
-				#maxplab.grid(sticky=W, row=(4+i/3), column=maxcolumn, pady=4, padx=5)
-		
-		#for i in range(9):
-			#setlab = Label(self, text="Set: ")
-			#setlab.grid(sticky=W, row=(4+i), column=stcolumn, pady=4, padx=5)
-			
-			#txtlab = Text(self, height=1, width=10)
-			#txtlab.grid(sticky=W, row=(4+i), column=txtcolumn, pady=4, padx=5)
-	
 	
 	def dispProps(self):
-		pcolumn = 1
-		ctcolumn = 2
-		ccolumn = 3
-		mintcolumn = 4
-		mincolumn = 5
-		maxtcolumn = 6
-		maxcolumn = 7
+		'''
+		Display updated properties of the camera module on the GUI.
+		'''
 		
+		# Receive the values of all camera properties
 		self.camera.sendCommand("A")
 		stats = self.camera.receiveAll()
 		
-		#titlb = Label(self, text="Properties")
-		#titlb.grid(sticky=W, row=4, column=pcolumn, pady=4, padx=5)
-		
-		#reswlbl = Label(self, text="Width: ")
-		#reswlbl.grid(sticky=W, row=5, column=pcolumn, pady=4, padx=5)
-		
-		#reshlbl = Label(self, text="Height: ")
-		#reshlbl.grid(sticky=W, row=6, column=pcolumn, pady=4, padx=5)
-		
-		#frlbl = Label(self, text="Framerate: ")
-		#frlbl.grid(sticky=W, row=7, column=pcolumn, pady=4, padx=5)
-		
-		#xtlbl = Label(self, text="Exposure Time: ")
-		#xtlbl.grid(sticky=W, row=8, column=pcolumn, pady=4, padx=5)
-		
-		#brlbl = Label(self, text="Brightness: ")
-		#brlbl.grid(sticky=W, row=9, column=pcolumn, pady=4, padx=5)
-		
-		#colbl = Label(self, text="Contrast: ")
-		#colbl.grid(sticky=W, row=10, column=pcolumn, pady=4, padx=5)
-		
-		#gnlbl = Label(self, text="Gain: ")
-		#gnlbl.grid(sticky=W, row=11, column=pcolumn, pady=4, padx=5)
-		
-		#stlbl = Label(self, text="Saturation: ")
-		#stlbl.grid(sticky=W, row=12, column=pcolumn, pady=4, padx=5)
-		
-		#stlbl = Label(self, text="Sharpness: ")
-		#stlbl.grid(sticky=W, row=13, column=pcolumn, pady=4, padx=5)
-		
+		# Update every property
 		for i in range(27):
 			if i % 3 == 0:
-				#currlab = Label(self, text="Curr:")
-				#currlab.grid(sticky=W, row=(5+i/3), column=ctcolumn, pady=4, padx=5)
-				
 				self.proplab[i/3].config(text=str(stats[i]))
-				#self.proplab[i/3].destroy()
-				#self.proplab[i/3] = Label(self.frame3, text=str(stats[i]))
-				#self.proplab[i/3].grid(sticky=W, row=(5+i/3), column=ccolumn, pady=4, padx=5)
 			
 			if i % 3 == 1:
-				#minlab = Label(self, text="Min:")
-				#minlab.grid(sticky=W, row=(5+i/3), column=mintcolumn, pady=4, padx=5)
-				
 				self.minplab[i/3].config(text=str(stats[i]))
-				#self.minplab[i/3].destroy()
-				#self.minplab[i/3] = Label(self.frame3, text=str(stats[i]))
-				#self.minplab[i/3].grid(sticky=W, row=(5+i/3), column=mincolumn, pady=4, padx=5)
 			
 			if i % 3 == 2:
-				#maxlab = Label(self, text="Max:")
-				#maxlab.grid(sticky=W, row=(5+i/3), column=maxtcolumn, pady=4, padx=5)
-				
 				self.maxplab[i/3].config(text=str(stats[i]))
-				#self.maxplab[i/3].destroy()
-				#self.maxplab[i/3] = Label(self.frame3, text=str(stats[i]))
-				#self.maxplab[i/3].grid(sticky=W, row=(5+i/3), column=maxcolumn, pady=4, padx=5)
-	
+		
 	
 	def dispChange(self, useCmd):
+		'''
+		Change the control section of the GUI if there is a mode change.
+		'''
+		
 		self.but.grid_forget()
 		self.but2.grid_forget()
 		self.lbl.grid_forget()
@@ -569,7 +451,13 @@ class cameraGUI(Frame):
 			self.lbl = Label(self.frame2, text=" ")
 			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 	
+	
 	def retStr(self, useCmd):
+		'''
+		Determine the parameters in the Entry text boxes, and start 
+		running the command.
+		'''
+		
 		self.fnameValue = self.txt.get()
 		self.durValue = self.txt2.get()
 
@@ -577,6 +465,11 @@ class cameraGUI(Frame):
 	
 	
 	def streamStop(self, useCmd):
+		'''
+		Process that is run if the stop button is pressed.
+		'''
+		
+		# Set the value to stop the stream/record process
 		self.camera.procStop.value = 1
 		time.sleep(1)
 		
@@ -587,6 +480,7 @@ class cameraGUI(Frame):
 			self.camera.client_socket = socket.socket()
 			self.camera.client_socket.connect(('192.168.1.1', 8000))
 		elif useCmd == "V":
+			# Receive the video file
 			self.statlb.config(text="Status: " + self.camera.confStop)
 			Tk.update(self.camera.root)
 			self.camera.printStats()
@@ -637,18 +531,21 @@ class cameraModuleClient:
 				if not data:
 					break
 				player.stdin.write(data)
+				
+				# Finish if stop button is pressed
 				if self.useGUI == 1 and self.procStop.value == 1 and self.durStop == "inf":
 					raise KeyboardInterrupt
+			
 		except KeyboardInterrupt:
 			self.send_msg(self.client_socket, "Stop")
 			self.msgSent = 1
 			time.sleep(1)
 		
+		# Close resources
 		connection.close()
 		player.terminate()
 		
 		if not self.useGUI == 1 or not self.durStop == "inf":
-			
 			# Free connection resources
 			print(GREEN + "Network stream closed" + CLEAR)
 			self.client_socket.close()
@@ -672,6 +569,7 @@ class cameraModuleClient:
 			player = subprocess.Popen(subline)
 			
 			if self.useGUI == 1:
+				# Stop when stop button is pressed or process has ended
 				while not player.poll() == 1:
 					if self.procStop.value == 1:
 						raise KeyboardInterrupt	
@@ -684,6 +582,7 @@ class cameraModuleClient:
 				player.terminate()
 		
 		except KeyboardInterrupt:
+			# Free resources
 			print(GREEN + "Network stream closed" + CLEAR)
 			player.terminate()
 			
@@ -757,8 +656,13 @@ class cameraModuleClient:
 		
 		
 	def receiveAll(self):
+		'''
+		Receive all camera properties for use by the GUI.
+		'''
+		
 		result = []
 		
+		# Fetch all camera properties, including mins and maxs
 		for i in range(27):
 			result.append(self.recv_msg(self.client_socket))
 		
@@ -780,7 +684,7 @@ class cameraModuleClient:
 			num, den = default.split('/')
 			default = str(float(num)/float(den))
 		
-		# Input parameter value from terminal
+		# Input parameter value from terminal or GUI
 		while True:
 			if self.useGUI == 1:
 				value = self.app.durValue
@@ -828,6 +732,7 @@ class cameraModuleClient:
 					else:
 						print(RED + "Not a number" + CLEAR)
 		
+		# Save duration value to global if GUI is used
 		if self.useGUI == 1 and parameter == "Duration (seconds)":
 			self.durStop = value
 		
@@ -860,7 +765,7 @@ class cameraModuleClient:
 		# Receive default, min, max parameters from Pi
 		default = self.recv_msg(self.client_socket)
 
-		# Input parameter value from terminal
+		# Input parameter value from terminal or GUI
 		while True:
 			if self.useGUI == 1:
 				value = self.app.fnameValue
@@ -886,6 +791,7 @@ class cameraModuleClient:
 					break
 				else:
 					if self.useGUI == 1:
+						# Add correct extension if not correct
 						value += ".jpg"
 						break
 					else:
@@ -919,6 +825,7 @@ class cameraModuleClient:
 		if confirm == None:
 			raise Exception("Command Failed (May need to lower resolution or framerate)")
 		else:
+			# Update GUI status
 			if self.useGUI == 1:
 				self.app.statlb.config(text="Status: " + confirm)
 				Tk.update(self.root)
@@ -929,6 +836,11 @@ class cameraModuleClient:
 	
 	
 	def filenameGUI(self, parameter):
+		'''
+		Get the filename if the GUI is used. In order to use the stop 
+		button correctly, this has to be in a separate function 
+		to processStrParameter.
+		'''
 		
 		# Receive default, min, max parameters from Pi
 		default = self.recv_msg(self.client_socket)
@@ -985,8 +897,13 @@ class cameraModuleClient:
 		
 	
 	def videoGUI(self):
+		'''
+		If the duration is infinite, then determine whether the stop 
+		button of the GUI has been pressed.
+		'''
 		
 		while True:
+			# Stop the process by setting the value
 			if self.procStop.value == 1:
 				break
 		# Send message to stop recording if Ctrl+C is pressed
@@ -1070,6 +987,7 @@ class cameraModuleClient:
 			os.system("nc 192.168.1.1 60000 > ../../Videos/" + fname)
 		
 		if self.useGUI == 1:
+			# Update GUI status
 			self.app.statlb.config(text="Status: Downloaded file")
 			Tk.update(self.root)
 		else:
@@ -1085,9 +1003,11 @@ class cameraModuleClient:
 			trigger = str(raw_input("Trigger (T for capture, Q for quit): ")).upper()
 			self.send_msg(self.client_socket, trigger)
 			
+			# Capture trigger
 			if trigger == "T":
 				print("Capturing")
 			
+			# Quit trigger mode
 			if trigger == "Q":
 				break
 		
@@ -1226,15 +1146,22 @@ class cameraModuleClient:
 	
 	
 	def runGUI(self):
+		'''
+		Initialise the camera GUI, and run the GUI loop.
+		'''
+		
 		self.useGUI = 1
 		self.root = Tk()
 		self.root.geometry("640x480+150+150")
-		#root.attributes('-zoomed', True)
 		self.app = cameraGUI(self.root, self)
 		self.root.mainloop()
 	
 	
 	def quitGUI(self, app):
+		'''
+		Quit the GUI, and tell the Raspberry Pi to quit also.
+		'''
+		
 		app.quit()
 		self.sendCommand("Q")
 	
