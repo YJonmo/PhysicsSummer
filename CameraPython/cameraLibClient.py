@@ -576,10 +576,6 @@ class cameraModuleClient:
 			else:
 				# Wait for executable to exit
 				player.wait()
-			
-				# Free resources
-				print(GREEN + "Network stream closed" + CLEAR)
-				player.terminate()
 		
 		except KeyboardInterrupt:
 			# Free resources

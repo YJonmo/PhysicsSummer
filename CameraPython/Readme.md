@@ -244,6 +244,6 @@ Enter the downloaded OpenCV directory, and perform the following commands:
 
 If changes are made to the C++ code, the code can be compiled with the following command:
 
-	g++ BackGroundSubb_Video.cpp -o BackGroundSubb_Video -I/usr/local/include/opencv2 -L/usr/local/lib -lopencv_core -lopencv_video -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_imgproc
+	g++ -std=c++11 BackGroundSubb_Video.cpp -o BackGroundSubb_Video -I/usr/local/include/opencv2 -L/usr/local/lib -lopencv_core -lopencv_video -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_imgproc
 
 

@@ -89,7 +89,6 @@ void processVideo(char* videoFilename) {
     
     VideoWriter frameWriter;
     VideoWriter backWriter;
-    //writer.open("../../Videos/Test.avi", codec, fps, frame.size(), 1);
     
     int whitePixels;
     int totalPixels;
@@ -119,6 +118,7 @@ void processVideo(char* videoFilename) {
             cerr << "Exiting..." << endl;
             exit(EXIT_FAILURE);
         }
+        
         //update the background model
         pMOG2->apply(frame, fgMaskMOG2);
         
@@ -127,18 +127,14 @@ void processVideo(char* videoFilename) {
         totalPixels = fgMaskMOG2.total();
         pixPercent = ((float)whitePixels / (float)totalPixels) * 100;
         
-        /*cout << "White Pixels: ";
-        cout << whitePixels;
-        cout << ", Total Pixels: ";
-        cout << totalPixels;*/
         cout << "Percentage: ";
         cout << fixed << setprecision(1) << pixPercent;
         cout << " %, Save: ";
         
         if (pixPercent > THRESHOLD && totalFrames >= INIT_DISCARD) {
 			cout << "Y, Total: ";
-			//fname = "../../Images/Im";
-			//vname = "../../Videos/Vid";
+			fname = "../../Images/Im";
+			vname = "../../Videos/Vid";
 			now = time(0);
 			ltm = localtime(&now);
 			fname = "../../Images/Img" + to_string(1900+ltm->tm_year) + "-" + to_string(1+ltm->tm_mon) + "-" + to_string(ltm->tm_mday) + "T" + to_string(ltm->tm_hour) + "-" + to_string(ltm->tm_min) + "-" + to_string(ltm->tm_sec) + "N" + to_string(savedFrames);
@@ -186,9 +182,9 @@ void processVideo(char* videoFilename) {
         t2 = t1;
         t1 = chrono::high_resolution_clock::now();
         chrono::duration<double> time_span = chrono::duration_cast<chrono::duration<double>>(t1-t2);
-        cout << " Time: ";
-        cout << fixed << setprecision(6) << time_span.count() << endl;
-        
+		cout << " Time: ";
+		cout << fixed << setprecision(6) << time_span.count() << endl;
+		
         //get the input from the keyboard
         keyboard = waitKey( 10 );
     }
