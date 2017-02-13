@@ -15,7 +15,7 @@ import os
 import sys
 import tempfile
 from multiprocessing import Process, Value
-from Tkinter import Tk, Text, BOTH, W, N, E, S, RAISED, Frame, LEFT, TOP, BOTTOM
+from Tkinter import Tk, Text, BOTH, W, N, E, S, RAISED, Frame, LEFT, TOP, BOTTOM, DISABLED, NORMAL
 from ttk import Button, Style, Label, Entry
 
 
@@ -99,44 +99,44 @@ class cameraGUI(Frame):
 		lbl = Label(self.frame, text="Commands")
 		lbl.grid(row=0, column=0, pady=4, padx=5)
 		
-		imageButton = Button(self.frame, text="Take Image", command= lambda: self.dispChange("I"), width=self.buttonWidth)
-		imageButton.grid(row=1, column=bcolumn, pady=4)
+		self.imageButton = Button(self.frame, text="Take Image", command= lambda: self.dispChange("I"), width=self.buttonWidth)
+		self.imageButton.grid(row=1, column=bcolumn, pady=4)
 		
-		videoButton = Button(self.frame, text="Take Video", command= lambda: self.dispChange("V"), width=self.buttonWidth)
-		videoButton.grid(row=2, column=bcolumn, pady=4)
+		self.videoButton = Button(self.frame, text="Take Video", command= lambda: self.dispChange("V"), width=self.buttonWidth)
+		self.videoButton.grid(row=2, column=bcolumn, pady=4)
 		
-		networkButton = Button(self.frame, text="Stream to VLC", command= lambda: self.dispChange("N"), width=self.buttonWidth)
-		networkButton.grid(row=3, column=bcolumn, pady=4)
+		self.networkButton = Button(self.frame, text="Stream to VLC", command= lambda: self.dispChange("N"), width=self.buttonWidth)
+		self.networkButton.grid(row=3, column=bcolumn, pady=4)
 		
-		isButton = Button(self.frame, text="Image Subtraction", command= lambda: self.dispChange("O"), width=self.buttonWidth)
-		isButton.grid(row=4, column=bcolumn, pady=4)
+		self.isButton = Button(self.frame, text="Image Subtraction", command= lambda: self.dispChange("O"), width=self.buttonWidth)
+		self.isButton.grid(row=4, column=bcolumn, pady=4)
 		
-		resButton = Button(self.frame, text="Set Resolution", command= lambda: self.dispChange("R"), width=self.buttonWidth)
-		resButton.grid(row=5, column=bcolumn, pady=4)
+		self.resButton = Button(self.frame, text="Set Resolution", command= lambda: self.dispChange("R"), width=self.buttonWidth)
+		self.resButton.grid(row=5, column=bcolumn, pady=4)
 		
-		frButton = Button(self.frame, text="Set Framerate", command= lambda: self.dispChange("F"), width=self.buttonWidth)
-		frButton.grid(row=6, column=bcolumn, pady=4)
+		self.frButton = Button(self.frame, text="Set Framerate", command= lambda: self.dispChange("F"), width=self.buttonWidth)
+		self.frButton.grid(row=6, column=bcolumn, pady=4)
 		
-		xtButton = Button(self.frame, text="Set Exposure Time", command= lambda: self.dispChange("X"), width=self.buttonWidth)
-		xtButton.grid(row=7, column=bcolumn, pady=4)
+		self.xtButton = Button(self.frame, text="Set Exposure Time", command= lambda: self.dispChange("X"), width=self.buttonWidth)
+		self.xtButton.grid(row=7, column=bcolumn, pady=4)
 		
-		brButton = Button(self.frame, text="Set Brightness", command= lambda: self.dispChange("B"), width=self.buttonWidth)
-		brButton.grid(row=8, column=bcolumn, pady=4)
+		self.brButton = Button(self.frame, text="Set Brightness", command= lambda: self.dispChange("B"), width=self.buttonWidth)
+		self.brButton.grid(row=8, column=bcolumn, pady=4)
 		
-		coButton = Button(self.frame, text="Set Contrast", command= lambda: self.dispChange("C"), width=self.buttonWidth)
-		coButton.grid(row=9, column=bcolumn, pady=4)
+		self.coButton = Button(self.frame, text="Set Contrast", command= lambda: self.dispChange("C"), width=self.buttonWidth)
+		self.coButton.grid(row=9, column=bcolumn, pady=4)
 		
-		gnButton = Button(self.frame, text="Set ISO", command= lambda: self.dispChange("G"), width=self.buttonWidth)
-		gnButton.grid(row=10, column=bcolumn, pady=4)
+		self.gnButton = Button(self.frame, text="Set ISO", command= lambda: self.dispChange("G"), width=self.buttonWidth)
+		self.gnButton.grid(row=10, column=bcolumn, pady=4)
 		
-		stButton = Button(self.frame, text="Set Saturation", command= lambda: self.dispChange("U"), width=self.buttonWidth)
-		stButton.grid(row=11, column=bcolumn, pady=4)
+		self.stButton = Button(self.frame, text="Set Saturation", command= lambda: self.dispChange("U"), width=self.buttonWidth)
+		self.stButton.grid(row=11, column=bcolumn, pady=4)
 		
-		shButton = Button(self.frame, text="Set Sharpness", command= lambda: self.dispChange("S"), width=self.buttonWidth)
-		shButton.grid(row=12, column=bcolumn, pady=4)
+		self.shButton = Button(self.frame, text="Set Sharpness", command= lambda: self.dispChange("S"), width=self.buttonWidth)
+		self.shButton.grid(row=12, column=bcolumn, pady=4)
 		
-		quitButton = Button(self.frame, text="Quit", command= lambda: self.camera.quitGUI(self), width=self.buttonWidth)
-		quitButton.grid(row=13, column=bcolumn, pady=4)
+		self.quitButton = Button(self.frame, text="Quit", command= lambda: self.camera.quitGUI(self), width=self.buttonWidth)
+		self.quitButton.grid(row=13, column=bcolumn, pady=4)
 		
 		# Set the section to control a mode
 		ctrlbl = Label(self.frame2, text="Control")
@@ -462,6 +462,21 @@ class cameraGUI(Frame):
 		self.durValue = self.txt2.get()
 
 		self.camera.sendCommand(useCmd)
+		
+		if self.camera.durStop == "inf":
+			self.imageButton.config(state=DISABLED)
+			self.videoButton.config(state=DISABLED)
+			self.networkButton.config(state=DISABLED)
+			self.isButton.config(state=DISABLED)
+			self.resButton.config(state=DISABLED)
+			self.frButton.config(state=DISABLED)
+			self.xtButton.config(state=DISABLED)
+			self.brButton.config(state=DISABLED)
+			self.coButton.config(state=DISABLED)
+			self.gnButton.config(state=DISABLED)
+			self.stButton.config(state=DISABLED)
+			self.shButton.config(state=DISABLED)
+			self.quitButton.config(state=DISABLED)
 	
 	
 	def streamStop(self, useCmd):
@@ -472,6 +487,20 @@ class cameraGUI(Frame):
 		# Set the value to stop the stream/record process
 		self.camera.procStop.value = 1
 		time.sleep(1)
+		
+		self.imageButton.config(state=NORMAL)
+		self.videoButton.config(state=NORMAL)
+		self.networkButton.config(state=NORMAL)
+		self.isButton.config(state=NORMAL)
+		self.resButton.config(state=NORMAL)
+		self.frButton.config(state=NORMAL)
+		self.xtButton.config(state=NORMAL)
+		self.brButton.config(state=NORMAL)
+		self.coButton.config(state=NORMAL)
+		self.gnButton.config(state=NORMAL)
+		self.stButton.config(state=NORMAL)
+		self.shButton.config(state=NORMAL)
+		self.quitButton.config(state=NORMAL)
 		
 		if useCmd == "N":
 			# Free connection resources
@@ -568,11 +597,12 @@ class cameraModuleClient:
 			time.sleep(0.1)
 			player = subprocess.Popen(subline)
 			
-			if self.useGUI == 1:
+			if self.useGUI == 1 and self.durStop == "inf":
 				# Stop when stop button is pressed or process has ended
-				while not player.poll() == 1:
+				while player.poll() == None:
 					if self.procStop.value == 1:
-						raise KeyboardInterrupt	
+						raise KeyboardInterrupt
+
 			else:
 				# Wait for executable to exit
 				player.wait()
@@ -1074,7 +1104,7 @@ class cameraModuleClient:
 		elif command == "O":
 			print(CYAN + "Note: Press Ctrl+C to exit recording" + CLEAR)
 			duration = self.processIntParameter("Duration (seconds)")
-			if self.useGUI == 1:
+			if self.useGUI == 1 and self.durStop == "inf":
 				self.procStop.value = 0
 				prc = Process(target = self.networkStreamSubtract, args=(duration,))
 				prc.start()
