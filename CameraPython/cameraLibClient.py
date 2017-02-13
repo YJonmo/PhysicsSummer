@@ -589,6 +589,7 @@ class cameraGUI(Frame):
 		elif useCmd == "V":
 			self.statlb.config(text="Status: " + self.camera.confStop)
 			Tk.update(self.camera.root)
+			self.camera.printStats()
 			self.camera.receiveFile(self.camera.fileStop, "Video")
 
 
@@ -636,7 +637,7 @@ class cameraModuleClient:
 				if not data:
 					break
 				player.stdin.write(data)
-				if self.useGUI == 1 and self.procStop.value == 1:
+				if self.useGUI == 1 and self.procStop.value == 1 and self.durStop == "inf":
 					raise KeyboardInterrupt
 		except KeyboardInterrupt:
 			self.send_msg(self.client_socket, "Stop")
@@ -646,7 +647,8 @@ class cameraModuleClient:
 		connection.close()
 		player.terminate()
 		
-		if not self.useGUI == 1:
+		if not self.useGUI == 1 or not self.durStop == "inf":
+			
 			# Free connection resources
 			print(GREEN + "Network stream closed" + CLEAR)
 			self.client_socket.close()
@@ -1145,7 +1147,7 @@ class cameraModuleClient:
 		elif command == "N":
 			print(CYAN + "Note: Press Ctrl+C to exit recording" + CLEAR)
 			duration = self.processIntParameter("Duration (seconds)")
-			if self.useGUI == 1:
+			if self.useGUI == 1 and self.durStop == "inf":
 				self.procStop.value = 0
 				prc = Process(target = self.networkStreamServer, args=(duration,))
 				prc.start()
@@ -1202,7 +1204,7 @@ class cameraModuleClient:
 		elif command == "V":
 			print(CYAN + "Note: Press Ctrl+C to exit recording" + CLEAR)
 			self.processIntParameter("Duration (seconds)")
-			if self.useGUI == 1:
+			if self.useGUI == 1 and self.durStop == "inf":
 				self.fileStop = self.filenameGUI("Video filename")
 				self.procStop.value = 0
 				prc = Process(target = self.videoGUI)
