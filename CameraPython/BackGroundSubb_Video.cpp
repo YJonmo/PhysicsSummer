@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
     }
     //destroy GUI windows
     destroyAllWindows();
-    cout << "Done";
+    cout << "Done" << endl;
     return EXIT_SUCCESS;
 }
 void processVideo(char* videoFilename) {
@@ -131,7 +131,7 @@ void processVideo(char* videoFilename) {
         totalPixels = fgMaskMOG2.total();
         pixPercent = ((float)whitePixels / (float)totalPixels) * 100;
         
-        cout << "Percentage: ";
+        cout << "Perc: ";
         cout << fixed << setprecision(1) << pixPercent;
         cout << " %, Save: ";
         
@@ -156,8 +156,8 @@ void processVideo(char* videoFilename) {
 			}
 
 			cvtColor(fgMaskMOG2, backFrame, COLOR_GRAY2RGB);
-			//frameWriter.write(frame);
-			//backWriter.write(backFrame);
+			frameWriter.write(frame);
+			backWriter.write(backFrame);
 			savedFrames++;
 		}
 		else {
@@ -187,10 +187,15 @@ void processVideo(char* videoFilename) {
 
         totalFrames++;
         
+        cout << ", FA: ";
+        cout << frameNumberString;
+        cout << ", FB: ";
+        cout << totalFrames;
+        
         t2 = t1;
         t1 = chrono::high_resolution_clock::now();
         chrono::duration<double> time_span = chrono::duration_cast<chrono::duration<double>>(t1-t2);
-		cout << " Time: ";
+		cout << ", Time: ";
 		cout << fixed << setprecision(6) << time_span.count() << endl;
 		
         //get the input from the keyboard
