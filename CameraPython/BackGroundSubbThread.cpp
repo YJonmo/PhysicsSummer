@@ -146,6 +146,8 @@ void threadStore(char* fname) {
             cerr << "Exiting..." << endl;
             break;
         }
+        
+		imshow("Frame", Fr1);
 		
 		// Load the frame onto a queue
 		sharedMutex.lock();
@@ -313,7 +315,7 @@ void processVideo(char* videoFilename, string imgFile) {
 			cout << savedFrames;
 			
 			//show the current frame and the fg masks
-			imshow("Frame", frame);
+			//imshow("Frame", frame);
 			imshow("FG Mask MOG 2", fgMaskMOG2);
 
 			totalFrames++;
