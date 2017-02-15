@@ -147,12 +147,14 @@ void threadStore(char* fname) {
             break;
         }
         
-		imshow("Frame", Fr1);
+		//imshow("Frame", Fr1);
 		
 		// Load the frame onto a queue
 		sharedMutex.lock();
 		Producers.push(Fr1.clone());
 		sharedMutex.unlock();
+		
+		//waitKey( 1 );
 	}
 	
 	// Close video resource
@@ -315,7 +317,7 @@ void processVideo(char* videoFilename, string imgFile) {
 			cout << savedFrames;
 			
 			//show the current frame and the fg masks
-			//imshow("Frame", frame);
+			imshow("Frame", frame);
 			imshow("FG Mask MOG 2", fgMaskMOG2);
 
 			totalFrames++;

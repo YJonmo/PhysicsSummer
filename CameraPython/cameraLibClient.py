@@ -605,7 +605,7 @@ class cameraModuleClient:
 			gstcmd = "tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, framerate=" + frate + "/1 ! avdec_h264 ! videoconvert ! queue max-size-buffers=0 max-size-time=0 max-size-bytes=0 ! appsink"
 			#gstcmd = "tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, framerate=" + frate + "/1 ! avdec_h264 ! videoconvert ! appsink"
 			
-			if self.app.fnameValue == "":
+			if self.useGUI == 0 or (self.useGUI == 1 and self.app.fnameValue == ""):
 				subline = ['./BackGroundSubbThread', '-vid', gstcmd]
 			else:
 				subline = ['./BackGroundSubbThread', '-vid', gstcmd, '-back', '../../Images/' + self.app.fnameValue]

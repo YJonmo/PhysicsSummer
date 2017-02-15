@@ -735,7 +735,7 @@ class cameraModuleServer:
 		'''
 		
 		if parameter == "Image filename":
-			default = "Image" + datetime.datetime.now().isoformat() + ".png"
+			default = "Image" + datetime.datetime.now().isoformat() + ".jpg"
 			
 		elif parameter == "Video filename":
 			default = "Video" + datetime.datetime.now().isoformat() + ".mp4"
