@@ -598,7 +598,7 @@ class cameraModuleClient:
 			# Receive a stream from gstreamer, and pipe into the openCV executable.
 			gstcmd = "tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, framerate=" + frate + "/1 ! avdec_h264 ! videoconvert ! queue max-size-buffers=0 max-size-time=0 max-size-bytes=0 ! appsink"
 			#gstcmd = "tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, framerate=" + frate + "/1 ! avdec_h264 ! videoconvert ! appsink"
-			subline = ['./BackGroundSubbThread', '-vid', gstcmd]
+			subline = ['./BackGroundSubbThread', '-vid', gstcmd, '-back', '../../Images/B2.jpg']
 			time.sleep(0.1)
 			player = subprocess.Popen(subline, preexec_fn=os.setpgrp)
 			

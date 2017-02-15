@@ -23,9 +23,8 @@
 #include <ctime>
 #include <queue>
 #include <deque>
-//#include "Producer.h"
 #include <boost/thread.hpp>
-
+#include <boost/filesystem.hpp>
 
 #define THRESHOLD 5.0
 #define INIT_DISCARD 100
@@ -49,8 +48,7 @@ int keyboard; //input from keyboard
 
 void help();
 void threadStore(char* fname);
-void processVideo(char* videoFilename);
-void processImages(char* firstFrameFilename);
+void processVideo(char* videoFilename, string imgFile);
 
 
 void help()
@@ -72,15 +70,17 @@ void help()
 
 int main(int argc, char* argv[])
 {
+	string defImg = "";
+	
     //print help information
     help();
     
     //check for the input parameter correctness
-    if(argc != 3) {
+    /*if(argc != 3) {
         cerr <<"Incorret input list" << endl;
         cerr <<"exiting..." << endl;
         return EXIT_FAILURE;
-    }
+    }*/
     
     //create GUI windows
     namedWindow("Frame");
@@ -92,9 +92,19 @@ int main(int argc, char* argv[])
     if(strcmp(argv[1], "-vid") == 0) {
         // Initialise thread to read video
         boost::thread producerThread(&threadStore, argv[2]);
-        
+
         // Process output of video thread
-        processVideo(argv[2]);
+		if (argc == 5 && strcmp(argv[3], "-back") == 0) {
+			processVideo(argv[2], argv[4]);
+		}
+		else if (argc == 3) {
+			processVideo(argv[2], defImg);
+		}
+		else {
+			cerr <<"Incorret input list" << endl;
+			cerr <<"exiting..." << endl;
+			return EXIT_FAILURE;
+		}
     }
     else {
         //error in reading input parameters
@@ -152,7 +162,7 @@ void threadStore(char* fname) {
 
 
 
-void processVideo(char* videoFilename) {
+void processVideo(char* videoFilename, string imgFile) {
 	/*
 	 * This function reads each frame from a queue, and performs image subtraction.
 	 * If the difference between frames exceeds a tolerance, then the frame and
@@ -163,6 +173,8 @@ void processVideo(char* videoFilename) {
 	double fps;
 	int i;
 	Mat Fr2;
+	Mat ImgBack;
+	Mat ImgRGB;
 	int whitePixels;
     int totalPixels;
     double pixPercent;
@@ -176,6 +188,8 @@ void processVideo(char* videoFilename) {
     chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
     time_t now;
     tm *ltm;
+    string path;
+    string tstamp;
 	
 	// Objects to write frames to video
     VideoWriter frameWriter;
@@ -192,6 +206,10 @@ void processVideo(char* videoFilename) {
 	
 	// Close the video (as it's being used by another thread)
 	capture.release();
+	
+	if (!(imgFile == "")) {
+		ImgBack = imread(imgFile, 1);
+	}
     
     //read input data. ESC or 'q' for quitting
     while( (char)keyboard != 'q' && (char)keyboard != 27){
@@ -204,8 +222,27 @@ void processVideo(char* videoFilename) {
 			Producers.pop();
 			sharedMutex.unlock();
 			
-			//update the background model
-			pMOG2->apply(frame, fgMaskMOG2);
+			if (!(imgFile == "")) {
+				absdiff(frame, ImgBack, ImgRGB);
+				fgMaskMOG2 = Mat::zeros(ImgRGB.rows, ImgRGB.cols, CV_8UC1);
+				float thresh = 30.0f;
+				float dist;
+				
+				for (int j=0; j<ImgRGB.rows; ++j) {
+					for (int k=0; k<ImgRGB.cols; ++k) {
+						cv::Vec3b pix = ImgRGB.at<Vec3b>(j,k);
+						dist = (pix[0]*pix[0] + pix[1]*pix[1] + pix[2]*pix[2]);
+						dist = sqrt(dist);
+						if (dist>thresh) {
+							fgMaskMOG2.at<unsigned char>(j,k) = 255;
+						}
+					}
+				}
+			}
+			else {
+				//update the background model
+				pMOG2->apply(frame, fgMaskMOG2);
+			}
 			
 			// Count the number of white pixels
 			whitePixels = countNonZero(fgMaskMOG2);
@@ -220,15 +257,23 @@ void processVideo(char* videoFilename) {
 			// Save the frame if the number of white pixels exceeds the threshold
 			// Also skip the first few frames as they often appear green
 			if (pixPercent > THRESHOLD && totalFrames >= INIT_DISCARD) {
+				if (savedFrames == 0) {
+					// Create a folder which will contain all the saved images and videos
+					now = time(0);
+					ltm = localtime(&now);
+					tstamp = to_string(1900+ltm->tm_year) + "-" + to_string(1+ltm->tm_mon) + "-" + to_string(ltm->tm_mday) + "T" + to_string(ltm->tm_hour) + "-" + to_string(ltm->tm_min) + "-" + to_string(ltm->tm_sec);
+					path = "../../Images/IS" + tstamp;
+					boost::filesystem::path dir(path);
+					boost::filesystem::create_directory(dir);
+				}
+				
 				cout << "Y, Total: ";
 				
 				// Determine the filenames based on the timestamp
-				fname = "../../Images/Im";
-				vname = "../../Videos/Vid";
 				now = time(0);
 				ltm = localtime(&now);
-				fname = "../../Images/Img" + to_string(1900+ltm->tm_year) + "-" + to_string(1+ltm->tm_mon) + "-" + to_string(ltm->tm_mday) + "T" + to_string(ltm->tm_hour) + "-" + to_string(ltm->tm_min) + "-" + to_string(ltm->tm_sec) + "N" + to_string(savedFrames);
-				vname = "../../Videos/Vid" + to_string(1900+ltm->tm_year) + "-" + to_string(1+ltm->tm_mon) + "-" + to_string(ltm->tm_mday) + "T" + to_string(ltm->tm_hour) + "-" + to_string(ltm->tm_min) + "-" + to_string(ltm->tm_sec) + "N" + to_string(savedFrames);
+				fname = path + "/Img" + to_string(1900+ltm->tm_year) + "-" + to_string(1+ltm->tm_mon) + "-" + to_string(ltm->tm_mday) + "T" + to_string(ltm->tm_hour) + "-" + to_string(ltm->tm_min) + "-" + to_string(ltm->tm_sec) + "N" + to_string(savedFrames);
+				vname = path + "/Vid" + to_string(1900+ltm->tm_year) + "-" + to_string(1+ltm->tm_mon) + "-" + to_string(ltm->tm_mday) + "T" + to_string(ltm->tm_hour) + "-" + to_string(ltm->tm_min) + "-" + to_string(ltm->tm_sec) + "N" + to_string(savedFrames);
 				bname = fname + "BS";
 				sname = vname + "BS";
 				
@@ -266,7 +311,7 @@ void processVideo(char* videoFilename) {
 
 			totalFrames++;
 			
-			cout << ", FB: ";
+			cout << ", Frame: ";
 			cout << totalFrames;
 			
 			// Calculate time to process each frame
