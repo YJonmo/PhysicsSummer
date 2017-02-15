@@ -25,6 +25,7 @@
 #include <deque>
 #include <boost/thread.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/range/iterator_range.hpp>
 
 #define THRESHOLD 5.0
 #define INIT_DISCARD 100
@@ -49,6 +50,7 @@ int keyboard; //input from keyboard
 void help();
 void threadStore(char* fname);
 void processVideo(char* videoFilename, string imgFile);
+void extractImages(string path);
 
 
 void help()
@@ -222,17 +224,22 @@ void processVideo(char* videoFilename, string imgFile) {
 			Producers.pop();
 			sharedMutex.unlock();
 			
+			// Background subtraction algorithm for a static background image
 			if (!(imgFile == "")) {
 				absdiff(frame, ImgBack, ImgRGB);
 				fgMaskMOG2 = Mat::zeros(ImgRGB.rows, ImgRGB.cols, CV_8UC1);
 				float thresh = 30.0f;
 				float dist;
 				
+				// Iterate through every single pixel of the frame
 				for (int j=0; j<ImgRGB.rows; ++j) {
 					for (int k=0; k<ImgRGB.cols; ++k) {
 						cv::Vec3b pix = ImgRGB.at<Vec3b>(j,k);
 						dist = (pix[0]*pix[0] + pix[1]*pix[1] + pix[2]*pix[2]);
 						dist = sqrt(dist);
+						
+						// Pixel is white if the change between frames exceed the threshold,
+						// otherwise the pixel is black
 						if (dist>thresh) {
 							fgMaskMOG2.at<unsigned char>(j,k) = 255;
 						}
@@ -240,7 +247,7 @@ void processVideo(char* videoFilename, string imgFile) {
 				}
 			}
 			else {
-				//update the background model
+				// Background subtraction algorithm without static background
 				pMOG2->apply(frame, fgMaskMOG2);
 			}
 			
@@ -278,8 +285,8 @@ void processVideo(char* videoFilename, string imgFile) {
 				sname = vname + "BS";
 				
 				// Save the frame and foreground mask as separate images.
-				imwrite(fname + ".jpg", frame);
-				imwrite(bname + ".jpg", fgMaskMOG2);
+				//imwrite(fname + ".jpg", frame);
+				//imwrite(bname + ".jpg", fgMaskMOG2);
 				
 				// Initialise the video writers when motion is first detected
 				if (!frameWriter.isOpened()){
@@ -327,6 +334,9 @@ void processVideo(char* videoFilename, string imgFile) {
 		
 		// Close the program when no frames are left to process
 		if (!CloseStatus.empty()) {
+			if (savedFrames > 0) {
+				extractImages(path);
+			}
 			break;
 		}
 		
@@ -335,4 +345,44 @@ void processVideo(char* videoFilename, string imgFile) {
     // Free video writer resources
     frameWriter.release();
     backWriter.release();
+}
+
+
+
+void extractImages(string p) {
+	Mat extFrame;
+	int nof;
+	string fname;
+	
+	// Iterate through every video in the specified directory
+	for (auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(p), {})) {
+		//create the capture object
+		VideoCapture capture(entry.path().string());
+		cout << "Extracting: " << entry << endl;
+		
+		if(!capture.isOpened()){
+			//error in opening the video input
+			cerr << "Unable to open video file: " << entry.path().string() << endl;
+			exit(EXIT_FAILURE);
+		}
+		
+		nof = 0;
+		
+		// Iterate through every frame of the video
+		while (1) {
+			// Read the frame
+			if(!capture.read(extFrame)) {
+				// End the loop when video stops
+				break;
+			}
+			
+			// Save the frame as an image
+			fname = entry.path().string().substr(0, entry.path().string().find(".avi")) + "I" + to_string(nof);
+			imwrite(fname + ".jpg", extFrame);
+			nof++;
+		}
+		
+		// Close the video (as it's being used by another thread)
+		capture.release();
+	}
 }
