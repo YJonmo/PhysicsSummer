@@ -313,20 +313,26 @@ class cameraGUI(Frame):
 		elif useCmd == "O":
 			self.modelb.config(text="Mode: Subtract   ")
 			
+			self.lbl = Label(self.frame2, text="Enter Background:")
+			self.lbl.grid(sticky=W, row=2, column=1, pady=10, padx=5)
+			
+			self.txt = Entry(self.frame2)
+			self.txt.grid(sticky=W, row=2, column=2, pady=4, padx=5, columnspan=3)
+			
 			self.lbl2 = Label(self.frame2, text="Enter Duration:  ")
-			self.lbl2.grid(sticky=W, row=2, column=1, pady=10, padx=5)
+			self.lbl2.grid(sticky=W, row=3, column=1, pady=10, padx=5)
 			
 			self.txt2 = Entry(self.frame2)
-			self.txt2.grid(sticky=W, row=2, column=2, pady=4, padx=5, columnspan=3)
+			self.txt2.grid(sticky=W, row=3, column=2, pady=4, padx=5, columnspan=3)
 			
 			self.but = Button(self.frame2, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth/2)
-			self.but.grid(sticky=W, row=2, column=5, pady=4, padx=2.5)
+			self.but.grid(sticky=W, row=3, column=5, pady=4, padx=2.5)
 			
 			self.but2 = Button(self.frame2, text="Stop", state=DISABLED, command= lambda: self.streamStop(useCmd), width=self.buttonWidth/2)
-			self.but2.grid(sticky=W, row=2, column=6, pady=4, padx=2.5)
+			self.but2.grid(sticky=W, row=3, column=6, pady=4, padx=2.5)
 			
-			self.lbl = Label(self.frame2, text=" ")
-			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
+			#self.lbl = Label(self.frame2, text=" ")
+			#self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 			
 		elif useCmd == "R":
 			self.modelb.config(text="Mode: Resolution ")
@@ -598,7 +604,11 @@ class cameraModuleClient:
 			# Receive a stream from gstreamer, and pipe into the openCV executable.
 			gstcmd = "tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, framerate=" + frate + "/1 ! avdec_h264 ! videoconvert ! queue max-size-buffers=0 max-size-time=0 max-size-bytes=0 ! appsink"
 			#gstcmd = "tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, framerate=" + frate + "/1 ! avdec_h264 ! videoconvert ! appsink"
-			subline = ['./BackGroundSubbThread', '-vid', gstcmd]#, '-back', '../../Images/B3.jpg']
+			
+			if self.app.fnameValue == "":
+				subline = ['./BackGroundSubbThread', '-vid', gstcmd]
+			else:
+				subline = ['./BackGroundSubbThread', '-vid', gstcmd, '-back', '../../Images/' + self.app.fnameValue]
 			time.sleep(0.1)
 			player = subprocess.Popen(subline, preexec_fn=os.setpgrp)
 			
