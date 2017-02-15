@@ -465,6 +465,7 @@ class cameraModuleServer:
 			self.camera.stop_recording()
 			
 			# Terminate the streamer command
+			#pcm.wait()
 			pcm.terminate()
 		
 		else:

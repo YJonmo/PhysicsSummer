@@ -114,7 +114,7 @@ void threadStore(char* fname) {
         cerr << "Unable to open video file: " << fname << endl;
         exit(EXIT_FAILURE);
     }
-	
+    
 	while (1) {
 		if(!capture.read(Fr1)) {
             cerr << "Unable to read next frame." << endl;
@@ -122,6 +122,7 @@ void threadStore(char* fname) {
             break;
             //exit(EXIT_FAILURE);
         }
+        //cout << capture.get(CAP_PROP_POS_FRAMES) << endl;
 
 		sharedMutex.lock();
 		Producers.push(Fr1.clone());
@@ -141,16 +142,45 @@ void threadStore(char* fname) {
 void processVideo(char* videoFilename) {
 	int codec;
 	double fps;
+	int i;
 	string fnames;
 	Mat Fr2;
 	
     //create the capture object
-    //VideoCapture capture(videoFilename);
+    VideoCapture capture(videoFilename);
     
-    /*codec = CV_FOURCC('M','J','P','G');
+    codec = CV_FOURCC('M','J','P','G');
 	fps = capture.get(CV_CAP_PROP_FPS);
 	frame.cols = capture.get(CV_CAP_PROP_FRAME_WIDTH);
-	frame.rows = capture.get(CV_CAP_PROP_FRAME_HEIGHT);*/
+	frame.rows = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
+	
+	capture.release();
+	
+	/*while (1) {
+		if (!CaptureData.empty() && i == 0) {
+			captureMutex.lock();
+			cout << CaptureData.front() << endl;
+			CaptureData.pop();
+			captureMutex.unlock();
+			i++;
+		}
+		if (!CaptureData.empty() && i == 1) {
+			captureMutex.lock();
+			frame.cols = CaptureData.front();
+			CaptureData.pop();
+			captureMutex.unlock();
+			i++;
+		}
+		if (!CaptureData.empty() && i == 2) {
+			captureMutex.lock();
+			frame.rows = CaptureData.front();
+			CaptureData.pop();
+			captureMutex.unlock();
+			i++;
+		}
+		break;
+	}*/
+	//cout << fps << endl;
     
     VideoWriter frameWriter;
     VideoWriter backWriter;
@@ -219,21 +249,21 @@ void processVideo(char* videoFilename) {
 				imwrite(bname + ".jpg", fgMaskMOG2);
 				fnames += fname + ' ';
 				
-				/*if (!frameWriter.isOpened()){
+				if (!frameWriter.isOpened()){
 					frameWriter.open(vname + ".avi", codec, fps, frame.size(), 1);
 					backWriter.open(sname + ".avi", codec, fps, frame.size(), 1);
 				}
 
 				cvtColor(fgMaskMOG2, backFrame, COLOR_GRAY2RGB);
 				frameWriter.write(frame);
-				backWriter.write(backFrame);*/
+				backWriter.write(backFrame);
 				savedFrames++;
 			}
 			else {
-				/*if (frameWriter.isOpened()) {
+				if (frameWriter.isOpened()) {
 					frameWriter.release();
 					backWriter.release();
-				}*/
+				}
 				
 				cout << "N, Total: ";
 			}
@@ -279,6 +309,6 @@ void processVideo(char* videoFilename) {
     //cout << fnames;
     //delete capture object
     //capture.release();
-    //frameWriter.release();
-    //backWriter.release();
+    frameWriter.release();
+    backWriter.release();
 }

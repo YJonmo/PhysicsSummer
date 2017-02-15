@@ -584,7 +584,7 @@ class cameraModuleClient:
 			self.client_socket.close()
 			self.client_socket = socket.socket()
 			self.client_socket.connect(('192.168.1.1', 8000))
-		
+	
 	
 	def networkStreamSubtract(self, duration):
 		'''
@@ -598,9 +598,9 @@ class cameraModuleClient:
 			# Receive a stream from gstreamer, and pipe into the openCV executable.
 			gstcmd = "tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, framerate=" + frate + "/1 ! avdec_h264 ! videoconvert ! queue max-size-buffers=0 max-size-time=0 max-size-bytes=0 ! appsink"
 			#gstcmd = "tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, framerate=" + frate + "/1 ! avdec_h264 ! videoconvert ! appsink"
-			subline = ['./BackGroundSubb_Video', '-vid', gstcmd]
+			subline = ['./BackGroundSubbThread', '-vid', gstcmd]
 			time.sleep(0.1)
-			player = subprocess.Popen(subline)
+			player = subprocess.Popen(subline, preexec_fn=os.setpgrp)
 			
 			if self.useGUI == 1 and self.durStop == "inf":
 				# Stop when stop button is pressed or process has ended
@@ -614,11 +614,12 @@ class cameraModuleClient:
 		
 		except KeyboardInterrupt:
 			# Free resources
-			print(GREEN + "Network stream closed" + CLEAR)
-			player.terminate()
-			
+			#print(GREEN + "Network stream closed" + CLEAR)
+			#player.terminate()
+
 			self.send_msg(self.client_socket, "Stop")
-			time.sleep(1)
+			#time.sleep(1)
+			player.wait()
 		
 	
 	def send_msg(self, sock, msg):
