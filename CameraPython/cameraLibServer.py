@@ -465,7 +465,6 @@ class cameraModuleServer:
 			self.camera.stop_recording()
 			
 			# Terminate the streamer command
-			#pcm.wait()
 			pcm.terminate()
 		
 		else:
@@ -734,6 +733,7 @@ class cameraModuleServer:
 		Wait for a parameter from either the network or the Pi terminal.
 		'''
 		
+		# Determine the default filenames, which contain the current timestamp
 		if parameter == "Image filename":
 			default = "Image" + datetime.datetime.now().isoformat() + ".jpg"
 			

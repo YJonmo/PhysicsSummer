@@ -77,13 +77,6 @@ int main(int argc, char* argv[])
     //print help information
     help();
     
-    //check for the input parameter correctness
-    /*if(argc != 3) {
-        cerr <<"Incorret input list" << endl;
-        cerr <<"exiting..." << endl;
-        return EXIT_FAILURE;
-    }*/
-    
     //create GUI windows
     namedWindow("Frame");
     namedWindow("FG Mask MOG 2");
@@ -288,10 +281,6 @@ void processVideo(char* videoFilename, string imgFile) {
 				bname = fname + "BS";
 				sname = vname + "BS";
 				
-				// Save the frame and foreground mask as separate images.
-				//imwrite(fname + ".jpg", frame);
-				//imwrite(bname + ".jpg", fgMaskMOG2);
-				
 				// Initialise the video writers when motion is first detected
 				if (!frameWriter.isOpened()){
 					frameWriter.open(vname + ".avi", codec, fps, frame.size(), 1);
@@ -354,6 +343,12 @@ void processVideo(char* videoFilename, string imgFile) {
 
 
 void extractImages(string p) {
+	/*
+	 * This function iterates through every video that was created during 
+	 * the background subtraction process.Each frame in each video is saved 
+	 * as an individual image within the same folder.
+	 */
+	
 	Mat extFrame;
 	int nof;
 	string fname;

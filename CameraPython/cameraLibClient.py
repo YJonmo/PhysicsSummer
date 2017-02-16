@@ -249,6 +249,7 @@ class cameraGUI(Frame):
 		Change the control section of the GUI if there is a mode change.
 		'''
 		
+		# Remove the items of the previous mode
 		self.but.grid_forget()
 		self.but2.grid_forget()
 		self.lbl.grid_forget()
@@ -257,6 +258,7 @@ class cameraGUI(Frame):
 		self.txt2.grid_forget()
 		
 		if useCmd == "I":
+			# Buttons, Entries, and Lables for Image mode
 			self.modelb.config(text="Mode: Image      ")
 			
 			self.but = Button(self.frame2, text="Start", command= lambda: self.retStr(useCmd), width=self.buttonWidth)
@@ -272,6 +274,7 @@ class cameraGUI(Frame):
 			self.lbl2.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 			
 		elif useCmd == "V":
+			# Buttons, Entries, and Lables for Video mode
 			self.modelb.config(text="Mode: Video      ")
 			
 			self.lbl = Label(self.frame2, text="Enter Filename:  ")
@@ -293,6 +296,7 @@ class cameraGUI(Frame):
 			self.but2.grid(sticky=W, row=3, column=6, pady=0, padx=2.5)
 			
 		elif useCmd == "N":
+			# Buttons, Entries, and Lables for Network mode
 			self.modelb.config(text="Mode: Stream     ")
 			
 			self.lbl2 = Label(self.frame2, text="Enter Duration:  ")
@@ -311,6 +315,7 @@ class cameraGUI(Frame):
 			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 			
 		elif useCmd == "O":
+			# Buttons, Entries, and Lables for Background Subtraction mode
 			self.modelb.config(text="Mode: Subtract   ")
 			
 			self.lbl = Label(self.frame2, text="Enter Background:")
@@ -331,10 +336,8 @@ class cameraGUI(Frame):
 			self.but2 = Button(self.frame2, text="Stop", state=DISABLED, command= lambda: self.streamStop(useCmd), width=self.buttonWidth/2)
 			self.but2.grid(sticky=W, row=3, column=6, pady=4, padx=2.5)
 			
-			#self.lbl = Label(self.frame2, text=" ")
-			#self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
-			
 		elif useCmd == "R":
+			# Buttons, Entries, and Lables for Resolution mode
 			self.modelb.config(text="Mode: Resolution ")
 		
 			self.lbl2 = Label(self.frame2, text="Enter Width:     ")
@@ -353,6 +356,7 @@ class cameraGUI(Frame):
 			self.but.grid(sticky=W, row=3, column=5, pady=0, padx=5, columnspan=3)
 		
 		elif useCmd == "F":
+			# Buttons, Entries, and Lables for Framerate mode
 			self.modelb.config(text="Mode: Framerate  ")
 		
 			self.lbl2 = Label(self.frame2, text="Enter Rate (fps):")
@@ -368,6 +372,7 @@ class cameraGUI(Frame):
 			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 		
 		elif useCmd == "X":
+			# Buttons, Entries, and Lables for Exposure Time mode
 			self.modelb.config(text="Mode: Exposure   ")
 		
 			self.lbl2 = Label(self.frame2, text=u'Enter Time (\u03bcs):')
@@ -383,6 +388,7 @@ class cameraGUI(Frame):
 			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 		
 		elif useCmd == "B":
+			# Buttons, Entries, and Lables for Brightness mode
 			self.modelb.config(text="Mode: Brightness ")
 		
 			self.lbl2 = Label(self.frame2, text="Enter Brightness:")
@@ -398,6 +404,7 @@ class cameraGUI(Frame):
 			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 		
 		elif useCmd == "C":
+			# Buttons, Entries, and Lables for Contrast mode
 			self.modelb.config(text="Mode: Contrast   ")
 		
 			self.lbl2 = Label(self.frame2, text="Enter Contrast:  ")
@@ -413,6 +420,7 @@ class cameraGUI(Frame):
 			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 			
 		elif useCmd == "G":
+			# Buttons, Entries, and Lables for Gain mode
 			self.modelb.config(text="Mode: Gain       ")
 		
 			self.lbl2 = Label(self.frame2, text="Enter Gain:      ")
@@ -428,6 +436,7 @@ class cameraGUI(Frame):
 			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 			
 		elif useCmd == "U":
+			# Buttons, Entries, and Lables for Saturation mode
 			self.modelb.config(text="Mode: Saturation ")
 		
 			self.lbl2 = Label(self.frame2, text="Enter Saturation:")
@@ -443,6 +452,7 @@ class cameraGUI(Frame):
 			self.lbl.grid(sticky=W, row=3, column=1, pady=(10,9), padx=5)
 			
 		elif useCmd == "S":
+			# Buttons, Entries, and Lables for Sharpness mode
 			self.modelb.config(text="Mode: Sharpness  ")
 		
 			self.lbl2 = Label(self.frame2, text="Enter Sharpness: ")
@@ -464,11 +474,15 @@ class cameraGUI(Frame):
 		running the command.
 		'''
 		
+		# Obtain the text in each Entry box
 		self.fnameValue = self.txt.get()
 		self.durValue = self.txt2.get()
-
+		
+		# Perform the specified command
 		self.camera.sendCommand(useCmd)
 		
+		# Disable buttons if multiprocessing is used, so that only the
+		# stop button can be pressed
 		if self.camera.durStop == "inf":
 			self.imageButton.config(state=DISABLED)
 			self.videoButton.config(state=DISABLED)
@@ -496,6 +510,7 @@ class cameraGUI(Frame):
 		self.camera.procStop.value = 1
 		time.sleep(1)
 		
+		# Re-enable all the buttons after the stop button has been pressed
 		self.imageButton.config(state=NORMAL)
 		self.videoButton.config(state=NORMAL)
 		self.networkButton.config(state=NORMAL)
@@ -603,12 +618,14 @@ class cameraModuleClient:
 		try:
 			# Receive a stream from gstreamer, and pipe into the openCV executable.
 			gstcmd = "tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, framerate=" + frate + "/1 ! avdec_h264 ! videoconvert ! queue max-size-buffers=0 max-size-time=0 max-size-bytes=0 ! appsink"
-			#gstcmd = "tcpclientsrc host=192.168.1.1 port=5000 ! gdpdepay ! rtph264depay ! video/x-h264, framerate=" + frate + "/1 ! avdec_h264 ! videoconvert ! appsink"
 			
+			# Determin whether a static image is used as the background
 			if self.useGUI == 0 or (self.useGUI == 1 and self.app.fnameValue == ""):
 				subline = ['./BackGroundSubbThread', '-vid', gstcmd]
 			else:
 				subline = ['./BackGroundSubbThread', '-vid', gstcmd, '-back', '../../Images/' + self.app.fnameValue]
+				
+			# Initiate the background subtraction process
 			time.sleep(0.1)
 			player = subprocess.Popen(subline, preexec_fn=os.setpgrp)
 			
@@ -623,12 +640,8 @@ class cameraModuleClient:
 				player.wait()
 		
 		except KeyboardInterrupt:
-			# Free resources
-			#print(GREEN + "Network stream closed" + CLEAR)
-			#player.terminate()
-
+			# Tell the Raspberry Pi to stop the process
 			self.send_msg(self.client_socket, "Stop")
-			#time.sleep(1)
 			player.wait()
 		
 	
@@ -1026,7 +1039,7 @@ class cameraModuleClient:
 					os.system("nc 192.168.1.1 60000 > " + fnm)
 		elif typ == "Video":
 			time.sleep(0.1)
-			os.system("nc 192.168.1.1 60000 > ../../Videos/" + fname)
+			os.system("nc 192.168.1.1 60000 > ../../Images/" + fname)
 		
 		if self.useGUI == 1:
 			# Update GUI status
