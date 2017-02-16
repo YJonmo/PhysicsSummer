@@ -12,6 +12,8 @@ This folder contains Python code to control the Raspberry Pi camera module.
 
 - cameraClientTest.py: A client which connects to the Raspberry Pi cameraServerTest.py script, and remotely controls the camera module.
 
+- cameraClientGUI.py: Similar functionality to cameraClientTest.py, but runs with a GUI instead of command-line.
+
 - picamCommand.py: A script which runs indefinitely, and controls the camera module locally from the Raspberry Pi.
 
 - picamTest.py: A set of test functions for the image mode of the camera module.
@@ -19,6 +21,12 @@ This folder contains Python code to control the Raspberry Pi camera module.
 - pividTest.py: A set of test functions for the video mode of the camera module.
 
 - launcher.sh: A bash script which allows the python camera module server to be launched on the Raspberry Pi at boot.
+
+- BackGroundSubbThread.cpp: C++ code for background subtraction with threading utilised in order to avoid frame drops. This code is used in cameraLibClient.py.
+
+- BackGroundSubb_Video.cpp: Old C++ code with similar functionality to BackGroundSubbThread.cpp, but drops frames due to lack of threading.
+
+- BackGroundSubb_Video_RPI.cpp: C++ code with identical functionality to BackGroundSubb_Video.cpp, but runs on the Raspberry Pi instead of a remote computer.
 
 ## Instructions - Running from remote computer
 
@@ -102,7 +110,60 @@ The default value is equal to the current value of the property.
 If no value is entered, then the property is set to the default value.
 Note that increasing the exposure time may lower the framerate, that increaing the framerate may lower the exposure time.
 
-## Instructions - running from Raspberry Pi
+## Instructions - Running from remote computer with a GUI
+
+The CameraPython code can be run with a GUI on a remote computer.
+Mutliple terminals are still required to initialise the GUI.
+Once connected to PiNet, open a terminal and enter the following commands:
+
+	ssh pi@192.168.1.1
+	cd Documents/PhysicsSummer/CameraPython
+	python cameraServerTest.py
+	
+If prompted for a password, enter "PiPhysics".
+If the python script is successfully runnning on the Raspberry Pi, open a new terminal, navigate to the git repository directory, and enter the following commands:
+
+	cd CameraPython
+	python cameraClientGUI.py
+
+If successful, a window should appear containing a choice of camera modes, and an array of camera properties.
+
+The Take Image command enters the Image mode.
+In this mode, a filename may be entered.
+If there is no filetype specified, then the filetype will default to ".jpg".
+If the filename text box is left blank, then the filename will default to a string containing the current timestamp.
+Pushing the start button will capture the image.
+Once the image is captured, it will be downloaded into the Images folder, which must exist in the same directory as the git repository.
+
+The Take Video command enters the Video mode.
+In this mode, a filename may be entered.
+If the filename text box is left blank, then the filename will default to a string containing the current timestamp.
+A duration (in seconds) may also be entered.
+If a duration is entered, then the video will record for that exact duration.
+If the duration text box is left blank, then the video will record until the stop button is pressed.
+Pressing the start button starts the video recording.
+When the camera stops recording, the video is downloaded to the Images folder, which must exist in the same directory as the git repository.
+
+The Stream to VLC command enters the Stream mode.
+In this mode, a duration (in seconds) may be entered.
+If a duration is entered, then the stream will last for that exact duration.
+If the duration text box is left blank, then the stream will display until the stop button is pressed.
+Pressing the start button opens VLC and starts the stream.
+A stream delay of 1-5 seconds will exist due to the usage of VLC.
+
+The Image Subtraction command enters the Subtract mode.
+In this mode, a duration (in seconds) may be entered.
+If a duration is entered, then the stream will last for that exact duration.
+If the duration text box is left blank, then the stream will display until the stop button is pressed.
+A background text box also exists.
+If an image filename is entered into the background text box, then that image will be used as a static background which is subtracted from every video frame.
+The image associated with the image filename must be contained within the Images folder, which must exist in the same directory as the git repository.
+If no background is entered, then the each video frame will be subtracted by previous video frames.
+
+The rest of the commands set camera properties.
+The current, minimum, and maximum values for each property are displayed in the Properties frame.
+
+## Instructions - Running from Raspberry Pi
 
 The CameraPython code can be run directly from the Raspberry Pi.
 On the Raspberry Pi, open a terminal, and run the command:
