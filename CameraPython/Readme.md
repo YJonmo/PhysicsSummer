@@ -179,6 +179,38 @@ The code runs the same way as on a remote computer, but with a few differences:
 
 - The O command (image subtraction) runs on the Raspberry Pi as opposed to streaming on a remote computer. It runs a lot slower on the Raspberry Pi.
 
+## BackGroundSubbThread C++ Code
+
+The BackGroundSubbThread code is used for image subtraction.
+It is called within the cameraLibClient library, and may also be called from the bash command-line.
+To perform background subtraction on a video file, run the command (and remove the brackets):
+
+	./BackGroundSubbThread -vid <Video filename>
+
+Background subtraction may also be performed with a static background image by running the command  (and removing the brackets):
+
+	./BackGroundSubbThread -vid <Video filename> -back <Static background image filename>
+
+The background subtraction code utilises threading in order to avoid dropping frames.
+The thread goes through every single frame in the video or stream, and adds each frame to a queue.
+The main thread reads from the queue, and performs background subtraction on each frame read from the queue.
+If the time taken to perform background subtraction on each frame exceeds the time taken to read each frame from the stream, then a delay will occur.
+A delay will normally occur if frames are being saved, if the resolution exceeds 640x480, or the framerate exceeds 30 fps.
+
+Each background subtraction iteration produces a foreground mask.
+The foreground mask contains a black and white image, where white pixels indicate changes between frames.
+If the number of white pixels exceeds a threshold, then that frame will be saved.
+Both the frame and the foreground mask is saved.
+The THRESHOLD constant in the code is currently set to 5%.
+In addition, the first 100 frames are not saved, as the stream often appears green at startup.
+
+A video is created every time the number of white pixels exceeds a threshold, and the previous frame did not exceed the threshold.
+Each subsequent frame is added to the video if the number of white pixels also exceeds the threshold.
+The video is closed at the first subsequent frame which doesn't meet the threshold.
+The videos are stored in a folder containing the timestamp that the first video was created at.
+The timestamped folder is contained in the Images folder.
+Once all image processing is completed, each frame of each video is extracted and stored as separate images.
+
 ## Raspberry Pi Installation
 
 The code requires the MP4Box package to place the raw video in a container, in order to playback at the correct framerate. This can be installed by:
@@ -281,7 +313,7 @@ However, remotely running the picamCommand script will not allow video streaming
 
 ## Image subtraction setup
 
-The C++ code "BackGroundSubb_Video.cpp" is used to perform image subtraction on a network stream using OpenCV.
+The C++ code "BackGroundSubbThread.cpp" is used to perform image subtraction on a network stream using OpenCV.
 The network stream requires gstreamer, which must be installed before installing OpenCV.
 Gstreamer can be installed by running the command:
 
