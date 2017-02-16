@@ -303,8 +303,12 @@ Enter the downloaded OpenCV directory, and perform the following commands:
 	sudo make install
 	sudo ldconfig
 
+The boost library is required for threading in the C++ code.
+This can be installed through the following command:
+
+	sudo apt-get install libboost-all-dev
+
 If changes are made to the C++ code, the code can be compiled with the following command:
 
-	g++ -std=c++11 BackGroundSubb_Video.cpp -o BackGroundSubb_Video -I/usr/local/include/opencv2 -L/usr/local/lib -lopencv_core -lopencv_video -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_imgproc
-
+	g++ -std=c++11 BackGroundSubbThread.cpp -o BackGroundSubbThread -I/usr/local/include/opencv2 -L/usr/local/lib -lopencv_core -lopencv_video -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_imgproc -lboost_system -lboost_thread -lboost_filesystem
 
